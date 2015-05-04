@@ -14,7 +14,6 @@
             <form action="{{ URL::to('dokumen-joborder-add') }}" method="post" id="fr">
                     <input name="_token" type="hidden" value="{!! csrf_token() !!}" />
                     <input name="id" type="hidden"/>
-                    <input name="kewajibanvalidasi" type="hidden"/>
                 <div class="row">
                     <div class="col-md-3"><label class="labelleft">Kode</label></div>
                     <div class="col-md-9 form-group" id="kodelistt">
@@ -257,7 +256,6 @@ var i = 0;
 
 function blankInput() {
     $('input[name="id"]').val('');
-    $('input[name="kewajibanvalidasi"]').val('');
 
     $('#pegawailisttt .innpegawaiiclass').each(function() {
         $(this).remove();

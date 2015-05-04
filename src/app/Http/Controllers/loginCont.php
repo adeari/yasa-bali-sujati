@@ -14,7 +14,7 @@ class loginCont extends Controller {
 		if (Auth::check()) {
 			return redirect('dashboard');
 		}
-		$divisis = User::select('divisi')->groupBy('divisi')->get();
+		$divisis = User::select('divisi')->groupBy('divisi')->orderBy('divisi')->get();
 		return view('login', array(
 			'divisis' => $divisis
 			));
