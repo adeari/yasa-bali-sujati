@@ -14,11 +14,15 @@ class loginCont extends Controller {
 		if (Auth::check()) {
 			return redirect('dashboard');
 		}
-		$divisis = User::select('divisi')->groupBy('divisi')->orderBy('divisi')->get();
-		return view('login', array(
-			'divisis' => $divisis,
-			'nextt' => Input::get('nextt'),
-			));
+
+		
+		$data['divisis'] = User::select('divisi')->groupBy('divisi')->orderBy('divisi')->get();
+
+		if (!is_null(Input::get('nextt'))) {
+			$data['nextt'] = Input::get('nextt');
+		}
+
+		return view('login', $data);
 	}
 
 	public function postlogin() {

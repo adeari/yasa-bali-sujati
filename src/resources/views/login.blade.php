@@ -158,10 +158,10 @@
             data: $(this).serialize()
 		}).done(function(result){
             if (result.success == 1) {
-                @if (empt($nextt))
+                @if (@$nextt == null)
                 location = '{{ URL::to('dashboard') }}';
                 @else
-                location = '{{ $nextt }}';
+                location = '{{ URL::to($nextt) }}';
                 @endif
             } else {
                 $('#loading').remove();
