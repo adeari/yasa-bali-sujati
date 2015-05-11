@@ -68,10 +68,16 @@ class masterCustomerCont extends Controller1 {
 	}
 
 	public function del($id) {
-		$success = 1;
+		$success = 0;
 		$msg = '';
-		Customers::find($id)->delete();
+		if (Customers::where('isdeleted','=',false)->whereid($id)->count() > 0) {
+			$msg = 'Tidak bida dihapus karena data ini di pakai di job order';
+		} else {
+			Customers::where('isdeleted','=',true)->whereid($id)->delete();
+			$success = 1;
+		}
 		$result = array('success' => $success, 'msg' => $msg);
 		return response()->json($result);
+
 	}
 }

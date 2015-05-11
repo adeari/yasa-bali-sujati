@@ -90,10 +90,12 @@
                 <i class="glyphicon glyphicon-edit icon-white"></i>
                 Edit
             </a>
+            @if ($filling->isdeleted)
             <a class="btn btn-danger btn-xs hapus" data-id="{{ $filling->id }}" href="#">
                 <i class="glyphicon glyphicon-trash icon-white"></i>
                 Delete
             </a>
+            @endif
         </td>
     </tr>
     @endforeach
@@ -130,6 +132,8 @@
     </div>
 <script type="text/javascript">
 function blankInput() {
+    $('#msg').hide();
+    $('#msg').html('');
     $('input[name="id"]').val('');
     $('#warna').val('');
     $('#huruf').val('');
@@ -143,7 +147,7 @@ $(function(){
         e.preventDefault();
         $('#layoutTambah').hide();
         $('#layoutForm').show( "fast");
-        $('#titleForm').html('<i class="glyphicon glyphicon-edit"></i> Mengubah User');
+        $('#titleForm').html('<i class="glyphicon glyphicon-edit"></i> Mengubah filling');
         blankInput();
         $('input[name="id"]').val($(this).data('id'));
         var rowelement = '#row'+$(this).data('id');
@@ -159,10 +163,12 @@ $(function(){
                 $('#checkk'+entry).prop("checked", true);
             });
         }
+        $("html, body").animate({ scrollTop: 0 }, "fast");
    });
 
    $('#tabell').on('click','.hapus',function(e) {
         e.preventDefault();
+        $('#btnBatal').trigger('click');
         var iddata = $(this).data('id');
         if (confirm('Apakah filling ini ingin di hapus?')) {
             $.ajax({

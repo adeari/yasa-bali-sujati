@@ -40,7 +40,8 @@ class Authenticate {
 			}
 			else
 			{
-				return redirect('/');
+				$actual_link = $_SERVER[REQUEST_URI];
+				return redirect('/?nextt='.$actual_link);
 			}
 		}
 

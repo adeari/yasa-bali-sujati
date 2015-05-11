@@ -16,11 +16,7 @@
                     <input name="id" type="hidden"/>
                 <div class="row">
                     <div class="col-md-3"><label class="labelleft">Kode</label></div>
-                    <div class="col-md-9 form-group" id="kodelistt">
-                        @foreach ($kodelist as $kode1)
-                            <label class='checkboxlabel' style="margin:0 20px 0 0;"><input type="radio" class="kodekk" name="kode" id="kodeee{{ $kode1->id }}" data-validasi="{{ $kode1->aturanValidasi }}" value="{{ $kode1->id }}"> {{ $kode1->kode .' - '.$kode1->warna }}</label>
-                        @endforeach
-                    </div>
+                    <div class="col-md-9 form-group" id="kodelistt"></div>
                 </div>
                 <div class="row">
                     <div class="col-md-3"><label class="labelleft">Customer</label></div>
@@ -61,12 +57,12 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-3"><label class="labelleft">Selain itu</label></div>
-                    <div class="col-md-4 form-group"><input class="form-control" type="text" name="jenis_customer" id="jenis_customer"><br/></div>
+                    <div class="col-md-2"><label class="labelleft">Selain itu</label></div>
+                    <div class="col-md-3 form-group"><input class="form-control" type="text" name="jenis_kegiatan" id="jenis_kegiatan"><br/></div>
                 </div>
                 @endif
                 <div class="row">
-                    <div class="col-md-3"><label class="labelleft">Waktu pelaksanaan </label></div>
+                    <div class="col-md-3"><label class="labelleft">Waktu pelaksanaan</label></div>
                     <div class="col-md-3 form-group"><input class="form-control" type="text" name="tgl_pelaksanaan" id="tgl_pelaksanaan">dd/mm/yyyy HH:mm</div>
                 </div>
                 @if (count($pegawais) > 0)
@@ -96,6 +92,7 @@
                 <div class="row">
                     <div class="col-md-3"><label class="labelleft">Validasi</label></div>
                     <div class="col-md-4 form-group" id="validasicheckedlist">
+                    <span id='msgStatus'></span>
                         @foreach ($validasi_rules as $validasi_rule)
                         <label class='checkboxlabel'><input type="checkbox" class="checkk" id="checkk{{ $validasi_rule->id }}" name="validasi_rules[]" value="{{ $validasi_rule->id }}"> {{ $validasi_rule->aturan }} <span class="label label-warning classbannervalidasi" id="bannervalidasi{{ $validasi_rule->id }}"></span></label><br/>
                         @endforeach 
@@ -111,9 +108,11 @@
 
 </div>
 
+@if (is_null($statusSelected))
 <div class="row" id="layoutTambah"><div class="box col-md-12">
 <button type="button" class="btn btn-success" id="btnTambah"><i class="glyphicon glyphicon-plus"></i>Tambah job order</button>
 </div></div>
+@endif
 
 <div class="row">
     <div class="box col-md-12">
@@ -126,35 +125,110 @@
         </div>
     </div>
     <div class="box-content">
+    <div class="row" style="margin:0 0 10px 0;">
+        <div class="col-md-2">Status : </div>
+        <div class="col-md-4">
+            <select class="form-control float-left" name="statusChoose" id="statusChoose">
+                <option value="">Semua status</option>}
+                <option value="kosong"{{ ($statusSelected == 'kosong') ? ' selected' : '' }}>Belum valid</option>
+                <option value="sebagian"{{ ($statusSelected == 'sebagian') ? ' selected' : '' }}>Validasi sebagian</option>
+                <option value="lengkap"{{ ($statusSelected == 'lengkap') ? ' selected' : '' }}>Validasi lengkap</option>
+            </select>
+        </div>
+    </div>
     <table class="table table-striped table-bordered bootstrap-datatable datatable responsive" id="tabell">
     <thead>
     <tr>
         <th>Kode</th>
+        <th></th>
+        <th>Tgl. pelaksanaan</th>
+        <th>Kegiatan</th>
         <th>Customer / CP</th>
         <th>Exportir / CP</th>
-        <th>Kegiatan</th>
-        <th>Tgl. pelaksanaan</th>
+        @if (is_null($statusSelected))
         <th></th>
+        @endif
     </tr>
     </thead>
     <tbody>
     @foreach ($joborders as $joborder)
-    <tr id="row{{ $joborder->id }}">
-        <td>{{ $joborder->kode }}</td>
-        <td>{{ $joborder->kode }}</td>
-        <td>{{ $joborder->kode }}</td>
-        <td>{{ $joborder->kode }}</td>
-        <td>{{ $joborder->kode }}</td>
+    <tr id="row{{ $joborder->id }}" 
+    data-kode="{{ $joborder->kode }}" 
+    data-customer="{{ $joborder->customer }}" 
+    data-jeniskegiatan="{{ $joborder->jenis_kegiatan }}" 
+    data-exportir="{{ $joborder->exportir }}" 
+    data-tglpelaksanaan="{{ viewdateInput($joborder->tgl_pelaksanaan) }}" 
+    data-catatan="{{ $joborder->catatan }}" 
+    data-fillingid="{{ $joborder->filling }}" 
+    data-status="{{ $joborder->status }}" 
+    data-filling="<?php
+    $validationRuless = $joborder->filling1->validasi_rules()->get();
+    $theFirst = true;
+
+    foreach ($validationRuless as $validationRules) {
+        if ($theFirst) {
+                echo $validationRules->id;
+                $theFirst = false;
+            }
+            else {
+                echo ",".$validationRules->id;
+            }
+    }
+    ?>" 
+    data-pegawai='<?php  
+        $theFirst = true;
+
+        foreach ($joborder->pegawai as $pegawai) {
+            if ($theFirst) {
+                echo '[{"id":'.$pegawai->id.',"nama":"'.$pegawai->nama.'"}';
+                $theFirst = false;
+            }
+            else {
+                echo ',{"id":'.$pegawai->id.',"nama":"'.$pegawai->nama.'"}';
+            }
+        }
+        if (!$theFirst) {
+            echo "]";
+        }
+        ?>' 
+    data-validasirules="<?php 
+        $theFirst = true;
+
+        foreach ($joborder->validasi_rules as $validasi_rule) {
+            if ($theFirst) {
+                echo $validasi_rule->id;
+                $theFirst = false;
+            }
+            else {
+                echo ",".$validasi_rule->id;
+            }
+        }
+    ?>" 
+    >
+        <td><a target="_blank" href="{{ URL::to('dokumen-joborder1/'.$joborder->kode) }}">{{ $joborder->kode }}</a> </td>
+        <td><?php 
+if ($joborder->status == 'Lengkap') {
+    echo '<i class="glyphicon glyphicon-ok"></i>';
+} else if ($joborder->status == 'Sebagian') {
+    echo '<i class="glyphicon glyphicon-magnet"></i>';
+}
+        ?></td>
+        <td>{{ viewdate($joborder->tgl_pelaksanaan) }}</td>
+        <td>{{ $joborder->jenis_kegiatan }}</td>
+        <td>{{ $joborder->customer1->nama_perusahaan.' / '.$joborder->customer1->contact_person }}</td>
+        <td>{{ $joborder->exportir1->nama_perusahaan.' / '.$joborder->exportir1->contact_person }}</td>
+        @if (is_null($statusSelected))
         <td class="center">
-            <a class="btn btn-info btn-xs edit"data-id="{{ $customer->id }}" href="#">
+            <a class="btn btn-info btn-xs edit"data-id="{{ $joborder->id }}" href="#">
                 <i class="glyphicon glyphicon-edit icon-white"></i>
                 Edit
             </a>
-            <a class="btn btn-danger btn-xs hapus" data-id="{{ $customer->id }}" href="#">
+            <a class="btn btn-danger btn-xs hapus" data-id="{{ $joborder->id }}" href="#">
                 <i class="glyphicon glyphicon-trash icon-white"></i>
                 Delete
             </a>
         </td>
+        @endif
     </tr>
     @endforeach
     </tbody>
@@ -178,6 +252,9 @@
                     <p>
                         Bagian ini untuk menambah job order atau menghapus job order dan juga mengganti data job order.
                         <br/>Pada bagain tanggal cukup isi dengan angka maka otomatis di atur. Aturan tanggal 2 digit tanggal  2 digit bulan  2 digit tahun 2 digit jam 2 digit menit. jadi cukup ketik angka saja ndak usah yang lain.
+                        <br/>Untuk memilih petugas operasi marking maka tinggal klik dropdown nya lalu bisa nulis nama petugas untuk memudahkan pencarian lalu klik petugas yang diinginkan. Kemudian jika nama petugas telah terpilih di dropdown tinggal klik ok maka nama petugas akan muncul di atas dropdown. Nama - nama petugas di atas dropdown lah yang akan tersimpan. Jika ternyata nama petugas yang diingkan telah tampil di dropdown tinggal klik ok saja. Untuk menghapus pegawai yang terpilih tinggal klik tombol merah X saja ini bisa di pakai untuk ralat.
+                        <br/>Untuk bagian validasi bisa di pilih saat pembuatan awal job order atau waktu ralat saja.
+                        <br/>Klik kode job order untuk melihat print previewnya dan (url  atau link) tersebut bisa di copy dan di berikan ke divisi lain agar cepat analisanya.
                     </p>
                 </div>
                 <div class="modal-footer">
@@ -255,6 +332,8 @@ var i = 0;
 }
 
 function blankInput() {
+    $('#msg').hide();
+    $('#msg').html('');
     $('input[name="id"]').val('');
 
     $('#pegawailisttt .innpegawaiiclass').each(function() {
@@ -281,26 +360,97 @@ function blankInput() {
     $('#jenis_kegiatan').val('');
     $('#tgl_pelaksanaan').val('');
     $('#catatan').val('');
+
+    $('#msgStatus').text('');
+    $('#msgStatus').removeClass();
 }
+
+function refreshKode(){
+    
+    $.ajax({
+        url: '{{ URL::to('dokumen-joborder-view-option-kode') }}',
+        data: {'_token' : '{!! csrf_token() !!}'}
+    }).done(function(results){
+        var str = '';
+
+        $.each(results, function(index, value) {
+            str += '<label class="checkboxlabel" style="margin:0 20px 0 0;"><input type="radio" class="kodekk" name="kode" id="kodeee'+value.id+'" data-validasi="'+value.aturanValidasi+'" value="'+value.id+'"> '+value.kode+' '+value.warna+'</label>';
+        });
+        $('#kodelistt').html(str);
+        $('body').css('overflow','auto');
+    });
+}
+
+function pegawaiInput(pegawaiidselectedd, strr) {
+    return '<div id="inn'+pegawaiidselectedd+'" class="innpegawaiiclass"><input type="hidden" name="pegawaiinputval[]" class="float-left pegawaiinput" value="'+pegawaiidselectedd+'"><input class="form-control float-left" type="text"  style="width:60%;float:left;padding:10px 10px 10px 10px;margin:5px 10px 5px 0;background:#FFF;" name="pegawaiinput"  value="'+strr+'" readonly><button type="button" class="btn btn-danger float-left delthispegawai" data-id="'+pegawaiidselectedd+'" style="margin:5px 5px 5px 0">X</button><br/></div>';
+}
+
+function showWajib(str) {
+    var datalist = str;
+    $('#validasicheckedlist .classbannervalidasi').each(function() {
+        $(this).html('');
+    });
+    
+    if (isNumber(datalist)) {
+        $('#bannervalidasi'+datalist).html('Wajib');
+    } else {
+        var dataValidasiarray = datalist.split(',');
+        dataValidasiarray.forEach(function(entry) {
+            $('#bannervalidasi'+entry).html('Wajib');
+        });
+    }
+}
+
 $(function(){
    $('#tabell').on('click','.edit',function(e) {
         e.preventDefault();
         $('#layoutTambah').hide();
         $('#layoutForm').show( "fast");
-        $('#titleForm').html('<i class="glyphicon glyphicon-edit"></i> Mengubah User');
+        $('#titleForm').html('<i class="glyphicon glyphicon-edit"></i> Mengubah job order');
         blankInput();
         $('input[name="id"]').val($(this).data('id'));
         var rowelement = '#row'+$(this).data('id');
-        $('#nama_perusahaan').val($(rowelement).children('td:first').text());
-        $('#contact_person').val($(rowelement).children('td:eq(1)').text());
-        $('#alamat').val($(rowelement).children('td:eq(2)').text());
-        $('#telepon').val($(rowelement).children('td:eq(3)').text());
-        $('#email').val($(rowelement).children('td:eq(4)').text());
-        $("#jenis_customer1 option[value='"+$(rowelement).children('td:eq(5)').text()+"']").attr('selected', 'selected');
+        $('#kodelistt').html('<input type="hidden" name="kode" value="'+$(rowelement).data('fillingid')+'"><input class="form-control" type="text" value="'+$(rowelement).data('kode')+'" style="background:#FFF;width:250px;" readonly>');
+        $('#jenis_kegiatan1').val($(rowelement).data('jeniskegiatan'));        
+        $("#customer option[value='"+$(rowelement).data('customer')+"']").attr('selected', 'selected');
+        $('#customer').trigger("chosen:updated");
+        $("#exportir option[value='"+$(rowelement).data('exportir')+"']").attr('selected', 'selected');
+        $('#exportir').trigger("chosen:updated");
+        $('#tgl_pelaksanaan').val($(rowelement).data('tglpelaksanaan'));
+        var statuss = $(rowelement).data('status');
+        if (statuss == 'Lengkap') {
+            $('#msgStatus').html('Validasi '+statuss+'&nbsp;&nbsp;&nbsp;<br/>');
+            $('#msgStatus').addClass("label-success label label-default");
+        } else if (statuss == 'Sebagian') {
+            $('#msgStatus').html('Validasi '+statuss+'&nbsp;&nbsp;&nbsp;<br/>');
+            $('#msgStatus').addClass("label-warning  label label-default");
+        } else {
+            $('#msgStatus').html('Belum divalidasi&nbsp;&nbsp;&nbsp;<br/>');
+            $('#msgStatus').addClass("label-danger  label label-default");
+        }
+        if ($(rowelement).data('pegawai').length > 0) {
+            $.each($(rowelement).data('pegawai'), function(i, item) {
+                $('#pegawailisttt #selectlayoutpegawai').before(pegawaiInput(item.id, item.nama));
+            });
+            refreshselectoption();
+        }
+        $('#catatan').val($(rowelement).data('catatan'));
+        var strvalidasi = $(rowelement).data('validasirules');
+        if (isNumber(strvalidasi)) {
+            $('#checkk'+strvalidasi).prop("checked", true);
+        } else {
+            var dataValidasiarray = strvalidasi.split(',');
+            dataValidasiarray.forEach(function(entry) {
+                $('#checkk'+entry).prop("checked", true);
+            });
+        }
+        showWajib($(rowelement).data('filling'));
+        $("html, body").animate({ scrollTop: 0 }, "fast");
    });
 
    $('#tabell').on('click','.hapus',function(e) {
         e.preventDefault();
+        $('#btnBatal').trigger('click');
         var iddata = $(this).data('id');
         if (confirm('Apakah job order ini ingin di hapus?')) {
             $.ajax({
@@ -320,8 +470,9 @@ $(function(){
    $('#btnTambah').click(function(){
     $('#layoutTambah').hide();
     $('#layoutForm').show( "fast");
-    $('#titleForm').html('<i class="glyphicon glyphicon-plus"></i> Menambah customer');
+    $('#titleForm').html('<i class="glyphicon glyphicon-plus"></i> Menambah job order');
     blankInput();
+    refreshKode();
    });
 
    $('#btnBatal').click(function(){
@@ -333,19 +484,26 @@ $(function(){
    $('#fr').submit(function(e) {
         e.preventDefault();
         var msg = '';
-        if ($('#nama_perusahaan').val().length < 1) {
-            msg = 'Tulis nama perusahaan';
-            $('#nama_perusahaan').focus();
-        } else if ($('#contact_person').val().length < 1) {
-            msg = 'Tulis contact person';
-            $('#contact_person').focus();
-        } else if ($('#alamat').val().length < 1) {
-            msg = 'Tulis alamat perusahaan';
-            $('#alamat').focus();
-        } else if ($('#telepon').val().length < 1) {
-            msg = 'Tulis telepon';
-            $('#telepon').focus();
-        }
+
+        var iskodechecked = false;
+        $('#kodelistt .kodekk').each(function() {
+            if ($(this).is(':checked')) {
+                iskodechecked = true;
+            }
+        });
+
+        if (!iskodechecked && $('input[name="id"]').val().length < 1) {
+            msg = 'Pilih kode';
+
+@if (count($jenis_kegiatan)<1)
+        } else if ($('#jenis_kegiatan').val().length < 1) {
+            msg = 'Tulis jenis kegiatan';
+            $('#jenis_kegiatan').focus();
+@endif
+        } else if ($('#tgl_pelaksanaan').val().length < 1) {
+            msg = 'Tulis tanggal pelaksanaan';
+            $('#tgl_pelaksanaan').focus();
+        } 
         if (msg.length > 0) {
             $('#msg').show();
             $('#msg').text(msg);
@@ -358,7 +516,8 @@ $(function(){
 
    $('#pegawailisttt').on('click','#btnpegawaiok',function(e) {
         var pegawaiidselectedd = $("#pegawailisttt #pegawaiselect").chosen().val();
-        $('#pegawailisttt #selectlayoutpegawai').before('<div id="inn'+pegawaiidselectedd+'" class="innpegawaiiclass"><input type="hidden" name="pegawaiinputval" class="float-left pegawaiinput" value="'+pegawaiidselectedd+'"><input class="form-control float-left" type="text"  style="width:60%;float:left;padding:10px 10px 10px 10px;margin:5px 10px 5px 0;background:#FFF;" name="pegawaiinput"  value="'+$('#pegawailisttt #pegawaiselect_chosen a.chosen-single').text()+'" readonly><button type="button" class="btn btn-danger float-left delthispegawai" data-id="'+pegawaiidselectedd+'" style="margin:5px 5px 5px 0">X</button><br/></div>');
+        $('#pegawailisttt #selectlayoutpegawai').before(
+            pegawaiInput(pegawaiidselectedd, $('#pegawailisttt #pegawaiselect_chosen a.chosen-single').text()));
         refreshselectoption();
    });
 
@@ -368,22 +527,19 @@ $('#pegawailisttt').on('click','.delthispegawai',function(){
 });
 
 $('#kodelistt').on('click','.kodekk',function(e){
-    var datalist = $(this).data('validasi');
-        $('#validasicheckedlist .classbannervalidasi').each(function() {
-            $(this).html('');
-        });
-        
-        if (isNumber(datalist)) {
-            $('#bannervalidasi'+datalist).html('Wajib');
-        } else {
-            var dataValidasiarray = datalist.split(',');
-            dataValidasiarray.forEach(function(entry) {
-                $('#bannervalidasi'+entry).html('Wajib');
-            });
-        }
+    showWajib($(this).data('validasi'));
+});
+$('#statusChoose').change(function(e) {
+    var str = '{{ URL::to('dokumen-joborder') }}';
+
+    if ($(this).val().length > 0) {
+        str += '-'+$(this).val();
+    }
+    document.location = str;
 });
 
-$('#tgl_pelaksanaan').mask("00/00/0000 00:00", {placeholder: "__/__/____ __:__"});
+$('#tgl_pelaksanaan').mask("00/00/0000 00:00", {placeholder: "__/__/____ __:__"}, {selectOnFocus: true});
+refreshKode();
 });    
 </script>
 @include('layout-footer')

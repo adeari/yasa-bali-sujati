@@ -79,7 +79,7 @@
                 <i class="glyphicon glyphicon-edit icon-white"></i>
                 Edit
             </a>
-            @if ($user->id != Auth::user()->id && $user->id != 1)
+            @if ($user->id != Auth::user()->id && $user->id != 1 && $user->isdeleted)
             <a class="btn btn-danger btn-xs hapus" data-id="{{ $user->id }}" href="#">
                 <i class="glyphicon glyphicon-trash icon-white"></i>
                 Delete
@@ -121,6 +121,8 @@
     </div>
 <script type="text/javascript">
 function blankInput() {
+    $('#msg').hide();
+    $('#msg').html('');
     $('input[name="id"]').val('');
     $('#users').val('');
     $('#pass').val('');
@@ -137,10 +139,12 @@ $(function(){
         var rowelement = '#row'+$(this).data('id');
         $('#users').val($(rowelement).children('td:first').text());
         $("#divisi1 option[value='"+$(rowelement).children('td:eq(2)').text()+"']").attr('selected', 'selected');
+        $("html, body").animate({ scrollTop: 0 }, "fast");
    });
 
    $('#tabell').on('click','.hapus',function(e) {
         e.preventDefault();
+        $('#btnBatal').trigger('click');
         var iddata = $(this).data('id');
         if (confirm('Apakah user ini ingin di hapus?')) {
             $.ajax({

@@ -16,7 +16,8 @@ class loginCont extends Controller {
 		}
 		$divisis = User::select('divisi')->groupBy('divisi')->orderBy('divisi')->get();
 		return view('login', array(
-			'divisis' => $divisis
+			'divisis' => $divisis,
+			'nextt' => Input::get('nextt'),
 			));
 	}
 

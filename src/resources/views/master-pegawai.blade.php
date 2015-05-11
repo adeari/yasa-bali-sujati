@@ -55,14 +55,14 @@
 </div>
 
 <div class="row" id="layoutTambah"><div class="box col-md-12">
-<button type="button" class="btn btn-success" id="btnTambah"><i class="glyphicon glyphicon-plus"></i>Tambah Pegawai</button>
+<button type="button" class="btn btn-success" id="btnTambah"><i class="glyphicon glyphicon-plus"></i>Tambah pegawai</button>
 </div></div>
 
 <div class="row">
     <div class="box col-md-12">
     <div class="box-inner">
     <div class="box-header well" data-original-title="">
-        <h2><i class="glyphicon glyphicon-user"></i> Tabel Pegawai</h2>
+        <h2><i class="glyphicon glyphicon-user"></i> Tabel pegawai</h2>
         <div class="box-icon">
             <a href="#" class="btn btn-setting btn-round btn-default"><i
                     class="glyphicon glyphicon glyphicon-question-sign"></i></a>
@@ -91,10 +91,12 @@
                 <i class="glyphicon glyphicon-edit icon-white"></i>
                 Edit
             </a>
+            @if ($pegawai->isdeleted)
             <a class="btn btn-danger btn-xs hapus" data-id="{{ $pegawai->id }}" href="#">
                 <i class="glyphicon glyphicon-trash icon-white"></i>
                 Delete
             </a>
+            @endif
         </td>
     </tr>
     @endforeach
@@ -130,6 +132,8 @@
     </div>
 <script type="text/javascript">
 function blankInput() {
+    $('#msg').hide();
+    $('#msg').html('');
     $('input[name="id"]').val('');
     $('#nama').val('');
     $('#telepon').val('');
@@ -141,18 +145,20 @@ $(function(){
         e.preventDefault();
         $('#layoutTambah').hide();
         $('#layoutForm').show( "fast");
-        $('#titleForm').html('<i class="glyphicon glyphicon-edit"></i> Mengubah User');
+        $('#titleForm').html('<i class="glyphicon glyphicon-edit"></i> Mengubah pegawai');
         blankInput();
         $('input[name="id"]').val($(this).data('id'));
         var rowelement = '#row'+$(this).data('id');
         $('#nama').val($(rowelement).children('td:first').text());
-        $('#telepon').val($(rowelement).children('td:eq(1)').text());
-        $('#alamat').val($(rowelement).children('td:eq(2)').text());
+        $('#alamat').val($(rowelement).children('td:eq(1)').text());
+        $('#telepon').val($(rowelement).children('td:eq(2)').text());
         $("#divisi1 option[value='"+$(rowelement).children('td:eq(3)').text()+"']").attr('selected', 'selected');
+        $("html, body").animate({ scrollTop: 0 }, "fast");
    });
 
    $('#tabell').on('click','.hapus',function(e) {
         e.preventDefault();
+        $('#btnBatal').trigger('click');
         var iddata = $(this).data('id');
         if (confirm('Apakah pegawai ini ingin di hapus?')) {
             $.ajax({

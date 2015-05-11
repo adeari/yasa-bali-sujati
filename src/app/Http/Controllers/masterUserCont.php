@@ -73,13 +73,11 @@ class masterUserCont extends Controller1 {
 					'divisi' => $divisiIn,
 				]);
 			} else {
-				if (Input::get('id') != '1') {
-					$userUpdate = User::find(Input::get('id'));
-					$userUpdate->name = Input::get('users');
-					$userUpdate->password = bcrypt(Input::get('pass'));
-					$userUpdate->divisi = $divisiIn;
-					$userUpdate->update();
-				}
+				$userUpdate = User::find(Input::get('id'));
+				$userUpdate->name = Input::get('users');
+				$userUpdate->password = bcrypt(Input::get('pass'));
+				$userUpdate->divisi = $divisiIn;
+				$userUpdate->update();
 			}
 		}
 		Session::flash('msg', $msg);
@@ -87,14 +85,9 @@ class masterUserCont extends Controller1 {
 	}
 
 	public function del($id) {
-		$success = 0;
+		$success = 1;
 		$msg = '';
-		if ($id != Auth::user()->id && $id != 1) {
-			User::find($id)->delete();
-			$success = 1;
-		} else {
-			$msg = 'User ini tidak bisa dihapus';
-		}
+		User::find($id)->delete();
 		$result = array('success' => $success, 'msg' => $msg);
 		return response()->json($result);
 	}

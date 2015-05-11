@@ -8,6 +8,7 @@ $.ajaxSetup({
      complete: function(xhr,status) {
      	$('#loading').remove();
         $('#content').fadeIn();
+        $('body').css('overflow','auto');
      }
 });
 

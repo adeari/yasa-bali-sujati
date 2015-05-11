@@ -38,5 +38,9 @@ Route::post($prefix.'-delete/{id}', $controllername.'del');
 $prefix = 'dokumen-joborder';
 $controllername = 'dokumenJoborderCont@';
 Route::get($prefix, $controllername.'index');
+Route::get($prefix.'-{status}', $controllername.'index');
 Route::post($prefix.'-add', $controllername.'add');
 Route::post($prefix.'-delete/{id}', $controllername.'del');
+
+Route::post($prefix.'-view-option-kode', $controllername.'viewOptionCode');
+Route::get($prefix.'1/{kode}', $controllername.'viewKode');

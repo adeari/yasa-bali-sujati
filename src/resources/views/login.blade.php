@@ -59,7 +59,7 @@
         
     <div class="row">
         <div class="col-md-12 center login-header">
-            <h2>Welcome</h2>
+            <h2>Selamat datang di aplikasi dokumenter</h2>
         </div>
         <!--/span-->
     </div><!--/row-->
@@ -158,7 +158,11 @@
             data: $(this).serialize()
 		}).done(function(result){
             if (result.success == 1) {
+                @if (empt($nextt))
                 location = '{{ URL::to('dashboard') }}';
+                @else
+                location = '{{ $nextt }}';
+                @endif
             } else {
                 $('#loading').remove();
                 $('#content').fadeIn();

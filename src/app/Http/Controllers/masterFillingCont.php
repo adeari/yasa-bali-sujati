@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Controller;
 use App\models\Filling;
+use App\models\Filling_validasi_rules;
 use App\models\Validasi_rules;
 
 use Illuminate\Support\Facades\Input;
@@ -20,6 +21,7 @@ class masterFillingCont extends Controller1 {
 	}
 	public function add()
 	{
+		$datasync = array();
 		$validator = Validator::make(
 			 [
 		        'warna' => Input::get('warna'),
@@ -57,16 +59,20 @@ class masterFillingCont extends Controller1 {
 			} else {
 				$filling->update();
 			}
-			if (count(Input::get('validasi_rules'))>0) {
-				$datasyncin = Input::get('validasi_rules');
+			$datasyncin = Input::get('validasi_rules');
+			if (count($datasyncin) > 0) {
 				$filling->validasi_rules()->sync($datasyncin);
 				foreach ($datasyncin as $datasync1) {
 					$this->cekIsAturanCanbeDeleted($datasync1);
 				}
+			} else {
+				$filling->validasi_rules()->detach();
 			}
-			if (!is_null($datasync[0])) {
-				foreach ($datasync as $datasync1) {
-					$this->cekIsAturanCanbeDeleted($datasync1);
+			if (count($datasync) > 0) {
+				if (!is_null($datasync[0])) {
+					foreach ($datasync as $datasync1) {
+						$this->cekIsAturanCanbeDeleted($datasync1);
+					}
 				}
 			}
 		}
@@ -75,9 +81,21 @@ class masterFillingCont extends Controller1 {
 	}
 
 	public function del($id) {
-		$success = 1;
+		$success = 0;
 		$msg = '';
-		Filling::find($id)->delete();
+		$fillingData = Filling_validasi_rules::where('filling_id', '=', $id);
+		$fillings = $fillingData->get();
+		$fillingData->delete();
+
+		if (Filling::where('isdeleted','=',false)->whereid($id)->count() > 0) {
+			$msg = 'Tidak bida dihapus karena data ini di pakai di job order';
+		} else {
+			Filling::where('isdeleted','=',true)->whereid($id)->delete();
+			$success = 1;
+		}
+		foreach ($fillings as $filling) {
+			$this->cekIsAturanCanbeDeleted($filling->validasi_rules_id);
+		}
 		$result = array('success' => $success, 'msg' => $msg);
 		return response()->json($result);
 	}

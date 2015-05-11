@@ -93,6 +93,7 @@ $(document).ready(function () {
                 var newTitle = $(msg).filter('title').text();
                 $('title').text(newTitle);
                 docReady();
+                $('body').css('overflow','auto');
             }
         });
     });

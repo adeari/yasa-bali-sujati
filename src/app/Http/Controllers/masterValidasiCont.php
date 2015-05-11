@@ -53,10 +53,10 @@ class masterValidasiCont extends Controller1 {
 	public function del($id) {
 		$success = 0;
 		$msg = '';
-		if (Validasi_rules::find($id)->where('isdeleted','=',false)->count() > 0) {
+		if (Validasi_rules::where('isdeleted','=',false)->whereid($id)->count() > 0) {
 			$msg = 'Tidak bida dihapus karena data ini di pakai di data filling atau job order';
 		} else {
-			Validasi_rules::find($id)->where('isdeleted','=',true)->delete();
+			Validasi_rules::where('isdeleted','=',true)->whereid($id)->delete();
 			$success = 1;
 		}
 		$result = array('success' => $success, 'msg' => $msg);

@@ -1,4 +1,4 @@
-
+@include('function')
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -53,22 +53,17 @@
     <link rel="shortcut icon" href="{{ URL::to("public/komponenku/charisma") }}/img/favicon.ico">
 
 </head>
-
-<?php
-function viewdate($str) {
-	$tgl = substr($str, 0, 19);
-	$datee = new DateTime($tgl);
-	$tgl = date_format($datee, 'd F Y,  H:i:s');
-	return $tgl;
-}
-?>
-
 <body>
     <!-- topbar starts -->
     <div class="navbar navbar-default" role="navigation">
 
         <div class="navbar-inner">
-            
+            <button type="button" class="navbar-toggle pull-left animated flip">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
             <a class="navbar-brand" href="dashboard"> <img alt="Charisma Logo" src="{{ URL::to("public/komponenku/charisma") }}/img/logo20.png" class="hidden-xs"/>
                 <span>PT. YASA BALI SUJATI</span></a>
 

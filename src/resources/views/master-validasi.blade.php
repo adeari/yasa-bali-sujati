@@ -105,6 +105,8 @@
     </div>
 <script type="text/javascript">
 function blankInput() {
+    $('#msg').hide();
+    $('#msg').html('');
     $('input[name="id"]').val('');
     $('#urutan').val('');
     $('#aturan').val('');
@@ -120,10 +122,12 @@ $(function(){
         var rowelement = '#row'+$(this).data('id');
         $('#urutan').val($(rowelement).children('td:first').text());
         $('#aturan').val($(rowelement).children('td:eq(1)').text());
+        $("html, body").animate({ scrollTop: 0 }, "fast");
    });
 
    $('#tabell').on('click','.hapus',function(e) {
         e.preventDefault();
+        $('#btnBatal').trigger('click');
         var iddata = $(this).data('id');
         if (confirm('Apakah validasi aturan ini ingin di hapus?')) {
             $.ajax({
