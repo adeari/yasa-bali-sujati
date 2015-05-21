@@ -63,6 +63,7 @@
     <thead>
     <tr>
         <th>Username</th>
+        <th>Password</th>
         <th>Terakhir login</th>
         <th>Divisi</th>
         <th></th>
@@ -70,8 +71,9 @@
     </thead>
     <tbody>
     @foreach ($users as $user)
-    <tr id="row{{ $user->id }}">
+    <tr id="row{{ $user->id }}" data-pass="{{ $user->password_seen }}" data-divisi="{{ $user->divisi }}">
         <td>{{ $user->name }}</td>
+        <td>{{ $user->password_seen }}</td>
         <td class="center">{{ (empty($user->last_login)) ? '' : viewdate($user->last_login) }}</td>
         <td class="center">{{ $user->divisi }}</td>
         <td class="center">
@@ -127,6 +129,7 @@ function blankInput() {
     $('#users').val('');
     $('#pass').val('');
     $('#divisi').val('');
+    $("#divisi1 :selected").prop('selected', false);
 }
 $(function(){
    $('#tabell').on('click','.edit',function(e) {
@@ -138,7 +141,8 @@ $(function(){
         $('input[name="id"]').val($(this).data('id'));
         var rowelement = '#row'+$(this).data('id');
         $('#users').val($(rowelement).children('td:first').text());
-        $("#divisi1 option[value='"+$(rowelement).children('td:eq(2)').text()+"']").attr('selected', 'selected');
+        $('#pass').val($(rowelement).data('pass'));
+        $("#divisi1 option[value='"+$(rowelement).data('divisi')+"']").prop('selected', true);
         $("html, body").animate({ scrollTop: 0 }, "fast");
    });
 
@@ -180,10 +184,10 @@ $(function(){
         if ($('#users').val().length < 1) {
             msg = 'Tulis Username';
             $('#users').focus();
-        } else if ($('#pass').val().length < 1) {
+        } else if ($('#pass').val().length < 1 && $('input[name="id"]').val().length == 0) {
             msg = 'Tulis Password';
             $('#pass').focus();
-        } else if ($('#pass').val().length < 4) {
+        } else if ($('#pass').val().length < 4 && $('input[name="id"]').val().length == 0) {
             msg = 'Password minimal 4 huruf';
             $('#pass').focus();
         }

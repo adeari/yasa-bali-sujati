@@ -1,5 +1,7 @@
 <?php
 
+Route::get('test', 'testtCont@index');
+
 Route::get('/', 'loginCont@index');
 Route::post('postlogin', 'loginCont@postlogin');
 Route::get('dashboard', 'dashboardCont@index');
@@ -22,6 +24,14 @@ $controllername = 'masterCustomerCont@';
 Route::get($prefix, $controllername.'index');
 Route::post($prefix.'-add', $controllername.'add');
 Route::post($prefix.'-delete/{id}', $controllername.'del');
+Route::get($prefix.'-{status}', $controllername.'index');
+
+$prefix = 'master-shipper';
+$controllername = 'masterSipperCont@';
+Route::get($prefix, $controllername.'index');
+Route::post($prefix.'-add', $controllername.'add');
+Route::post($prefix.'-delete/{id}', $controllername.'del');
+Route::get($prefix.'-{status}', $controllername.'index');
 
 $prefix = 'master-filling';
 $controllername = 'masterFillingCont@';

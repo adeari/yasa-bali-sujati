@@ -34,16 +34,13 @@
                     <div class="col-md-2"><label class="labelleft">Email</label></div>
                     <div class="col-md-4 form-group"><input class="form-control" type="email" name="email" id="email"></div>
                 </div>
-                @if (count($jenis_customer)<1)
-                <div class="row">
-                    <div class="col-md-2"><label class="labelleft">Jenis customer</label></div>
-                    <div class="col-md-3 form-group"><input class="form-control" type="text" name="jenis_customer" id="jenis_customer"></div>
-                </div>
-                @else
                 <div class="row">
                     <div class="col-md-2"><label class="labelleft">Jenis customer</label></div>
                     <div class="col-md-3 form-group">
                         <select class="form-control" name="jenis_customer1" id="jenis_customer1">
+                            <option value="Rekanan">Rekanan</option>
+                            <option value="Exportir">Exportir</option>
+                            <option value="Importir">Importir</option>
                             @foreach ($jenis_customer as $jenis_customer1)
                                 <option value="{{ $jenis_customer1->jenis_customer }}">{{ $jenis_customer1->jenis_customer }}</option>
                             @endforeach
@@ -52,7 +49,6 @@
                     <div class="col-md-2"><label class="labelleft">Selain itu</label></div>
                     <div class="col-md-3 form-group"><input class="form-control" type="text" name="jenis_customer" id="jenis_customer"></div>
                 </div>
-                @endif
                  <button type="submit" class="btn btn-success">Simpan</button>
                  <button type="button" class="btn btn-danger" id="btnBatal">Batal</button>
             </form>
@@ -78,10 +74,21 @@
         </div>
     </div>
     <div class="box-content">
+    <div class="row" style="margin:0 0 10px 0;">
+        <div class="col-md-2">Status : </div>
+        <div class="col-md-4">
+            <select class="form-control float-left" name="statusChoose" id="statusChoose">
+                <option value="">Semua status</option>
+                <option value="false" {{ ($statusSelected == 'false') ? ' selected' : '' }}>Belum lengkap</option>
+                <option value="true" {{ ($statusSelected == 'true') ? ' selected' : '' }}>Lengkap</option>
+            </select>
+        </div>
+    </div>
     <table class="table table-striped table-bordered bootstrap-datatable datatable responsive" id="tabell">
     <thead>
     <tr>
         <th>Perusahaan</th>
+        <th></th>
         <th>Cont. person</th>
         <th>Alamat</th>
         <th>Telepon</th>
@@ -92,8 +99,18 @@
     </thead>
     <tbody>
     @foreach ($customers as $customer)
-    <tr id="row{{ $customer->id }}">
+    <tr id="row{{ $customer->id }}" 
+    data-nama_perusahaan="{{ $customer->nama_perusahaan }}"
+    data-contact_person="{{ $customer->contact_person }}"
+    data-alamat="{{ $customer->alamat }}"
+    data-telepon="{{ $customer->telepon }}"
+    data-email="{{ $customer->email }}"
+    data-jenis_customer="{{ $customer->jenis_customer }}"
+    >
         <td>{{ $customer->nama_perusahaan }}</td>
+        <td><?php
+         echo ($customer->islengkap) ? '<i class="glyphicon glyphicon-ok"></i>' : '<i class="glyphicon glyphicon-magnet"></i>'; 
+         ?></td>
         <td>{{ $customer->contact_person }}</td>
         <td>{{ $customer->alamat }}</td>
         <td>{{ $customer->telepon }}</td>
@@ -134,7 +151,7 @@
                     <p>
                         Bagian ini untuk menambah customer atau menghapus customer dan juga mengganti data customer.
                         <br/>Pada kolom jenis customer bisa memilih data yang ada di dropdown pilihan tapi jika jenis customer b terebut tidak ada
-                        di dropdown maka isilah kolom selain itu. Jika mengisi kolom selain itu maka selain itulah yang akan di simpan walau di dropdown memilih exportir misalnya.
+                        di dropdown maka isilah kolom selain itu. Jika mengisi kolom selain itu maka selain itulah yang akan di simpan walau di dropdown memilih Rekanan misalnya.
                     </p>
                 </div>
                 <div class="modal-footer">
@@ -154,6 +171,7 @@ function blankInput() {
     $('#contact_person').val('');
     $('#email').val('');
     $('#jenis_customer').val('');
+    $("#jenis_customer1 :selected").prop('selected', false);
 }
 $(function(){
    $('#tabell').on('click','.edit',function(e) {
@@ -164,12 +182,12 @@ $(function(){
         blankInput();
         $('input[name="id"]').val($(this).data('id'));
         var rowelement = '#row'+$(this).data('id');
-        $('#nama_perusahaan').val($(rowelement).children('td:first').text());
-        $('#contact_person').val($(rowelement).children('td:eq(1)').text());
-        $('#alamat').val($(rowelement).children('td:eq(2)').text());
-        $('#telepon').val($(rowelement).children('td:eq(3)').text());
-        $('#email').val($(rowelement).children('td:eq(4)').text());
-        $("#jenis_customer1 option[value='"+$(rowelement).children('td:eq(5)').text()+"']").attr('selected', 'selected');
+        $('#nama_perusahaan').val($(rowelement).data('nama_perusahaan'));
+        $('#contact_person').val($(rowelement).data('contact_person'));
+        $('#alamat').val($(rowelement).data('alamat'));
+        $('#telepon').val($(rowelement).data('telepon'));
+        $('#email').val($(rowelement).data('email'));
+        $("#jenis_customer1 option[value='"+$(rowelement).data('jenis_customer')+"']").prop('selected', true);
         $("html, body").animate({ scrollTop: 0 }, "fast");
    });
 
@@ -197,6 +215,7 @@ $(function(){
     $('#layoutForm').show( "fast");
     $('#titleForm').html('<i class="glyphicon glyphicon-plus"></i> Menambah customer');
     blankInput();
+    $("#jenis_customer1 option[value='Rekanan']").prop('selected', true);
    });
 
    $('#btnBatal').click(function(){
@@ -220,11 +239,6 @@ $(function(){
         } else if ($('#telepon').val().length < 1) {
             msg = 'Tulis telepon';
             $('#telepon').focus();
-        @if (count($jenis_customer)<1)
-        } else if ($('#jenis_customer').val().length < 1) {
-            msg = 'Tulis jenis customer';
-            $('#jenis_customer').focus();
-        @endif
         }
         if (msg.length > 0) {
             $('#msg').show();
@@ -234,6 +248,15 @@ $(function(){
             $(this).submit();
         }
    });
+
+   $('#statusChoose').change(function(e) {
+    var str = '{{ URL::to('master-customer') }}';
+
+    if ($(this).val().length > 0) {
+        str += '-'+$(this).val();
+    }
+    document.location = str;
+});
 
 });    
 </script>

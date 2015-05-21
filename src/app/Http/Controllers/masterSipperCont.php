@@ -7,23 +7,17 @@ use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Session;
 
-class masterCustomerCont extends Controller1 {
+class masterSipperCont extends Controller1 {
 	public function index($status = null)
 	{
-		$jenis_customer = Customers::select('jenis_customer')
-		->whereRaw("LOWER(jenis_customer) NOT IN ('exportir', 'importir', 'rekanan')")
-		->groupBy('jenis_customer')
-		->get();
-
 		$customers = Customers::orderBy('nama_perusahaan')
-		->whereRaw("LOWER(jenis_customer) NOT IN ('exportir', 'importir')");
+		->whereRaw("LOWER(jenis_customer) IN ('exportir', 'importir')");
 		if (!is_null($status)) {
 			$customers = $customers->where('islengkap', $status);
 		}
 		$customers = $customers->get();
-		return view('master-customer', array(
+		return view('master-shipper', array(
 			'customers' => $customers,
-			'jenis_customer' => $jenis_customer,
 			'statusSelected' => $status,
 			));
 	}
@@ -51,7 +45,7 @@ class masterCustomerCont extends Controller1 {
 		    ]
 		);
 
-		$msg = "Customer tersimpan";
+		$msg = "Shipper tersimpan";
 		if ($validator->fails()) {
 			$msg = $validator->messages();
 		} else {
@@ -85,7 +79,7 @@ class masterCustomerCont extends Controller1 {
 			}
 		}
 		Session::flash('msg', $msg);
-		return redirect('master-customer');
+		return redirect('master-shipper');
 	}
 
 	public function del($id) {

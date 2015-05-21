@@ -19,6 +19,27 @@
                     <div class="col-md-9 form-group" id="kodelistt"></div>
                 </div>
                 <div class="row">
+                    <div class="col-md-3"><label class="labelleft">Komoditi</label></div>
+                    <div class="col-md-4 form-group"><input class="form-control" type="text" name="komoditi" id="komoditi"></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3"><label class="labelleft">Partai</label></div>
+                    <div class="col-md-3 form-group">
+                        <select class="form-control" name="partai" id="partai">
+                            <option value="20 Feet">20 Feet</option>
+                            <option value="40 Feet">40 Feet</option>
+                            <option value="LCL">LCL</option>
+                            @foreach ($partais as $partai)
+                                <option value="{{ $partai->partai }}">{{ $partai->partai }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3"><label class="labelleft">Destinasi</label></div>
+                    <div class="col-md-4 form-group"><input class="form-control" type="text" name="destinasi" id="destinasi"></div>
+                </div>
+                <div class="row">
                     <div class="col-md-3"><label class="labelleft">Customer</label></div>
                     <div class="col-md-4 form-group">
                     <div class="control-group">
@@ -33,12 +54,37 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-3"><label class="labelleft">Exportir</label></div>
+                    <div class="col-md-3"><label class="labelleft">Customer lainnya</label></div>
+                    <div class="col-md-4 form-group"><input class="form-control" type="text" name="customer1" id="customer1"></div>
+                    <div class="col-md-3 form-group">
+                        <select class="form-control" name="jenis_customer" id="jenis_customer">
+                            <option value="Rekanan">Rekanan</option>
+                            <option value="Exportir">Exportir</option>
+                            <option value="Importir">Importir</option>
+                            @foreach ($jenis_customer as $jenis_customer1)
+                                <option value="{{ $jenis_customer1->jenis_customer }}">{{ $jenis_customer1->jenis_customer }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3"><label class="labelleft">Shipper</label></div>
                     <div class="col-md-4 form-group">
                         <select class="form-control" name="exportir" id="exportir" data-rel="chosen">
+                            <option value="">Tidak memilih</option>
                             @foreach ($exportirs as $exportir)
                                 <option value="{{ $exportir->id }}">{{ $exportir->nama_perusahaan }}</option>
                             @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3"><label class="labelleft">Shipper lainnya</label></div>
+                    <div class="col-md-4 form-group"><input class="form-control" type="text" name="shipper1" id="shipper1"></div>
+                    <div class="col-md-3 form-group">
+                        <select class="form-control" name="jenis_shipper" id="jenis_shipper">
+                            <option value="Exportir">Exportir</option>
+                            <option value="Importir">Importir</option>
                         </select>
                     </div>
                 </div>
@@ -64,6 +110,10 @@
                 <div class="row">
                     <div class="col-md-3"><label class="labelleft">Waktu pelaksanaan</label></div>
                     <div class="col-md-3 form-group"><input class="form-control" type="text" name="tgl_pelaksanaan" id="tgl_pelaksanaan">dd/mm/yyyy HH:mm</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3"><label class="labelleft">Tempat pelaksanaan</label></div>
+                    <div class="col-md-4 form-group"><textarea class="form-control" type="text" name="t4_pelaksanaan" id="t4_pelaksanaan" rows="3"></textarea></div>
                 </div>
                 @if (count($pegawais) > 0)
                 <div class="row">
@@ -146,7 +196,7 @@
         <th>Customer / CP</th>
         <th>Exportir / CP</th>
         @if (is_null($statusSelected))
-        <th></th>
+        <th style="width:90px"></th>
         @endif
     </tr>
     </thead>
@@ -154,6 +204,10 @@
     @foreach ($joborders as $joborder)
     <tr id="row{{ $joborder->id }}" 
     data-kode="{{ $joborder->kode }}" 
+    data-t4_pelaksanaan="{{ $joborder->t4_pelaksanaan }}" 
+    data-partai="{{ $joborder->partai }}" 
+    data-komoditi="{{ $joborder->komoditi }}" 
+    data-destinasi="{{ $joborder->destinasi }}" 
     data-customer="{{ $joborder->customer }}" 
     data-jeniskegiatan="{{ $joborder->jenis_kegiatan }}" 
     data-exportir="{{ $joborder->exportir }}" 
@@ -215,8 +269,8 @@ if ($joborder->status == 'Lengkap') {
         ?></td>
         <td>{{ viewdate($joborder->tgl_pelaksanaan) }}</td>
         <td>{{ $joborder->jenis_kegiatan }}</td>
-        <td>{{ $joborder->customer1->nama_perusahaan.' / '.$joborder->customer1->contact_person }}</td>
-        <td>{{ $joborder->exportir1->nama_perusahaan.' / '.$joborder->exportir1->contact_person }}</td>
+        <td>{{ $joborder->customer1->nama_perusahaan }} /<br/>{{ $joborder->customer1->contact_person }}</td>
+        <td>{{ $joborder->exportir1->nama_perusahaan }} /<br/>{{ $joborder->exportir1->contact_person }}</td>
         @if (is_null($statusSelected))
         <td class="center">
             <a class="btn btn-info btn-xs edit"data-id="{{ $joborder->id }}" href="#">
@@ -323,7 +377,7 @@ var i = 0;
              $('#pegawailisttt #selectlayoutpegawai').html('');
         }
         
-        $('#selectlayoutpegawai #pegawaiselect').chosen({
+        $('#selectlayoutpegawai #pegawaiselect').chosen({            
             no_results_text: "Tidak ada data ini",
             max_selected_options: 25,
             width: "100%",
@@ -346,7 +400,7 @@ function blankInput() {
             optionlist += '<option value="'+entry+'">'+pegawaitextlist[i]+'</option>';
             i++;
         });
-    $('#pegawailisttt #selectlayoutpegawai').html('<select class="form-control float-left" name="pegawaiselect" id="pegawaiselect">'+optionlist+'</select>');
+    $('#pegawailisttt #selectlayoutpegawai').html('<select class="form-control float-left" name="pegawaiselect" id="pegawaiselect" data-rel="chosen">'+optionlist+'</select>');
     $('#pegawailisttt #btnpegawaiok').show();
     $('#kodelistt .kodekk').each(function() {
         $(this).prop("checked", false);
@@ -363,6 +417,12 @@ function blankInput() {
 
     $('#msgStatus').text('');
     $('#msgStatus').removeClass();
+
+    $("#customer :selected").prop('selected', false);
+    $("#exportir :selected").prop('selected', false);
+    $('#customer').trigger("chosen:updated");
+    $('#exportir').trigger("chosen:updated");
+    refreshselectoption();
 }
 
 function refreshKode(){
@@ -412,11 +472,15 @@ $(function(){
         var rowelement = '#row'+$(this).data('id');
         $('#kodelistt').html('<input type="hidden" name="kode" value="'+$(rowelement).data('fillingid')+'"><input class="form-control" type="text" value="'+$(rowelement).data('kode')+'" style="background:#FFF;width:250px;" readonly>');
         $('#jenis_kegiatan1').val($(rowelement).data('jeniskegiatan'));        
-        $("#customer option[value='"+$(rowelement).data('customer')+"']").attr('selected', 'selected');
+        $("#customer option[value='"+$(rowelement).data('customer')+"']").prop('selected', true);
         $('#customer').trigger("chosen:updated");
-        $("#exportir option[value='"+$(rowelement).data('exportir')+"']").attr('selected', 'selected');
+        $("#exportir option[value='"+$(rowelement).data('exportir')+"']").prop('selected', true);
         $('#exportir').trigger("chosen:updated");
         $('#tgl_pelaksanaan').val($(rowelement).data('tglpelaksanaan'));
+        $('#komoditi').val($(rowelement).data('komoditi'));
+        $('#partai').val($(rowelement).data('partai'));
+        $('#destinasi').val($(rowelement).data('destinasi'));
+        $('#t4_pelaksanaan').val($(rowelement).data('t4_pelaksanaan'));
         var statuss = $(rowelement).data('status');
         if (statuss == 'Lengkap') {
             $('#msgStatus').html('Validasi '+statuss+'&nbsp;&nbsp;&nbsp;<br/>');

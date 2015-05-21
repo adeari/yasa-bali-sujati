@@ -57,6 +57,21 @@
                 </div>
                 <div class="row">
                     <div class="col-md-1"></div>
+                    <div class="col-md-2"><label class="labelleft">Komoditi</label></div>
+                    <div class="col-md-8 form-group">{{ $joborder->komoditi }}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-1"></div>
+                    <div class="col-md-2"><label class="labelleft">Partai</label></div>
+                    <div class="col-md-8 form-group">{{ $joborder->partai }}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-1"></div>
+                    <div class="col-md-2"><label class="labelleft">Destinasi</label></div>
+                    <div class="col-md-8 form-group">{{ $joborder->destinasi }}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-1"></div>
                     <div class="col-md-2"><label class="labelleft">Customer</label></div>
                     <div class="col-md-8 form-group">{{ $joborder->customer1->nama_perusahaan }}</div>
                 </div>
@@ -77,8 +92,8 @@
                 </div>
                 <div class="row">
                     <div class="col-md-1"></div>
-                    <div class="col-md-2"><label class="labelleft">Waktu pelaksanaan</label></div>
-                    <div class="col-md-8 form-group">{{ viewdateInput($joborder->tgl_pelaksanaan) }}</div>
+                    <div class="col-md-2"><label class="labelleft">Tempat pelaksanaan</label></div>
+                    <div class="col-md-8 form-group">{{ $joborder->t4_pelaksanaan }}</div>
                 </div>
                 <div class="row">
                     <div class="col-md-1"></div>

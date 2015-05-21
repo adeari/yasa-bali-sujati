@@ -19,15 +19,16 @@ class dokumenJoborderCont extends Controller1 {
 
 	function getNewKode($filling) {
 		$kodee = $filling->huruf;
+		$kodee11 = str_replace("_", "\_", $kodee);
 
-		if (Joborder::where('kode', 'like', $kodee.'%')->count() == 0) {
+		if (Joborder::whereRaw("kode like '$kodee11%'")->count() == 0) {
 
 			for ($i = 1; $i < $filling->digit; $i++) {
 				$kodee .= '0';
 			}
 			$kodee .= '1';
 		} else {
-			$joborderid = Joborder::select('kode')->where('kode','like', $kodee.'%')->orderBy('kode', 'desc')->first()->kode;
+			$joborderid = Joborder::select('kode')->whereRaw("kode like '$kodee11%'")->orderBy('kode', 'desc')->first()->kode;
 			$numberCode = floatval(str_replace($kodee, '', $joborderid)) + 1;
 			$numberCode = ''.$numberCode;
 			for ($i = strlen($numberCode); $i < $filling->digit; $i++) {
@@ -47,9 +48,16 @@ class dokumenJoborderCont extends Controller1 {
 		}
 		$joborders = $joborders->orderBy('kode')->orderBy('id','desc')->get();
 		$customers = Customers::orderBy('nama_perusahaan')->get();
-		$exportirs = Customers::whereRaw("LOWER(jenis_customer) = 'exportir'")->orderBy('nama_perusahaan')->get();
+		$exportirs = Customers::whereRaw("LOWER(jenis_customer) in ('exportir', 'importir')")->orderBy('nama_perusahaan')->get();
 		$jenis_kegiatan = Joborder::select('jenis_kegiatan')->groupBy('jenis_kegiatan')->orderBy('jenis_kegiatan')->get();
+		$partais = Joborder::select('partai')->whereRaw("LOWER(partai) NOT IN ('20 feet', '40 feet', 'lcl')")
+		->groupBy('partai')->orderBy('partai')->get();
 		$validasi_rules = Validasi_rules::orderBy('urutan')->get();
+
+		$jenis_customer = Customers::select('jenis_customer')
+		->whereRaw("LOWER(jenis_customer) NOT IN ('exportir', 'importir', 'rekanan')")
+		->groupBy('jenis_customer')
+		->get();
 
 		return view('dokumen-joborder', array(
 			'joborders' => $joborders,
@@ -59,6 +67,8 @@ class dokumenJoborderCont extends Controller1 {
 			'pegawais' => $pegawais,
 			'validasi_rules' => $validasi_rules,
 			'statusSelected' => $status,
+			'jenis_customer' => $jenis_customer,
+			'partais' => $partais,
 		));
 	}
 	public function add()
@@ -79,17 +89,13 @@ class dokumenJoborderCont extends Controller1 {
 		$validator = Validator::make(
 			 [
 		        'kode' => Input::get('kode'),
-		        'customer' => Input::get('customer'),
-		        'exportir' => Input::get('exportir'),
 		        'jenis_kegiatan' => $jenisKegiatan,
 		        'tgl_pelaksanaan' => Input::get('tgl_pelaksanaan'),
 		    ],
 		    [
 		        'kode' => 'required',
-		        'customer' => 'required',
-		        'exportir' => 'required',
 		        'jenis_kegiatan' => 'required',
-		        'tgl_pelaksanaan' => 'required',
+		        'tgl_pelaksanaan' => 'required|date_format:d/m/Y H:i|regex:/[0-9]{2}\/[0-9]{2}\/[0-9]{4} [0-9]{2}:[0-9]{2}/',
 		    ]
 		);
 
@@ -98,6 +104,9 @@ class dokumenJoborderCont extends Controller1 {
 		$customerBefore = null;
 		if ($validator->fails()) {
 			$msg = $validator->messages();
+			if ($msg->has('tgl_pelaksanaan')) {
+				$msg .= "<br>Tanggal tidak sesuai";
+			}
 		} else {
 			$jobOrder = new Joborder();
 			if (empty(Input::get('id'))) {
@@ -125,7 +134,21 @@ class dokumenJoborderCont extends Controller1 {
 
 			
 			$jobOrder->customer = Input::get('customer');
+			if (!empty(Input::get('customer1'))) {
+				$customerAdd = new Customers();
+				$customerAdd->nama_perusahaan = Input::get('customer1');
+				$customerAdd->jenis_customer = Input::get('jenis_customer');
+				$customerAdd->save();
+				$jobOrder->customer = $customerAdd->id;
+			}
 			$jobOrder->exportir = Input::get('exportir');
+			if (!empty(Input::get('shipper1'))) {
+				$customerAdd = new Customers();
+				$customerAdd->nama_perusahaan = Input::get('shipper1');
+				$customerAdd->jenis_customer = Input::get('jenis_shipper');
+				$customerAdd->save();
+				$jobOrder->exportir = $customerAdd->id;
+			}
 			$jobOrder->jenis_kegiatan = $jenisKegiatan;
 			$jobOrder->tgl_pelaksanaan = $this->setDateTime(Input::get('tgl_pelaksanaan'));
 			$jobOrder->catatan = Input::get('catatan');
@@ -133,6 +156,10 @@ class dokumenJoborderCont extends Controller1 {
 			$jobOrder->updated_by = Auth::user()->id;
 			$fillingBefore = $jobOrder->filling;
 			$jobOrder->filling = Input::get('kode');
+			$jobOrder->t4_pelaksanaan = Input::get('t4_pelaksanaan');
+			$jobOrder->komoditi = Input::get('komoditi');
+			$jobOrder->partai = Input::get('partai');
+			$jobOrder->destinasi = Input::get('destinasi');
 
 
 			if ($countDataSyncin > 0) {

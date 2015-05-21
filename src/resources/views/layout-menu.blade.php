@@ -10,9 +10,12 @@
                         <li class="accordion">
                             <a href="#"><i class="glyphicon glyphicon-plus"></i><span> Master</span></a>
                             <ul class="nav nav-pills nav-stacked" style="display: block;">
+                            @if (strtolower(Auth::user()->divisi) == "admin")
                                 <li><a class="ajax-link" href="{{ URL::to('master-user') }}">User Management</a></li>
+                            @endif
                                 <li><a class="ajax-link" href="{{ URL::to('master-pegawai') }}">Pegawai</a></li>
                                 <li><a class="ajax-link" href="{{ URL::to('master-customer') }}">Customer</a></li>
+                                <li><a class="ajax-link" href="{{ URL::to('master-shipper') }}">Shipper</a></li>
                                 <li><a class="ajax-link" href="{{ URL::to('master-filling') }}">Aturan Filling</a></li>
                                 <li><a class="ajax-link" href="{{ URL::to('master-validasi') }}">Aturan validasi</a></li>
                                 <li><a class="ajax-link" href="{{ URL::to('dashboard') }}">Dashboard</a></li>

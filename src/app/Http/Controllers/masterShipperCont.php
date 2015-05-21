@@ -21,7 +21,7 @@ class masterCustomerCont extends Controller1 {
 			$customers = $customers->where('islengkap', $status);
 		}
 		$customers = $customers->get();
-		return view('master-customer', array(
+		return view('master-shipper', array(
 			'customers' => $customers,
 			'jenis_customer' => $jenis_customer,
 			'statusSelected' => $status,
@@ -71,6 +71,7 @@ class masterCustomerCont extends Controller1 {
 				&& !empty($customer->alamat) 
 				&& !empty($customer->telepon) 
 				&& !empty($customer->nama_perusahaan) 
+				&& !empty($customer->email) 
 				&& !empty($customer->jenis_customer) 
 				) {
 				$customer->islengkap = true;
@@ -85,7 +86,7 @@ class masterCustomerCont extends Controller1 {
 			}
 		}
 		Session::flash('msg', $msg);
-		return redirect('master-customer');
+		return redirect('master-shipper');
 	}
 
 	public function del($id) {

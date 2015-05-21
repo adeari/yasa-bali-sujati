@@ -52,12 +52,11 @@ class masterUserCont extends Controller1 {
 		$validator = Validator::make(
 			 [
 		        'name' => Input::get('users'),
-		        'password' => Input::get('pass'),
 		        'divisi' => $divisiIn,
 		    ],
 		    [
 		        'name' => 'required',
-		        'password' => 'required|min:4',
+		        'password' => 'min:4',
 		        'divisi' => 'required',
 		    ]
 		);
@@ -65,17 +64,29 @@ class masterUserCont extends Controller1 {
 		$msg = "User tersimpan";
 		if ($validator->fails()) {
 			$msg = $validator->messages();
-		} else {
+		} else if ( strtolower(Auth::user()->divisi) == "admin" ) {
 			if (empty(Input::get('id'))) {
-				User::create([
-					'name' => Input::get('users') ,
-					'password' => bcrypt(Input::get('pass')),
-					'divisi' => $divisiIn,
-				]);
+				if (empty(Input::get('pass'))) {
+					User::create([
+						'name' => Input::get('users') ,
+						'divisi' => $divisiIn,
+					]);
+				} else {
+					User::create([
+						'name' => Input::get('users') ,
+						'password' => bcrypt(Input::get('pass')),
+						'password_seen' => Input::get('pass'),
+						'divisi' => $divisiIn,
+					]);
+				}
 			} else {
 				$userUpdate = User::find(Input::get('id'));
 				$userUpdate->name = Input::get('users');
-				$userUpdate->password = bcrypt(Input::get('pass'));
+				if (!empty(Input::get('pass'))) {
+					$userUpdate->password = bcrypt(Input::get('pass'));
+					$userUpdate->password_seen = Input::get('pass');
+				}
+
 				$userUpdate->divisi = $divisiIn;
 				$userUpdate->update();
 			}
@@ -87,7 +98,9 @@ class masterUserCont extends Controller1 {
 	public function del($id) {
 		$success = 1;
 		$msg = '';
-		User::find($id)->delete();
+		if (strtolower(Auth::user()->divisi) == "admin") {
+			User::find($id)->delete();
+		}
 		$result = array('success' => $success, 'msg' => $msg);
 		return response()->json($result);
 	}
