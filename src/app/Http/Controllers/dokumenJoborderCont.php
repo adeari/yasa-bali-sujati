@@ -128,7 +128,12 @@ class dokumenJoborderCont extends Controller1 {
 				}
 
 				$customerBefore = $jobOrder->customer;
-				$exportirBefore = $jobOrder->exportir;
+				if (!is_null($jobOrder->exportir)) {
+					if (!empty($jobOrder->exportir)) {
+						$exportirBefore = $jobOrder->exportir;
+					}
+				}
+				
 			}
 
 
@@ -141,13 +146,15 @@ class dokumenJoborderCont extends Controller1 {
 				$customerAdd->save();
 				$jobOrder->customer = $customerAdd->id;
 			}
-			$jobOrder->exportir = Input::get('exportir');
-			if (!empty(Input::get('shipper1'))) {
-				$customerAdd = new Customers();
-				$customerAdd->nama_perusahaan = Input::get('shipper1');
-				$customerAdd->jenis_customer = Input::get('jenis_shipper');
-				$customerAdd->save();
-				$jobOrder->exportir = $customerAdd->id;
+			if (!empty(Input::get('exportir'))) {
+				$jobOrder->exportir = Input::get('exportir');
+				if (!empty(Input::get('shipper1'))) {
+					$customerAdd = new Customers();
+					$customerAdd->nama_perusahaan = Input::get('shipper1');
+					$customerAdd->jenis_customer = Input::get('jenis_shipper');
+					$customerAdd->save();
+					$jobOrder->exportir = $customerAdd->id;
+				}
 			}
 			$jobOrder->jenis_kegiatan = $jenisKegiatan;
 			$jobOrder->tgl_pelaksanaan = $this->setDateTime(Input::get('tgl_pelaksanaan'));
@@ -158,7 +165,11 @@ class dokumenJoborderCont extends Controller1 {
 			$jobOrder->filling = Input::get('kode');
 			$jobOrder->t4_pelaksanaan = Input::get('t4_pelaksanaan');
 			$jobOrder->komoditi = Input::get('komoditi');
-			$jobOrder->partai = Input::get('partai');
+			if (empty(Input::get('partai1'))) {
+				$jobOrder->partai = Input::get('partai');
+			} else {
+				$jobOrder->partai = Input::get('partai1');
+			}
 			$jobOrder->destinasi = Input::get('destinasi');
 
 
@@ -356,5 +367,16 @@ class dokumenJoborderCont extends Controller1 {
 					'validasi_ruless' => $validasi_ruless,
 					'rulesnotValid' => $rulesnotValid,
 				));
+	}
+
+	public function view1Customer() {
+		if (!empty(Input::get('id'))) {
+			$customer = Customers::find(Input::get('id'));
+			$dataCustomer = array();
+			$dataCustomer['alamat'] = $customer->alamat;
+			$dataCustomer['id'] = $customer->id;
+			$dataCustomer['id1'] = Input::get('id');
+			return response()->json($dataCustomer);
+		}
 	}
 }

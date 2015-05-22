@@ -54,3 +54,4 @@ Route::post($prefix.'-delete/{id}', $controllername.'del');
 
 Route::post($prefix.'-view-option-kode', $controllername.'viewOptionCode');
 Route::get($prefix.'1/{kode}', $controllername.'viewKode');
+Route::post($prefix.'-view-1customer', $controllername.'view1Customer');

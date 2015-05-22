@@ -80,17 +80,20 @@ abstract class Controller1 extends Controller {
 	}
 
 	function checkisCustomerCandeleted($id) {
-		$candeleted = true;
+		if (!is_null($id)) {
+			if (!empty($id)) {
+				$candeleted = true;
 
-		if ($candeleted) {
-			if (Joborder::whereRaw("customer = $id OR exportir = $id")->count() > 0) {
-				$candeleted = false;
-			}
-		}
+				if ($candeleted) {
+					if (Joborder::whereRaw("customer = $id OR exportir = $id")->count() > 0) {
+						$candeleted = false;
+					}
+				}
 
-		$customer = Customers::find($id);
-		$customer->isdeleted = $candeleted;
-		$customer->update();
+				$customer = Customers::find($id);
+				$customer->isdeleted = $candeleted;
+				$customer->update();
+			}}
 	}
 
 	function setDateTime($str) {

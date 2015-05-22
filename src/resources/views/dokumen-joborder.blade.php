@@ -34,6 +34,8 @@
                             @endforeach
                         </select>
                     </div>
+                    <div class="col-md-2"><label class="labelleft">Selain itu</label></div>
+                    <div class="col-md-3 form-group"><input class="form-control" type="text" name="partai1" id="partai1"></div>
                 </div>
                 <div class="row">
                     <div class="col-md-3"><label class="labelleft">Destinasi</label></div>
@@ -69,7 +71,7 @@
                 </div>
                 <div class="row">
                     <div class="col-md-3"><label class="labelleft">Shipper</label></div>
-                    <div class="col-md-4 form-group">
+                    <div class="col-md-4 form-group" id="shipper_chooser">
                         <select class="form-control" name="exportir" id="exportir" data-rel="chosen">
                             <option value="">Tidak memilih</option>
                             @foreach ($exportirs as $exportir)
@@ -210,7 +212,7 @@
     data-destinasi="{{ $joborder->destinasi }}" 
     data-customer="{{ $joborder->customer }}" 
     data-jeniskegiatan="{{ $joborder->jenis_kegiatan }}" 
-    data-exportir="{{ $joborder->exportir }}" 
+    data-exportir="{{ @$joborder->exportir }}" 
     data-tglpelaksanaan="{{ viewdateInput($joborder->tgl_pelaksanaan) }}" 
     data-catatan="{{ $joborder->catatan }}" 
     data-fillingid="{{ $joborder->filling }}" 
@@ -270,7 +272,11 @@ if ($joborder->status == 'Lengkap') {
         <td>{{ viewdate($joborder->tgl_pelaksanaan) }}</td>
         <td>{{ $joborder->jenis_kegiatan }}</td>
         <td>{{ $joborder->customer1->nama_perusahaan }} /<br/>{{ $joborder->customer1->contact_person }}</td>
-        <td>{{ $joborder->exportir1->nama_perusahaan }} /<br/>{{ $joborder->exportir1->contact_person }}</td>
+        <td>
+        @if (!is_null($joborder->exportir1))
+        {{ @$joborder->exportir1->nama_perusahaan }} /<br/>{{ @$joborder->exportir1->contact_person }}
+        @endif
+        </td>
         @if (is_null($statusSelected))
         <td class="center">
             <a class="btn btn-info btn-xs edit"data-id="{{ $joborder->id }}" href="#">
@@ -419,10 +425,22 @@ function blankInput() {
     $('#msgStatus').removeClass();
 
     $("#customer :selected").prop('selected', false);
-    $("#exportir :selected").prop('selected', false);
     $('#customer').trigger("chosen:updated");
+    $("#jenis_customer :selected").prop('selected', false);  
+    $('#customer1').val('');
+
+    $("#exportir :selected").prop('selected', false);
     $('#exportir').trigger("chosen:updated");
+    $('#shipper1').val("");
+    $("#jenis_shipper :selected").prop('selected', false);
+
     refreshselectoption();
+
+    $('#partai1').val('');
+    $("#partai :selected").prop('selected', false);
+    $('#destinasi').val('');
+    $('#komoditi').val('');
+    $('#t4_pelaksanaan').val('');
 }
 
 function refreshKode(){
@@ -604,6 +622,16 @@ $('#statusChoose').change(function(e) {
 
 $('#tgl_pelaksanaan').mask("00/00/0000 00:00", {placeholder: "__/__/____ __:__"}, {selectOnFocus: true});
 refreshKode();
-});    
+}); 
+$("#shipper_chooser").on('change', '#exportir', function() {
+    if ($(this).val().length > 0 && $('input[name="id"]').val().length == 0) {
+       $.ajax({
+            url: '{{ URL::to('dokumen-joborder-view-1customer') }}',
+            data: {'_token' : '{!! csrf_token() !!}', 'id' : $(this).val()}
+        }).done(function(results){
+                $('#t4_pelaksanaan').val(results.alamat);
+        });
+    }
+});
 </script>
 @include('layout-footer')
