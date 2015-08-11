@@ -75,6 +75,9 @@
                 </button>
                 <ul class="dropdown-menu">
                     <li><a href="#">Ganti Password</a></li>
+@if (strtolower(Auth::user()->divisi) == "admin")
+                    <li><a href="{{ URL::to("backup") }}">Backup data</a></li>
+@endif
                     <li class="divider"></li>
                     <li><a href="{{ URL::to("logout") }}">Logout</a></li>
                 </ul>

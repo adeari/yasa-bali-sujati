@@ -2,6 +2,7 @@
 
 Route::get('test', 'testtCont@index');
 
+
 Route::get('/', 'loginCont@index');
 Route::post('postlogin', 'loginCont@postlogin');
 Route::get('dashboard', 'dashboardCont@index');
@@ -55,3 +56,5 @@ Route::post($prefix.'-delete/{id}', $controllername.'del');
 Route::post($prefix.'-view-option-kode', $controllername.'viewOptionCode');
 Route::get($prefix.'1/{kode}', $controllername.'viewKode');
 Route::post($prefix.'-view-1customer', $controllername.'view1Customer');
+
+Route::get('backup', 'utilityCont@backupdata');
