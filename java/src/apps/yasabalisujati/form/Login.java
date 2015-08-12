@@ -12,7 +12,6 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
-import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
@@ -39,8 +38,6 @@ public class Login extends JFrame {
 
 	private MenuDesktop menuDesktop;
 	
-	private JInternalFrame intFrameFlow;	
-
 	private Textbox usernameTextbox;
 	private Passwordbox passwordbox;
 	private ComboBox divisiComboBox;
@@ -55,7 +52,7 @@ public class Login extends JFrame {
 		_service = new Service();
 
 		_frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
-		menuDesktop = new MenuDesktop(this);
+		menuDesktop = new MenuDesktop(this, _session, _service);
 
 		JPanel formPanel = new JPanel();
 		formPanel.setLayout(new FlowLayout(FlowLayout.LEADING));

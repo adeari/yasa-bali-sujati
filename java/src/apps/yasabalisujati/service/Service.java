@@ -3,6 +3,9 @@ package apps.yasabalisujati.service;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Properties;
 
 import org.hibernate.Session;
@@ -49,5 +52,23 @@ public class Service {
 			}
 		}
 		return key;
+	}
+	
+	public String convertStringFromDate(String format, Date date, SimpleDateFormat simpleDateFormat) {
+		if (date != null) {
+			simpleDateFormat.applyPattern(format);
+			return simpleDateFormat.format(date);
+		}
+		return "";
+	}
+	public Date convertStringToDate(String format, String date, SimpleDateFormat simpleDateFormat) {
+		if (date != null) {
+			simpleDateFormat.applyPattern(format);
+			try {
+				return simpleDateFormat.parse(date);
+			} catch (ParseException e) {
+			}
+		}
+		return null;
 	}
 }

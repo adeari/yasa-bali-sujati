@@ -38,10 +38,10 @@ import apps.yasabalisujati.components.ComboBox;
 import apps.yasabalisujati.components.Label;
 import apps.yasabalisujati.components.Table;
 import apps.yasabalisujati.components.Textbox;
-import apps.yasabalisujati.database.entity.User;
+import apps.yasabalisujati.database.entity.Pegawai;
 import apps.yasabalisujati.service.Service;
 
-public class UserIndex extends JInternalFrame {
+public class PegawaiIndex extends JInternalFrame {
 	private static final long serialVersionUID = 8967014638545080322L;
 
 	private JPanel buttonPanel;
@@ -51,7 +51,7 @@ public class UserIndex extends JInternalFrame {
 	private ComboBox searchingComboBox;
 	private Textbox searchTextbox;
 	private Button searchButton;
-	private final String[] kolom = new String[] { "", "Username", "Divisi", "Terakhir Login" };
+	private final String[] kolom = new String[] { "", "Nama", "Alamat", "Telepon", "Divisi" };
 	private TableModel tableModel;
 	private Vector<Object> dataVector;
 	private Table table;
@@ -69,8 +69,8 @@ public class UserIndex extends JInternalFrame {
 
 	private JInternalFrame _frame;
 
-	public UserIndex(Session session, Service service, SimpleDateFormat simpleDateFormat) {
-		super("User Login", true, true, true, true);
+	public PegawaiIndex(Session session, Service service, SimpleDateFormat simpleDateFormat) {
+		super("Pegawai", true, true, true, true);
 		_frame = this;
 		_frame.setLayout(new FlowLayout(FlowLayout.LEADING));
 		_frame.setPreferredSize(new Dimension(800, 600));
@@ -189,6 +189,7 @@ public class UserIndex extends JInternalFrame {
 		table.getColumnModel().getColumn(1).setPreferredWidth(200);
 		table.getColumnModel().getColumn(2).setPreferredWidth(200);
 		table.getColumnModel().getColumn(3).setPreferredWidth(200);
+		table.getColumnModel().getColumn(4).setPreferredWidth(200);
 		
 		TableRowSorter<TableModel> sorter = new TableRowSorter<>(
 				table.getModel());
@@ -283,7 +284,7 @@ public class UserIndex extends JInternalFrame {
 		_session = _service.getConnectionDB(_session);
 		_session.clear();
 		
-		Criteria criteria = _session.createCriteria(User.class)
+		Criteria criteria = _session.createCriteria(Pegawai.class)
 				.setProjection(Projections.rowCount());
 		criteria = setCriteriaCondition(criteria);
 		
@@ -314,20 +315,21 @@ public class UserIndex extends JInternalFrame {
 			buttonPrevious.setEnabled(true);
 		}
 		
-		criteria = _session.createCriteria(User.class);
+		criteria = _session.createCriteria(Pegawai.class);
 		criteria = setCriteriaCondition(criteria);
 		criteria.setFirstResult(startRow);
 		criteria.setMaxResults(Long.valueOf(countRows).intValue());
 
-		List<User> dataList = criteria.list();
+		List<Pegawai> dataList = criteria.list();
 		
-		for (User user : dataList) {
+		for (Pegawai pegawai : dataList) {
 			Vector<Object> data1 = new Vector<Object>();
 			data1.addElement(false);
-			data1.addElement(user.getName());
-			data1.addElement(user.getDivisi());
-			data1.addElement(_service.convertStringFromDate("dd/MM/yyyy HH:mm", user.getLastLogin(), _simpleDateFormat));
-			data1.addElement(user);
+			data1.addElement(pegawai.getNama());
+			data1.addElement(pegawai.getAlamat());
+			data1.addElement(pegawai.getTelepon());
+			data1.addElement(pegawai.getDivisi());
+			data1.addElement(pegawai);
 			dataVector.add(data1);
 		}
 		table.tableChanged(new javax.swing.event.TableModelEvent(tableModel));
