@@ -47,12 +47,14 @@ public class PegawaiIndex extends JInternalFrame {
 	private JPanel buttonPanel;
 	private JPanel searchingPanel;
 	private JPanel paginationPanel;
+	private Dimension rowDimension;
 	private JScrollPane jscoJScrollPane;
 	private ComboBox searchingComboBox;
 	private Textbox searchTextbox;
 	private Button searchButton;
 	private final String[] kolom = new String[] { "", "Nama", "Alamat", "Telepon", "Divisi" };
 	private TableModel tableModel;
+	private Dimension tableDimension;
 	private Vector<Object> dataVector;
 	private Table table;
 	private Session _session;
@@ -85,6 +87,10 @@ public class PegawaiIndex extends JInternalFrame {
 		_service = service;
 		_simpleDateFormat = simpleDateFormat;
 
+		rowDimension = new Dimension();
+		tableDimension = new Dimension();
+		
+		
 		buttonPanel = new JPanel();
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.LEADING));
 		buttonPanel.setBorder(BorderFactory.createTitledBorder(""));
@@ -336,15 +342,16 @@ public class PegawaiIndex extends JInternalFrame {
 	}
 
 	public void reSizePanel() {
-		buttonPanel.setPreferredSize(new Dimension(
-				_frame.getWidth() - 25, 40));
+		rowDimension.setSize(_frame.getWidth() - 25, 40);
+		buttonPanel.setPreferredSize(rowDimension);
 		buttonPanel.setSize(buttonPanel.getPreferredSize());
-		
+
 		searchingPanel.setPreferredSize(buttonPanel.getPreferredSize());
 		paginationPanel.setPreferredSize(buttonPanel.getPreferredSize());
-		
-		jscoJScrollPane.setPreferredSize(new Dimension(
-				_frame.getWidth() - 25, _frame.getHeight() - 200 ));
+
+		tableDimension.setSize(_frame.getWidth() - 25,
+				_frame.getHeight() - 200);
+		jscoJScrollPane.setPreferredSize(tableDimension);
 		jscoJScrollPane.setSize(jscoJScrollPane.getPreferredSize());
 		
 	}

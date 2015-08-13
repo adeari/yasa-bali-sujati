@@ -47,12 +47,15 @@ public class UserIndex extends JInternalFrame {
 	private JPanel buttonPanel;
 	private JPanel searchingPanel;
 	private JPanel paginationPanel;
+	private Dimension rowDimension;
 	private JScrollPane jscoJScrollPane;
 	private ComboBox searchingComboBox;
 	private Textbox searchTextbox;
 	private Button searchButton;
-	private final String[] kolom = new String[] { "", "Username", "Divisi", "Terakhir Login" };
+	private final String[] kolom = new String[] { "", "Username", "Divisi",
+			"Terakhir Login" };
 	private TableModel tableModel;
+	private Dimension tableDimension;
 	private Vector<Object> dataVector;
 	private Table table;
 	private Session _session;
@@ -69,13 +72,16 @@ public class UserIndex extends JInternalFrame {
 
 	private JInternalFrame _frame;
 
-	public UserIndex(Session session, Service service, SimpleDateFormat simpleDateFormat) {
+	public UserIndex(Session session, Service service,
+			SimpleDateFormat simpleDateFormat) {
 		super("User Login", true, true, true, true);
 		_frame = this;
 		_frame.setLayout(new FlowLayout(FlowLayout.LEADING));
 		_frame.setPreferredSize(new Dimension(800, 600));
 		_frame.setSize(_frame.getPreferredSize());
 		_frame.setLocation(10, 10);
+		_frame.setFrameIcon(new ImageIcon(getClass().getClassLoader()
+				.getResource("icons/people.png")));
 		_frame.addComponentListener(new ComponentAdapter() {
 			public void componentResized(ComponentEvent evt) {
 				reSizePanel();
@@ -86,20 +92,22 @@ public class UserIndex extends JInternalFrame {
 		_simpleDateFormat = simpleDateFormat;
 
 		buttonPanel = new JPanel();
+		rowDimension = new Dimension();
+		tableDimension = new Dimension();
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.LEADING));
 		buttonPanel.setBorder(BorderFactory.createTitledBorder(""));
 
-		Button baruButton = new Button(new ImageIcon(
-				getClass().getClassLoader().getResource("icons/addpeople.png")), "Baru");
+		Button baruButton = new Button(new ImageIcon(getClass()
+				.getClassLoader().getResource("icons/addpeople.png")), "Baru");
 		buttonPanel.add(baruButton);
-		Button ubahButton = new Button(new ImageIcon(
-				getClass().getClassLoader().getResource("icons/edit.png")), "Ubah");
+		Button ubahButton = new Button(new ImageIcon(getClass()
+				.getClassLoader().getResource("icons/edit.png")), "Ubah");
 		buttonPanel.add(ubahButton);
 		JLabel blank = new JLabel();
 		blank.setPreferredSize(new Dimension(200, 10));
 		buttonPanel.add(blank);
-		Button hapusButton = new Button(new ImageIcon(
-				getClass().getClassLoader().getResource("icons/delete.png")), "Hapus");
+		Button hapusButton = new Button(new ImageIcon(getClass()
+				.getClassLoader().getResource("icons/delete.png")), "Hapus");
 		buttonPanel.add(hapusButton);
 
 		_frame.add(buttonPanel);
@@ -119,26 +127,25 @@ public class UserIndex extends JInternalFrame {
 		searchTextbox.addKeyListener(new KeyAdapter() {
 			public void keyReleased(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					 refreshTable();
+					refreshTable();
 				}
 			}
 		});
 		searchingPanel.add(searchTextbox);
 
-		searchButton = new Button(new ImageIcon(
-				getClass().getClassLoader().getResource("icons/search.png")), "Cari");
+		searchButton = new Button(new ImageIcon(getClass().getClassLoader()
+				.getResource("icons/search.png")), "Cari");
 		searchButton.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				 refreshTable();
+				refreshTable();
 			}
 
 		});
 		searchingPanel.add(searchButton);
 		_frame.add(searchingPanel);
-		
-		
+
 		dataVector = new Vector<Object>();
 		tableModel = new AbstractTableModel() {
 			private static final long serialVersionUID = 9194573404469074938L;
@@ -181,64 +188,63 @@ public class UserIndex extends JInternalFrame {
 				}
 			}
 		};
-		
+
 		table = new Table(tableModel);
-		
+
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		table.getColumnModel().getColumn(0).setPreferredWidth(30);
 		table.getColumnModel().getColumn(1).setPreferredWidth(200);
 		table.getColumnModel().getColumn(2).setPreferredWidth(200);
 		table.getColumnModel().getColumn(3).setPreferredWidth(200);
-		
+
 		TableRowSorter<TableModel> sorter = new TableRowSorter<>(
 				table.getModel());
 		table.setRowSorter(sorter);
 		sorter.setSortable(0, false);
-		
+
 		jscoJScrollPane = new JScrollPane(table);
 		_frame.add(jscoJScrollPane);
-		
-		
+
 		paginationPanel = new JPanel();
 		paginationPanel.setLayout(new FlowLayout(FlowLayout.LEADING));
 		paginationPanel.setBorder(BorderFactory.createTitledBorder(""));
 		_frame.add(paginationPanel);
-		
-		
+
 		rowSelectComboBox = new JComboBox<Long>();
 		rowSelectComboBox.setFont(new Font("Tahoma", Font.BOLD, 15));
-		((JLabel)rowSelectComboBox.getRenderer()).setHorizontalAlignment(JLabel.RIGHT);
+		((JLabel) rowSelectComboBox.getRenderer())
+				.setHorizontalAlignment(JLabel.RIGHT);
 		rowSelectComboBox.addItem(Long.valueOf(50));
 		rowSelectComboBox.addItem(Long.valueOf(100));
 		rowSelectComboBox.addItem(Long.valueOf(500));
 		rowSelectComboBox.addItem(Long.valueOf(1000));
 		paginationPanel.add(rowSelectComboBox);
-		
+
 		buttonFirst = new JButton(" << ");
 		buttonFirst.setFont(new Font("Tahoma", Font.BOLD, 15));
 		paginationPanel.add(buttonFirst);
-		
+
 		buttonPrevious = new JButton(" < ");
 		buttonPrevious.setFont(new Font("Tahoma", Font.BOLD, 15));
 		paginationPanel.add(buttonPrevious);
-		
+
 		pageNowField = new JTextField("1");
 		pageNowField.setFont(new Font("Tahoma", Font.BOLD, 15));
 		pageNowField.setPreferredSize(new Dimension(50, 30));
 		pageNowField.setHorizontalAlignment(SwingConstants.RIGHT);
 		pageNowField.addKeyListener(new KeyListener() {
-			
+
 			@Override
 			public void keyTyped(KeyEvent arg0) {
 				keyPressed(arg0);
 			}
-			
+
 			@Override
 			public void keyReleased(KeyEvent arg0) {
 				keyPressed(arg0);
-				
+
 			}
-			
+
 			@Override
 			public void keyPressed(KeyEvent arg0) {
 				try {
@@ -249,15 +255,15 @@ public class UserIndex extends JInternalFrame {
 			}
 		});
 		paginationPanel.add(pageNowField);
-		
+
 		buttonNext = new JButton(" > ");
 		buttonNext.setFont(new Font("Tahoma", Font.BOLD, 15));
 		paginationPanel.add(buttonNext);
-		
+
 		buttonLast = new JButton(" >> ");
 		buttonLast.setFont(new Font("Tahoma", Font.BOLD, 15));
 		paginationPanel.add(buttonLast);
-		
+
 		countPageLabel = new Label("Halaman");
 		countPageLabel.setPreferredSize(new Dimension(300, 30));
 		countPageLabel.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -269,24 +275,24 @@ public class UserIndex extends JInternalFrame {
 		reSizePanel();
 		refreshTable();
 	}
-	
+
 	public Criteria setCriteriaCondition(Criteria criteria) {
 		String searchText = searchTextbox.getText();
 		if (!searchText.isEmpty()) {
-			
+
 		}
 		return criteria;
 	}
-	
+
 	public void refreshTable() {
 		dataVector.clear();
 		_session = _service.getConnectionDB(_session);
 		_session.clear();
-		
-		Criteria criteria = _session.createCriteria(User.class)
-				.setProjection(Projections.rowCount());
+
+		Criteria criteria = _session.createCriteria(User.class).setProjection(
+				Projections.rowCount());
 		criteria = setCriteriaCondition(criteria);
-		
+
 		long countData = (long) criteria.uniqueResult();
 		long pageNow = Integer.valueOf(pageNowField.getText()).intValue();
 		long countRows = ((Long) rowSelectComboBox.getSelectedItem())
@@ -295,9 +301,8 @@ public class UserIndex extends JInternalFrame {
 		countPage = (int) countData / countRows;
 		if ((countData % countRows) > 0)
 			countPage++;
-		countPageLabel.setText(countPage+" Halaman");
-		
-		
+		countPageLabel.setText(countPage + " Halaman");
+
 		int startRow = Long.valueOf((pageNow * countRows) - countRows)
 				.intValue();
 
@@ -313,20 +318,21 @@ public class UserIndex extends JInternalFrame {
 		} else {
 			buttonPrevious.setEnabled(true);
 		}
-		
+
 		criteria = _session.createCriteria(User.class);
 		criteria = setCriteriaCondition(criteria);
 		criteria.setFirstResult(startRow);
 		criteria.setMaxResults(Long.valueOf(countRows).intValue());
 
 		List<User> dataList = criteria.list();
-		
+
 		for (User user : dataList) {
 			Vector<Object> data1 = new Vector<Object>();
 			data1.addElement(false);
 			data1.addElement(user.getName());
 			data1.addElement(user.getDivisi());
-			data1.addElement(_service.convertStringFromDate("dd/MM/yyyy HH:mm", user.getLastLogin(), _simpleDateFormat));
+			data1.addElement(_service.convertStringFromDate("dd/MM/yyyy HH:mm",
+					user.getLastLogin(), _simpleDateFormat));
 			data1.addElement(user);
 			dataVector.add(data1);
 		}
@@ -334,16 +340,17 @@ public class UserIndex extends JInternalFrame {
 	}
 
 	public void reSizePanel() {
-		buttonPanel.setPreferredSize(new Dimension(
-				_frame.getWidth() - 25, 40));
+		rowDimension.setSize(_frame.getWidth() - 25, 40);
+		buttonPanel.setPreferredSize(rowDimension);
 		buttonPanel.setSize(buttonPanel.getPreferredSize());
-		
+
 		searchingPanel.setPreferredSize(buttonPanel.getPreferredSize());
 		paginationPanel.setPreferredSize(buttonPanel.getPreferredSize());
-		
-		jscoJScrollPane.setPreferredSize(new Dimension(
-				_frame.getWidth() - 25, _frame.getHeight() - 200 ));
+
+		tableDimension.setSize(_frame.getWidth() - 25,
+				_frame.getHeight() - 200);
+		jscoJScrollPane.setPreferredSize(tableDimension);
 		jscoJScrollPane.setSize(jscoJScrollPane.getPreferredSize());
-		
+
 	}
 }
