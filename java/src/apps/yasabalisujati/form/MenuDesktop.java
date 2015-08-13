@@ -2,6 +2,7 @@ package apps.yasabalisujati.form;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
@@ -36,7 +37,7 @@ public class MenuDesktop extends JFrame {
 	public MenuDesktop(Login login, Session session, Service service) {
 		super("Yasa Bali Sujati");
 		_frame = this;
-		_frame.setIconImage(new ImageIcon(Login.class.getResource("../icons/key.png")).getImage());
+		_frame.setIconImage(new ImageIcon(getClass().getClassLoader().getResource("icons/key.png")).getImage());
 		_frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		
 		_frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -59,10 +60,14 @@ public class MenuDesktop extends JFrame {
 		
 		JMenuBar menuBar = new JMenuBar();
 		_frame.setJMenuBar(menuBar);
-		JMenu menu = new JMenu("Master");
+		JMenu menu = new JMenu("Data Master");
+		menu.setFont(new Font(null, Font.BOLD, 15));
+		menu.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/star.png")));
 		menuBar.add(menu);
 		
 		JMenuItem usersMenuItem = new JMenuItem("Users");
+		usersMenuItem.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/people.png")));
+		usersMenuItem.setFont(new Font(null, Font.BOLD, 14));
 		usersMenuItem.addActionListener(new ActionListener() {
 			
 			@Override
@@ -74,6 +79,8 @@ public class MenuDesktop extends JFrame {
 		menu.add(usersMenuItem);
 		
 		JMenuItem pegawaiMenuItem = new JMenuItem("Pegawai");
+		pegawaiMenuItem.setFont(usersMenuItem.getFont());
+		pegawaiMenuItem.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/people.png")));
 		pegawaiMenuItem.addActionListener(new ActionListener() {
 			
 			@Override
@@ -86,6 +93,8 @@ public class MenuDesktop extends JFrame {
 		
 		menu.add(new JSeparator());
 		JMenuItem logoutMenuItem = new JMenuItem("Logout");
+		logoutMenuItem.setFont(usersMenuItem.getFont());
+		logoutMenuItem.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/key.png")));
 		logoutMenuItem.addActionListener(new ActionListener() {
 			
 			@Override
@@ -97,6 +106,8 @@ public class MenuDesktop extends JFrame {
 		});
 		menu.add(logoutMenuItem);
 		JMenuItem tutupMenuItem = new JMenuItem("Tutup");
+		tutupMenuItem.setFont(usersMenuItem.getFont());
+		tutupMenuItem.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/logout.png")));
 		tutupMenuItem.addActionListener(new ActionListener() {
 			
 			@Override

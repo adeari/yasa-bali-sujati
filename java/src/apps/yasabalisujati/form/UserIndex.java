@@ -90,16 +90,16 @@ public class UserIndex extends JInternalFrame {
 		buttonPanel.setBorder(BorderFactory.createTitledBorder(""));
 
 		Button baruButton = new Button(new ImageIcon(
-				Login.class.getResource("../icons/addpeople.png")), "Baru");
+				getClass().getClassLoader().getResource("icons/addpeople.png")), "Baru");
 		buttonPanel.add(baruButton);
 		Button ubahButton = new Button(new ImageIcon(
-				Login.class.getResource("../icons/edit.png")), "Ubah");
+				getClass().getClassLoader().getResource("icons/edit.png")), "Ubah");
 		buttonPanel.add(ubahButton);
 		JLabel blank = new JLabel();
 		blank.setPreferredSize(new Dimension(200, 10));
 		buttonPanel.add(blank);
 		Button hapusButton = new Button(new ImageIcon(
-				Login.class.getResource("../icons/delete.png")), "Hapus");
+				getClass().getClassLoader().getResource("icons/delete.png")), "Hapus");
 		buttonPanel.add(hapusButton);
 
 		_frame.add(buttonPanel);
@@ -126,7 +126,7 @@ public class UserIndex extends JInternalFrame {
 		searchingPanel.add(searchTextbox);
 
 		searchButton = new Button(new ImageIcon(
-				Login.class.getResource("../icons/search.png")), "Cari");
+				getClass().getClassLoader().getResource("icons/search.png")), "Cari");
 		searchButton.addActionListener(new ActionListener() {
 
 			@Override

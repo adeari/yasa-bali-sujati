@@ -1,6 +1,5 @@
 package apps.yasabalisujati.service;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
@@ -35,8 +34,7 @@ public class Service {
 	public String getProperties(String key) {
 		InputStream input = null;
 		try {
-			ClassLoader classLoader = getClass().getClassLoader();
-			input = classLoader.getResourceAsStream("data.properties");
+			input = getClass().getClassLoader().getResourceAsStream("data.properties");
 			Properties properties = new Properties();
 			properties.load(input);
 			return properties.getProperty(key);

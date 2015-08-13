@@ -47,8 +47,7 @@ public class Login extends JFrame {
 		_frame = this;
 		_frame.setPreferredSize(new Dimension(width, height));
 		_frame.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-		_frame.setIconImage(new ImageIcon(Login.class
-				.getResource("../icons/key.png")).getImage());
+		_frame.setIconImage(new ImageIcon(getClass().getClassLoader().getResource("icons/key.png")).getImage());
 		_service = new Service();
 
 		_frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -108,7 +107,7 @@ public class Login extends JFrame {
 		buttonSavePanel.setBorder(BorderFactory.createTitledBorder(""));
 
 		Button loginButton = new Button(new ImageIcon(
-				Login.class.getResource("../icons/key.png")), "L O G I N");
+				getClass().getClassLoader().getResource("icons/key.png")), "L O G I N");
 		loginButton.addActionListener(new ActionListener() {
 
 			@Override
@@ -119,7 +118,7 @@ public class Login extends JFrame {
 		buttonSavePanel.add(loginButton);
 
 		Button tutupButton = new Button(new ImageIcon(
-				Login.class.getResource("../icons/cancel.png")), "T U T U P");
+				getClass().getClassLoader().getResource("icons/cancel.png")), "T U T U P");
 		tutupButton.addActionListener(new ActionListener() {
 
 			@Override
