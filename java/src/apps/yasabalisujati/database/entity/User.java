@@ -12,7 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users_java")
 public class User implements Serializable  {
 	private static final long serialVersionUID = -9017213045496180885L;
 	
@@ -109,7 +109,7 @@ public class User implements Serializable  {
 		this.lastLogin = lastLogin;
 	}
 
-	public Boolean getDeleted() {
+	public Boolean isDeleted() {
 		return deleted;
 	}
 

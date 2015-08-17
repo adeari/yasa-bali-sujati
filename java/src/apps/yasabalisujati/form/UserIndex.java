@@ -7,10 +7,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -20,18 +26,22 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 
 import apps.yasabalisujati.components.Button;
 import apps.yasabalisujati.components.ComboBox;
@@ -72,6 +82,11 @@ public class UserIndex extends JInternalFrame {
 
 	private JInternalFrame _frame;
 
+	private UserTambah _userTambah;
+	
+	private java.sql.Timestamp _timeBegin;
+	private java.sql.Timestamp _timeEnd;
+
 	public UserIndex(Session session, Service service,
 			SimpleDateFormat simpleDateFormat) {
 		super("User Login", true, true, true, true);
@@ -80,6 +95,7 @@ public class UserIndex extends JInternalFrame {
 		_frame.setPreferredSize(new Dimension(800, 600));
 		_frame.setSize(_frame.getPreferredSize());
 		_frame.setLocation(10, 10);
+		_frame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		_frame.setFrameIcon(new ImageIcon(getClass().getClassLoader()
 				.getResource("icons/people.png")));
 		_frame.addComponentListener(new ComponentAdapter() {
@@ -87,9 +103,13 @@ public class UserIndex extends JInternalFrame {
 				reSizePanel();
 			}
 		});
+
 		_session = session;
 		_service = service;
 		_simpleDateFormat = simpleDateFormat;
+		
+		_timeBegin = new Timestamp(0);
+		_timeEnd = new Timestamp(0);
 
 		buttonPanel = new JPanel();
 		rowDimension = new Dimension();
@@ -99,15 +119,65 @@ public class UserIndex extends JInternalFrame {
 
 		Button baruButton = new Button(new ImageIcon(getClass()
 				.getClassLoader().getResource("icons/addpeople.png")), "Baru");
+		baruButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				_userTambah.setVisible(null);
+			}
+		});
 		buttonPanel.add(baruButton);
 		Button ubahButton = new Button(new ImageIcon(getClass()
 				.getClassLoader().getResource("icons/edit.png")), "Ubah");
+		ubahButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				showUpdateForm();
+			}
+		});
 		buttonPanel.add(ubahButton);
 		JLabel blank = new JLabel();
 		blank.setPreferredSize(new Dimension(200, 10));
 		buttonPanel.add(blank);
 		Button hapusButton = new Button(new ImageIcon(getClass()
 				.getClassLoader().getResource("icons/delete.png")), "Hapus");
+		hapusButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+
+				int countSelected = 0;
+				List<User> users = new ArrayList<User>();
+				for (int i = 0; i < table.getRowCount(); i++) {
+					if ((boolean) table.getValueAt(i, 0)) {
+						users.add((User) table.getModel().getValueAt(i,
+								kolom.length));
+						countSelected++;
+					}
+				}
+
+				if (countSelected == 0) {
+					JOptionPane.showMessageDialog(null,
+							"Klik data yang akan di hapus", "Informasi",
+							JOptionPane.INFORMATION_MESSAGE);
+					return;
+				} else {
+					if (JOptionPane.showConfirmDialog(null,
+							"Apakah data ini ingin di hapus ?", "Informasi",
+							JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+						_session = _service.getConnectionDB(_session);
+						for (User user : users) {
+							if (user.getId() > 1 && user.isDeleted()) {
+								_session.delete(user);
+								_session.flush();
+							}
+						}
+						refreshTable();
+					}
+				}
+			}
+		});
 		buttonPanel.add(hapusButton);
 
 		_frame.add(buttonPanel);
@@ -202,6 +272,17 @@ public class UserIndex extends JInternalFrame {
 		table.setRowSorter(sorter);
 		sorter.setSortable(0, false);
 
+		table.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() == 2) {
+					_userTambah.setVisible((User) table.getModel().getValueAt(
+							table.getSelectedRow(), kolom.length));
+				}
+			}
+		});
+
 		jscoJScrollPane = new JScrollPane(table);
 		_frame.add(jscoJScrollPane);
 
@@ -211,57 +292,88 @@ public class UserIndex extends JInternalFrame {
 		_frame.add(paginationPanel);
 
 		rowSelectComboBox = new JComboBox<Long>();
-		rowSelectComboBox.setFont(new Font("Tahoma", Font.BOLD, 15));
+		rowSelectComboBox.setFont(new Font(null, Font.BOLD, 15));
 		((JLabel) rowSelectComboBox.getRenderer())
 				.setHorizontalAlignment(JLabel.RIGHT);
 		rowSelectComboBox.addItem(Long.valueOf(50));
 		rowSelectComboBox.addItem(Long.valueOf(100));
 		rowSelectComboBox.addItem(Long.valueOf(500));
 		rowSelectComboBox.addItem(Long.valueOf(1000));
+		rowSelectComboBox.addItemListener(new ItemListener() {
+
+			@Override
+			public void itemStateChanged(ItemEvent arg0) {
+				refreshTable();
+			}
+
+		});
 		paginationPanel.add(rowSelectComboBox);
 
 		buttonFirst = new JButton(" << ");
-		buttonFirst.setFont(new Font("Tahoma", Font.BOLD, 15));
+		buttonFirst.setFont(new Font(null, Font.BOLD, 15));
+		buttonFirst.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				pageNowField.setText("1");
+				refreshTable();
+			}
+
+		});
 		paginationPanel.add(buttonFirst);
 
 		buttonPrevious = new JButton(" < ");
-		buttonPrevious.setFont(new Font("Tahoma", Font.BOLD, 15));
+		buttonPrevious.setFont(new Font(null, Font.BOLD, 15));
+		buttonPrevious.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				pageNowField.setText(String.valueOf(Integer.valueOf(
+						pageNowField.getText()).intValue() - 1));
+				refreshTable();
+			}
+
+		});
 		paginationPanel.add(buttonPrevious);
 
 		pageNowField = new JTextField("1");
-		pageNowField.setFont(new Font("Tahoma", Font.BOLD, 15));
+		pageNowField.setFont(new Font(null, Font.BOLD, 15));
 		pageNowField.setPreferredSize(new Dimension(50, 30));
 		pageNowField.setHorizontalAlignment(SwingConstants.RIGHT);
-		pageNowField.addKeyListener(new KeyListener() {
-
-			@Override
-			public void keyTyped(KeyEvent arg0) {
-				keyPressed(arg0);
-			}
-
-			@Override
-			public void keyReleased(KeyEvent arg0) {
-				keyPressed(arg0);
-
-			}
-
-			@Override
-			public void keyPressed(KeyEvent arg0) {
-				try {
-					Long.valueOf(pageNowField.getText());
-				} catch (Exception e) {
-					pageNowField.setText("1");
+		pageNowField.addKeyListener(new KeyAdapter() {
+			public void keyReleased(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+					refreshTable();
 				}
 			}
 		});
 		paginationPanel.add(pageNowField);
 
 		buttonNext = new JButton(" > ");
-		buttonNext.setFont(new Font("Tahoma", Font.BOLD, 15));
+		buttonNext.setFont(new Font(null, Font.BOLD, 15));
+		buttonNext.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				pageNowField.setText(String.valueOf(Integer.valueOf(
+						pageNowField.getText()).intValue() + 1));
+				refreshTable();
+			}
+
+		});
 		paginationPanel.add(buttonNext);
 
 		buttonLast = new JButton(" >> ");
-		buttonLast.setFont(new Font("Tahoma", Font.BOLD, 15));
+		buttonLast.setFont(new Font(null, Font.BOLD, 15));
+		buttonLast.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				pageNowField.setText(String.valueOf(countPage));
+				refreshTable();
+			}
+
+		});
 		paginationPanel.add(buttonLast);
 
 		countPageLabel = new Label("Halaman");
@@ -279,7 +391,47 @@ public class UserIndex extends JInternalFrame {
 	public Criteria setCriteriaCondition(Criteria criteria) {
 		String searchText = searchTextbox.getText();
 		if (!searchText.isEmpty()) {
+			if (searchingComboBox.getSelectedItem().equals(kolom[1])) {
+				criteria.add(Restrictions.like("name", searchText+"%").ignoreCase());
+			} else if (searchingComboBox.getSelectedItem().equals(kolom[2])) {
+				criteria.add(Restrictions.like("divisi", searchText+"%").ignoreCase());
+			} else if (searchingComboBox.getSelectedItem().equals(kolom[3])) {
+				if (_service.convertStringToDate("dd/MM/yyyy HH:mm:ss",
+						searchTextbox.getText(), _simpleDateFormat) != null) {
+					_timeBegin.setTime(_service.convertStringToDate(
+							"dd/MM/yyyy HH:mm:ss", searchTextbox.getText(),
+							_simpleDateFormat).getTime());
+					criteria.add(Restrictions.eq("lastLogin", _timeBegin));
+				} else if (_service.convertStringToDate("dd/MM/yyyy HH:mm",
+						searchTextbox.getText(), _simpleDateFormat) != null) {
 
+					_timeBegin.setTime(_service.convertStringToDate(
+							"dd/MM/yyyy HH:mm:ss",
+							searchTextbox.getText() + ":00", _simpleDateFormat)
+							.getTime());
+
+					_timeEnd.setTime(_service.convertStringToDate(
+							"dd/MM/yyyy HH:mm:ss",
+							searchTextbox.getText() + ":59", _simpleDateFormat)
+							.getTime());
+
+					criteria.add(Restrictions.between("lastLogin", _timeBegin, _timeEnd));
+				} else if (_service.convertStringToDate("dd/MM/yyyy",
+						searchTextbox.getText(), _simpleDateFormat) != null) {
+					
+					_timeBegin.setTime(_service.convertStringToDate(
+							"dd/MM/yyyy HH:mm:ss",
+							searchTextbox.getText() + " 00:00:00",
+							_simpleDateFormat).getTime());
+
+					_timeEnd.setTime(_service.convertStringToDate(
+							"dd/MM/yyyy HH:mm:ss",
+							searchTextbox.getText() + " 23:59:59",
+							_simpleDateFormat).getTime());
+					
+					criteria.add(Restrictions.between("lastLogin", _timeBegin, _timeEnd));
+				}
+			}
 		}
 		return criteria;
 	}
@@ -323,6 +475,7 @@ public class UserIndex extends JInternalFrame {
 		criteria = setCriteriaCondition(criteria);
 		criteria.setFirstResult(startRow);
 		criteria.setMaxResults(Long.valueOf(countRows).intValue());
+		criteria.addOrder(Order.asc("name"));
 
 		List<User> dataList = criteria.list();
 
@@ -347,10 +500,42 @@ public class UserIndex extends JInternalFrame {
 		searchingPanel.setPreferredSize(buttonPanel.getPreferredSize());
 		paginationPanel.setPreferredSize(buttonPanel.getPreferredSize());
 
-		tableDimension.setSize(_frame.getWidth() - 25,
-				_frame.getHeight() - 200);
+		tableDimension
+				.setSize(_frame.getWidth() - 25, _frame.getHeight() - 200);
 		jscoJScrollPane.setPreferredSize(tableDimension);
 		jscoJScrollPane.setSize(jscoJScrollPane.getPreferredSize());
 
+	}
+
+	public void setVisible() {
+		_frame.setVisible(true);
+	}
+	
+	public void showUpdateForm() {
+		int countSelected = 0;
+		List<User> users = new ArrayList<User>();
+		for (int i = 0; i < table.getRowCount(); i++) {
+			if ((boolean) table.getValueAt(i, 0)) {
+				users.add((User) table.getModel().getValueAt(i,
+						kolom.length));
+				countSelected++;
+			}
+		}
+		
+		if (countSelected == 0) {
+			JOptionPane.showMessageDialog(null,
+					"Klik data yang akan diubah", "Informasi",
+					JOptionPane.INFORMATION_MESSAGE);
+		} else if (countSelected == 1) {
+			_userTambah.setVisible(users.get(0));
+		} else {
+			JOptionPane.showMessageDialog(null,
+					"Klik 1 data yang akan diubah", "Informasi",
+					JOptionPane.INFORMATION_MESSAGE);
+		}
+	}
+
+	public void setUserTambah(UserTambah userTambah) {
+		_userTambah = userTambah;
 	}
 }

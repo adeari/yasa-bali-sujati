@@ -28,7 +28,10 @@ public class MenuDesktop extends JFrame {
 	private Login _login;
 	
 	private UserIndex userIndex;
+	private UserTambah userTambah;
 	private PegawaiIndex pegawaiIndex;
+	private PegawaiTambah pegawaiTambah;
+	
 	
 	private Session _session;
 	private Service _service;
@@ -51,11 +54,21 @@ public class MenuDesktop extends JFrame {
 		_desktopPane.setOpaque(true);
 		
 		
-		userIndex = new UserIndex(_session, _service, _simpleDateFormat);
-		_desktopPane.add(userIndex);
+		
 		pegawaiIndex = new PegawaiIndex(_session, _service, _simpleDateFormat);
 		_desktopPane.add(pegawaiIndex);
+		pegawaiTambah = new PegawaiTambah(_session, _service, _simpleDateFormat);
+		_desktopPane.add(pegawaiTambah);
+		userIndex = new UserIndex(_session, _service, _simpleDateFormat);
+		_desktopPane.add(userIndex);
+		userTambah = new UserTambah(_session, _service, _simpleDateFormat);
+		_desktopPane.add(userTambah);
 		
+		
+		userIndex.setUserTambah(userTambah);
+		userTambah.setUserIndex(userIndex);
+		pegawaiIndex.setPegawaiTambah(pegawaiTambah);
+		pegawaiTambah.setPegawaiIndex(pegawaiIndex);
 		
 		
 		JMenuBar menuBar = new JMenuBar();
@@ -73,7 +86,7 @@ public class MenuDesktop extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				userIndex.refreshTable();
-				userIndex.setVisible(true);
+				userIndex.setVisible();
 			}
 		});
 		menu.add(usersMenuItem);
@@ -86,7 +99,7 @@ public class MenuDesktop extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				pegawaiIndex.refreshTable();
-				pegawaiIndex.setVisible(true);
+				pegawaiIndex.setVisible();
 			}
 		});
 		menu.add(pegawaiMenuItem);

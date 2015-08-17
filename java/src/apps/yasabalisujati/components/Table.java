@@ -11,7 +11,8 @@ public class Table extends JTable {
 		super(tableModel);
 		this.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		this.setFont(new Font(null, Font.PLAIN, 14));
-		this.getTableHeader().setFont(new Font("Tahoma", Font.BOLD, 15));
+		this.getTableHeader().setFont(new Font(null, Font.BOLD, 15));
+		this.setDefaultRenderer(String.class, new BoardTableCellRenderer());
 		this.setRowHeight(26);
 	}
 }

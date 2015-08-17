@@ -24,11 +24,8 @@ public class Pegawai implements Serializable {
 	@Column(name = "nama")
     private String nama;
 	
-	@Column(name = "alamat")
-	private String alamat;
-	
-	@Column(name = "telepon")
-	private String telepon;
+	@Column(name = "detail")
+	private String detail;
 	
 	@Column(name = "divisi")
 	private String divisi;
@@ -58,20 +55,13 @@ public class Pegawai implements Serializable {
 		this.nama = nama;
 	}
 
-	public String getAlamat() {
-		return alamat;
+	
+	public String getDetail() {
+		return detail;
 	}
 
-	public void setAlamat(String alamat) {
-		this.alamat = alamat;
-	}
-
-	public String getTelepon() {
-		return telepon;
-	}
-
-	public void setTelepon(String telepon) {
-		this.telepon = telepon;
+	public void setDetail(String detail) {
+		this.detail = detail;
 	}
 
 	public String getDivisi() {
@@ -98,7 +88,7 @@ public class Pegawai implements Serializable {
 		this.updatedAt = updatedAt;
 	}
 
-	public Boolean getDeleted() {
+	public Boolean isDeleted() {
 		return deleted;
 	}
 

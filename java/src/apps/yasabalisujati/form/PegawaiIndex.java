@@ -7,10 +7,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -20,11 +25,13 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
@@ -32,6 +39,7 @@ import javax.swing.table.TableRowSorter;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 
 import apps.yasabalisujati.components.Button;
 import apps.yasabalisujati.components.ComboBox;
@@ -39,6 +47,7 @@ import apps.yasabalisujati.components.Label;
 import apps.yasabalisujati.components.Table;
 import apps.yasabalisujati.components.Textbox;
 import apps.yasabalisujati.database.entity.Pegawai;
+import apps.yasabalisujati.database.entity.User;
 import apps.yasabalisujati.service.Service;
 
 public class PegawaiIndex extends JInternalFrame {
@@ -52,7 +61,7 @@ public class PegawaiIndex extends JInternalFrame {
 	private ComboBox searchingComboBox;
 	private Textbox searchTextbox;
 	private Button searchButton;
-	private final String[] kolom = new String[] { "", "Nama", "Alamat", "Telepon", "Divisi" };
+	private final String[] kolom = new String[] { "", "Nama", "Detail", "Divisi" };
 	private TableModel tableModel;
 	private Dimension tableDimension;
 	private Vector<Object> dataVector;
@@ -70,6 +79,8 @@ public class PegawaiIndex extends JInternalFrame {
 	private SimpleDateFormat _simpleDateFormat;
 
 	private JInternalFrame _frame;
+	
+	private PegawaiTambah _pegawaiTambah;
 
 	public PegawaiIndex(Session session, Service service, SimpleDateFormat simpleDateFormat) {
 		super("Pegawai", true, true, true, true);
@@ -78,6 +89,8 @@ public class PegawaiIndex extends JInternalFrame {
 		_frame.setPreferredSize(new Dimension(800, 600));
 		_frame.setSize(_frame.getPreferredSize());
 		_frame.setLocation(10, 10);
+		_frame.setDefaultCloseOperation(
+                WindowConstants.HIDE_ON_CLOSE);
 		_frame.addComponentListener(new ComponentAdapter() {
 			public void componentResized(ComponentEvent evt) {
 				reSizePanel();
@@ -97,15 +110,65 @@ public class PegawaiIndex extends JInternalFrame {
 
 		Button baruButton = new Button(new ImageIcon(
 				getClass().getClassLoader().getResource("icons/addpeople.png")), "Baru");
+		baruButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				_pegawaiTambah.setVisible(null);
+			}
+		});
 		buttonPanel.add(baruButton);
 		Button ubahButton = new Button(new ImageIcon(
 				getClass().getClassLoader().getResource("icons/edit.png")), "Ubah");
+		ubahButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				showUpdateForm();
+			}
+		});
 		buttonPanel.add(ubahButton);
 		JLabel blank = new JLabel();
 		blank.setPreferredSize(new Dimension(200, 10));
 		buttonPanel.add(blank);
 		Button hapusButton = new Button(new ImageIcon(
 				getClass().getClassLoader().getResource("icons/delete.png")), "Hapus");
+		hapusButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+
+				int countSelected = 0;
+				List<Pegawai> pegawais = new ArrayList<Pegawai>();
+				for (int i = 0; i < table.getRowCount(); i++) {
+					if ((boolean) table.getValueAt(i, 0)) {
+						pegawais.add((Pegawai) table.getModel().getValueAt(i,
+								kolom.length));
+						countSelected++;
+					}
+				}
+
+				if (countSelected == 0) {
+					JOptionPane.showMessageDialog(null,
+							"Klik data yang akan di hapus", "Informasi",
+							JOptionPane.INFORMATION_MESSAGE);
+					return;
+				} else {
+					if (JOptionPane.showConfirmDialog(null,
+							"Apakah data ini ingin di hapus ?", "Informasi",
+							JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+						_session = _service.getConnectionDB(_session);
+						for (Pegawai pegawai : pegawais) {
+							if (pegawai.isDeleted()) {
+								_session.delete(pegawai);
+								_session.flush();
+							}
+						}
+						refreshTable();
+					}
+				}
+			}
+		});
 		buttonPanel.add(hapusButton);
 
 		_frame.add(buttonPanel);
@@ -195,7 +258,17 @@ public class PegawaiIndex extends JInternalFrame {
 		table.getColumnModel().getColumn(1).setPreferredWidth(200);
 		table.getColumnModel().getColumn(2).setPreferredWidth(200);
 		table.getColumnModel().getColumn(3).setPreferredWidth(200);
-		table.getColumnModel().getColumn(4).setPreferredWidth(200);
+		
+		table.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() == 2) {
+					_pegawaiTambah.setVisible((Pegawai) table.getModel().getValueAt(
+							table.getSelectedRow(), kolom.length));
+				}
+			}
+		});
 		
 		TableRowSorter<TableModel> sorter = new TableRowSorter<>(
 				table.getModel());
@@ -213,56 +286,88 @@ public class PegawaiIndex extends JInternalFrame {
 		
 		
 		rowSelectComboBox = new JComboBox<Long>();
-		rowSelectComboBox.setFont(new Font("Tahoma", Font.BOLD, 15));
-		((JLabel)rowSelectComboBox.getRenderer()).setHorizontalAlignment(JLabel.RIGHT);
+		rowSelectComboBox.setFont(new Font(null, Font.BOLD, 15));
+		((JLabel) rowSelectComboBox.getRenderer())
+				.setHorizontalAlignment(JLabel.RIGHT);
 		rowSelectComboBox.addItem(Long.valueOf(50));
 		rowSelectComboBox.addItem(Long.valueOf(100));
 		rowSelectComboBox.addItem(Long.valueOf(500));
 		rowSelectComboBox.addItem(Long.valueOf(1000));
+		rowSelectComboBox.addItemListener(new ItemListener() {
+
+			@Override
+			public void itemStateChanged(ItemEvent arg0) {
+				refreshTable();
+			}
+
+		});
 		paginationPanel.add(rowSelectComboBox);
-		
+
 		buttonFirst = new JButton(" << ");
-		buttonFirst.setFont(new Font("Tahoma", Font.BOLD, 15));
+		buttonFirst.setFont(new Font(null, Font.BOLD, 15));
+		buttonFirst.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				pageNowField.setText("1");
+				refreshTable();
+			}
+
+		});
 		paginationPanel.add(buttonFirst);
-		
+
 		buttonPrevious = new JButton(" < ");
-		buttonPrevious.setFont(new Font("Tahoma", Font.BOLD, 15));
+		buttonPrevious.setFont(new Font(null, Font.BOLD, 15));
+		buttonPrevious.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				pageNowField.setText(String.valueOf(Integer.valueOf(
+						pageNowField.getText()).intValue() - 1));
+				refreshTable();
+			}
+
+		});
 		paginationPanel.add(buttonPrevious);
-		
+
 		pageNowField = new JTextField("1");
-		pageNowField.setFont(new Font("Tahoma", Font.BOLD, 15));
+		pageNowField.setFont(new Font(null, Font.BOLD, 15));
 		pageNowField.setPreferredSize(new Dimension(50, 30));
 		pageNowField.setHorizontalAlignment(SwingConstants.RIGHT);
-		pageNowField.addKeyListener(new KeyListener() {
-			
-			@Override
-			public void keyTyped(KeyEvent arg0) {
-				keyPressed(arg0);
-			}
-			
-			@Override
-			public void keyReleased(KeyEvent arg0) {
-				keyPressed(arg0);
-				
-			}
-			
-			@Override
-			public void keyPressed(KeyEvent arg0) {
-				try {
-					Long.valueOf(pageNowField.getText());
-				} catch (Exception e) {
-					pageNowField.setText("1");
+		pageNowField.addKeyListener(new KeyAdapter() {
+			public void keyReleased(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+					refreshTable();
 				}
 			}
 		});
 		paginationPanel.add(pageNowField);
-		
+
 		buttonNext = new JButton(" > ");
-		buttonNext.setFont(new Font("Tahoma", Font.BOLD, 15));
+		buttonNext.setFont(new Font(null, Font.BOLD, 15));
+		buttonNext.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				pageNowField.setText(String.valueOf(Integer.valueOf(
+						pageNowField.getText()).intValue() + 1));
+				refreshTable();
+			}
+
+		});
 		paginationPanel.add(buttonNext);
-		
+
 		buttonLast = new JButton(" >> ");
-		buttonLast.setFont(new Font("Tahoma", Font.BOLD, 15));
+		buttonLast.setFont(new Font(null, Font.BOLD, 15));
+		buttonLast.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				pageNowField.setText(String.valueOf(countPage));
+				refreshTable();
+			}
+
+		});
 		paginationPanel.add(buttonLast);
 		
 		countPageLabel = new Label("Halaman");
@@ -280,7 +385,13 @@ public class PegawaiIndex extends JInternalFrame {
 	public Criteria setCriteriaCondition(Criteria criteria) {
 		String searchText = searchTextbox.getText();
 		if (!searchText.isEmpty()) {
-			
+			if (searchingComboBox.getSelectedItem().equals(kolom[1])) {
+				criteria.add(Restrictions.like("nama", searchText+"%").ignoreCase());
+			} else if (searchingComboBox.getSelectedItem().equals(kolom[2])) {
+				criteria.add(Restrictions.like("detail", "%"+searchText+"%").ignoreCase());
+			} else if (searchingComboBox.getSelectedItem().equals(kolom[3])) {
+				criteria.add(Restrictions.like("divisi", searchText+"%").ignoreCase());
+			}
 		}
 		return criteria;
 	}
@@ -332,8 +443,7 @@ public class PegawaiIndex extends JInternalFrame {
 			Vector<Object> data1 = new Vector<Object>();
 			data1.addElement(false);
 			data1.addElement(pegawai.getNama());
-			data1.addElement(pegawai.getAlamat());
-			data1.addElement(pegawai.getTelepon());
+			data1.addElement(pegawai.getDetail());
 			data1.addElement(pegawai.getDivisi());
 			data1.addElement(pegawai);
 			dataVector.add(data1);
@@ -354,5 +464,36 @@ public class PegawaiIndex extends JInternalFrame {
 		jscoJScrollPane.setPreferredSize(tableDimension);
 		jscoJScrollPane.setSize(jscoJScrollPane.getPreferredSize());
 		
+	}
+	public void setVisible() {
+		_frame.setVisible(true);
+	}
+	
+	public void setPegawaiTambah(PegawaiTambah pegawaiTambah) {
+		_pegawaiTambah = pegawaiTambah;
+	}
+	
+	public void showUpdateForm() {
+		int countSelected = 0;
+		List<Pegawai> pegawais = new ArrayList<Pegawai>();
+		for (int i = 0; i < table.getRowCount(); i++) {
+			if ((boolean) table.getValueAt(i, 0)) {
+				pegawais.add((Pegawai) table.getModel().getValueAt(i,
+						kolom.length));
+				countSelected++;
+			}
+		}
+		
+		if (countSelected == 0) {
+			JOptionPane.showMessageDialog(null,
+					"Klik data yang akan diubah", "Informasi",
+					JOptionPane.INFORMATION_MESSAGE);
+		} else if (countSelected == 1) {
+			_pegawaiTambah.setVisible(pegawais.get(0));
+		} else {
+			JOptionPane.showMessageDialog(null,
+					"Klik 1 data yang akan diubah", "Informasi",
+					JOptionPane.INFORMATION_MESSAGE);
+		}
 	}
 }

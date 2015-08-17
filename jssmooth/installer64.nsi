@@ -8,10 +8,10 @@
 ;--------------------------------
 
 ; The name of the installer
-Name "Intaller"
+Name "Intaller64"
 
 ; The file to write
-OutFile "Intaller.exe"
+OutFile "Intaller64.exe"
 
 ; The default installation directory
 InstallDir "D:\yasabalisujati"
@@ -28,13 +28,13 @@ Section "" ;No components page, name is not important
   SetOutPath $INSTDIR
   
   ; Put file there
-  File D:\software\javamaster\jre-7u80-windows-i586.exe
+  File D:\software\javamaster\jre-7u80-windows-x64.exe
   File D:\yasabalisujati\apps.exe
   File D:\yasabalisujati\apps.jar
   File D:\yasabalisujati\appsconfig.xml
-  File jalan.bat
+  File jalan64.bat
   
-  ExecWait  'jalan.bat'
+  ExecWait  'jalan64.bat'
   
   CreateShortCut "$DESKTOP\DataYasaBaliSujati.lnk" "D:\yasabalisujati\apps.exe"
   CreateShortCut "$SMPROGRAMS\DataYasaBaliSujati.lnk" "D:\yasabalisujati\apps.exe"

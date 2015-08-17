@@ -1,22 +1,22 @@
 package apps.yasabalisujati.components;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.border.Border;
 
-public class Textbox extends JTextField {
+public class TextboxArea extends JTextArea {
 	private static final long serialVersionUID = -2686295811222694572L;
 
-	public Textbox(String title) {
+	public TextboxArea(String title) {
 		super(title);
 		this.setFont(new Font(null, Font.PLAIN, 14));
 		this.setBackground(Color.WHITE);
 		this.setOpaque(true);
+		this.setBorder(new JTextField().getBorder());
 		this.addFocusListener(new FocusListener() {
 
 			public void focusGained(FocusEvent e) {
@@ -27,9 +27,5 @@ public class Textbox extends JTextField {
 				setBackground(new JTextField().getBackground());
 			}
 		});
-	}
-	
-	public Border getBorderCustom() {
-		return this.getBorder();
 	}
 }

@@ -139,8 +139,9 @@ public class Login extends JFrame {
 		
 		
 		if (_service.getProperties("directlogin").equals("1")) {
-			passwordbox.setText("1234");
 			usernameTextbox.setText("ade");
+			passwordbox.setText("1234");
+			divisiComboBox.setSelectedItem("Admin");
 			login();
 		}
 	}

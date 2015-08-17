@@ -14,7 +14,7 @@ public class Passwordbox extends JPasswordField {
 	public Passwordbox() {
 		super("");
 		this.setEchoChar(("*").charAt(0));
-		this.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		this.setFont(new Font(null, Font.PLAIN, 14));
 		this.addFocusListener(new FocusListener() {
 
 			public void focusGained(FocusEvent e) {
