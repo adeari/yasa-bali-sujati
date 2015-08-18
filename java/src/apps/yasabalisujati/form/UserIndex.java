@@ -167,11 +167,15 @@ public class UserIndex extends JInternalFrame {
 							"Apakah data ini ingin di hapus ?", "Informasi",
 							JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 						_session = _service.getConnectionDB(_session);
+						boolean isDeleted = false;
 						for (User user : users) {
 							if (user.getId() > 1 && user.isDeleted()) {
 								_session.delete(user);
-								_session.flush();
+								isDeleted = true;
 							}
+						}
+						if (isDeleted) {
+							_session.flush();
 						}
 						refreshTable();
 					}

@@ -30,10 +30,11 @@ import apps.yasabalisujati.components.ComboBox;
 import apps.yasabalisujati.components.Label;
 import apps.yasabalisujati.components.Textbox;
 import apps.yasabalisujati.components.TextboxArea;
+import apps.yasabalisujati.database.entity.Customer;
 import apps.yasabalisujati.database.entity.Pegawai;
 import apps.yasabalisujati.service.Service;
 
-public class PegawaiTambah extends JInternalFrame {
+public class CustomerTambah extends JInternalFrame {
 	private static final long serialVersionUID = -113509224699880126L;
 	private JInternalFrame _frame;
 	private Session _session;
@@ -41,15 +42,18 @@ public class PegawaiTambah extends JInternalFrame {
 	private SimpleDateFormat _simpleDateFormat;
 	
 	private Textbox namaTextbox;
-	private Textbox divisiTextbox;
+	private Textbox jenisCustomerTextbox;
 	private TextboxArea detailTextboxArea;
-	private ComboBox divisiComboBox;
+	private ComboBox jenisCustomerComboBox;
 	
-	private PegawaiIndex _pegawaiIndex;
-	private Pegawai _pegawai;
+	private CustomerIndex _customerIndex;
+	private ShipperIndex _shipperIndex;
+	private Customer _customer;
+	
+	private String[] jenisCustomersSet = new String[] {"Rekanan", "Exportir", "Importir" };
 	
 
-	public PegawaiTambah(Session session, Service service,
+	public CustomerTambah(Session session, Service service,
 			SimpleDateFormat simpleDateFormat) {
 		super("a", false, true, false, true); 
 		_frame = this;
@@ -96,7 +100,7 @@ public class PegawaiTambah extends JInternalFrame {
 													0,
 													detailTextboxArea.getText()
 															.length() - 1));
-							divisiTextbox.requestFocus();
+							jenisCustomerTextbox.requestFocus();
 						}
 
 					}
@@ -111,15 +115,15 @@ public class PegawaiTambah extends JInternalFrame {
 		Label divisiLabel = new Label("Divisi");
 		divisiLabel.setPreferredSize(labelDimension);
 		container.add(divisiLabel);
-		divisiComboBox = new ComboBox(new String[] { "a" });
-		divisiComboBox.setPreferredSize(textDimension);
-		container.add(divisiComboBox);
+		jenisCustomerComboBox = new ComboBox(new String[] { "a" });
+		jenisCustomerComboBox.setPreferredSize(textDimension);
+		container.add(jenisCustomerComboBox);
 		Label divisilainLabel = new Label("  Selain itu");
 		divisilainLabel.setPreferredSize(labelDimension);
 		container.add(divisilainLabel);
-		divisiTextbox = new Textbox("");
-		divisiTextbox.setPreferredSize(textDimension);
-		container.add(divisiTextbox);
+		jenisCustomerTextbox = new Textbox("");
+		jenisCustomerTextbox.setPreferredSize(textDimension);
+		container.add(jenisCustomerTextbox);
 		
 		JPanel buttonSavePanel = new JPanel();
 		buttonSavePanel.setPreferredSize(new Dimension(Double.valueOf(
@@ -156,21 +160,21 @@ public class PegawaiTambah extends JInternalFrame {
 		_frame.pack();
 	}
 	
-	public void setVisible(Pegawai pegawai) {
+	public void setVisible(Customer customer) {
 		clearForm();
-		_pegawai = pegawai;
-		refreshDivisiPegawai();
-		if (_pegawai == null) {
+		_customer = customer;
+		refreshDivisiCustomer();
+		if (_customer == null) {
 			_frame.setFrameIcon(new ImageIcon(getClass().getClassLoader()
 					.getResource("icons/addpeople.png")));
-			_frame.setTitle("Tambah Pegawai");
+			_frame.setTitle("Tambah Customer");
 		} else {
 			_frame.setFrameIcon(new ImageIcon(getClass().getClassLoader()
 					.getResource("icons/edit.png")));
-			_frame.setTitle("Ubah Pegawai");
-			namaTextbox.setText(_pegawai.getNama());
-			detailTextboxArea.setText(_pegawai.getDetail());
-			divisiComboBox.setSelectedItem(_pegawai.getDivisi());
+			_frame.setTitle("Ubah pegawai");
+			namaTextbox.setText(_customer.getNama());
+			detailTextboxArea.setText(_customer.getDetail());
+			jenisCustomerComboBox.setSelectedItem(_customer.getJenisCustomer());
 		}
 		
 		
@@ -180,22 +184,27 @@ public class PegawaiTambah extends JInternalFrame {
 	public void clearForm() {
 		namaTextbox.setText("");
 		detailTextboxArea.setText("");
-		divisiTextbox.setText("");
+		jenisCustomerTextbox.setText("");
 	}
 	
-	public void refreshDivisiPegawai() {
-		String divisiSelected = divisiComboBox.getSelectedItem().toString();
+	public void refreshDivisiCustomer() {
+		String divisiSelected = jenisCustomerComboBox.getSelectedItem().toString();
 		_session = _service.getConnectionDB(_session);
 		_session.clear();
-		divisiComboBox.removeAllItems();
-
-		Criteria criteria = _session.createCriteria(Pegawai.class).setProjection(
-				Projections.groupProperty("divisi"));
-		List<String> divisis = criteria.list();
-		for (String divisi : divisis) {
-			divisiComboBox.addItem(divisi);
+		jenisCustomerComboBox.removeAllItems();
+		
+		for (String settt : jenisCustomersSet) {
+			jenisCustomerComboBox.addItem(settt);
 		}
-		divisiComboBox.setSelectedItem(divisiSelected);
+
+		Criteria criteria = _session.createCriteria(Customer.class).setProjection(
+				Projections.groupProperty("jenisCustomer"));
+		criteria.add(Restrictions.not(Restrictions.in("jenisCustomer", jenisCustomersSet )));
+		List<String> jenisCustomers = criteria.list();
+		for (String jenisCustomer : jenisCustomers) {
+			jenisCustomerComboBox.addItem(jenisCustomer);
+		}
+		jenisCustomerComboBox.setSelectedItem(divisiSelected);
 	}
 	
 	public void save() {
@@ -207,7 +216,7 @@ public class PegawaiTambah extends JInternalFrame {
 		}
 		
 		
-		if (_pegawai == null) {
+		if (_customer == null) {
 			_session = _service.getConnectionDB(_session);
 			Criteria citeria = _session.createCriteria(Pegawai.class).setProjection(Projections.rowCount());
 			citeria.add(Restrictions.eq("nama", namaTextbox.getText()));
@@ -219,37 +228,42 @@ public class PegawaiTambah extends JInternalFrame {
 			}
 		}
 		
-		String divisi = divisiComboBox.getSelectedItem().toString();
-		if (!divisiTextbox.getText().isEmpty()) {
-			divisi = divisiTextbox.getText();
+		String jenisCustomer = jenisCustomerComboBox.getSelectedItem().toString();
+		if (!jenisCustomerTextbox.getText().isEmpty()) {
+			jenisCustomer = jenisCustomerTextbox.getText();
 		}
 		
 		Date nowDate = new Date();
 		java.sql.Timestamp nowSqlDate = new java.sql.Timestamp(nowDate.getTime());
 		
-		Pegawai pegawai = new Pegawai();
-		if (_pegawai != null) {
-			pegawai = _pegawai;
+		Customer customer = new Customer();
+		if (_customer != null) {
+			customer = _customer;
 		} else {
-			pegawai.setCreatedAt(nowSqlDate);
+			customer.setCreatedAt(nowSqlDate);
 		}
-		pegawai.setUpdatedAt(nowSqlDate);
+		customer.setUpdatedAt(nowSqlDate);
 		
-		pegawai.setDivisi(divisi);
-		pegawai.setNama(namaTextbox.getText());
-		pegawai.setDetail(detailTextboxArea.getText());
+		customer.setJenisCustomer(jenisCustomer);
+		customer.setNama(namaTextbox.getText());
+		customer.setDetail(detailTextboxArea.getText());
 		
-		if (_pegawai == null) {
-			pegawai.setDeleted(true);
-			_session.save(pegawai);
+		if (_customer == null) {
+			customer.setDeleted(true);
+			_session.save(customer);
 		} else {
-			_session.update(pegawai);
+			_session.update(customer);
 			_session.flush();
 		}
 		
-		refreshDivisiPegawai();
-		_pegawaiIndex.refreshTable();
-		if (_pegawai == null) {
+		refreshDivisiCustomer();
+		if (jenisCustomer.equalsIgnoreCase("Exportir") || jenisCustomer.equalsIgnoreCase("Importir")) {
+			_shipperIndex.refreshTable();
+		} else {
+			_customerIndex.refreshTable();
+		}
+		
+		if (_customer == null) {
 			clearForm();
 		} else {
 			closeEvent();
@@ -260,7 +274,10 @@ public class PegawaiTambah extends JInternalFrame {
 		_frame.setVisible(false);
 	}
 	
-	public void setPegawaiIndex(PegawaiIndex pegawaiIndex) {
-		_pegawaiIndex = pegawaiIndex;
+	public void setCustomerIndex(CustomerIndex customerIndex) {
+		_customerIndex = customerIndex;
+	}
+	public void setShipperIndex(ShipperIndex shipperIndex) {
+		_shipperIndex = shipperIndex;
 	}
 }

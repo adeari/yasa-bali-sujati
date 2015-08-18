@@ -45,10 +45,11 @@ import apps.yasabalisujati.components.ComboBox;
 import apps.yasabalisujati.components.Label;
 import apps.yasabalisujati.components.Table;
 import apps.yasabalisujati.components.Textbox;
+import apps.yasabalisujati.database.entity.Customer;
 import apps.yasabalisujati.database.entity.Pegawai;
 import apps.yasabalisujati.service.Service;
 
-public class PegawaiIndex extends JInternalFrame {
+public class CustomerIndex extends JInternalFrame {
 	private static final long serialVersionUID = 8967014638545080322L;
 
 	private JPanel buttonPanel;
@@ -59,7 +60,7 @@ public class PegawaiIndex extends JInternalFrame {
 	private ComboBox searchingComboBox;
 	private Textbox searchTextbox;
 	private Button searchButton;
-	private final String[] kolom = new String[] { "", "Nama", "Detail", "Divisi" };
+	private final String[] kolom = new String[] { "", "Nama Perusahaan", "Detail", "Jenis Customer" };
 	private TableModel tableModel;
 	private Dimension tableDimension;
 	private Vector<Object> dataVector;
@@ -78,19 +79,21 @@ public class PegawaiIndex extends JInternalFrame {
 
 	private JInternalFrame _frame;
 	
-	private PegawaiTambah _pegawaiTambah;
+	private CustomerTambah _customerTambah;
+	
+	private String[] jenisCustomersNotShow = new String[] {"Exportir", "Importir" };
 
-	public PegawaiIndex(Session session, Service service, SimpleDateFormat simpleDateFormat) {
-		super("Pegawai", true, true, true, true);
+	public CustomerIndex(Session session, Service service, SimpleDateFormat simpleDateFormat) {
+		super("Customer", true, true, true, true);
 		_frame = this;
 		_frame.setLayout(new FlowLayout(FlowLayout.LEADING));
 		_frame.setPreferredSize(new Dimension(800, 600));
 		_frame.setSize(_frame.getPreferredSize());
 		_frame.setLocation(10, 10);
-		_frame.setFrameIcon(new ImageIcon(getClass().getClassLoader()
-				.getResource("icons/people.png")));
 		_frame.setDefaultCloseOperation(
                 WindowConstants.HIDE_ON_CLOSE);
+		_frame.setFrameIcon(new ImageIcon(getClass().getClassLoader()
+				.getResource("icons/people.png")));
 		_frame.addComponentListener(new ComponentAdapter() {
 			public void componentResized(ComponentEvent evt) {
 				reSizePanel();
@@ -114,7 +117,7 @@ public class PegawaiIndex extends JInternalFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				_pegawaiTambah.setVisible(null);
+				_customerTambah.setVisible(null);
 			}
 		});
 		buttonPanel.add(baruButton);
@@ -139,10 +142,10 @@ public class PegawaiIndex extends JInternalFrame {
 			public void actionPerformed(ActionEvent arg0) {
 
 				int countSelected = 0;
-				List<Pegawai> pegawais = new ArrayList<Pegawai>();
+				List<Customer> customers = new ArrayList<Customer>();
 				for (int i = 0; i < table.getRowCount(); i++) {
 					if ((boolean) table.getValueAt(i, 0)) {
-						pegawais.add((Pegawai) table.getModel().getValueAt(i,
+						customers.add((Customer) table.getModel().getValueAt(i,
 								kolom.length));
 						countSelected++;
 					}
@@ -159,9 +162,9 @@ public class PegawaiIndex extends JInternalFrame {
 							JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 						_session = _service.getConnectionDB(_session);
 						boolean isDeleted = false;
-						for (Pegawai pegawai : pegawais) {
-							if (pegawai.isDeleted()) {
-								_session.delete(pegawai);
+						for (Customer customer : customers) {
+							if (customer.isDeleted()) {
+								_session.delete(customer);
 								isDeleted = true;
 							}
 						}
@@ -183,7 +186,7 @@ public class PegawaiIndex extends JInternalFrame {
 		searchingPanel.setBorder(BorderFactory.createTitledBorder(""));
 
 		searchingComboBox = new ComboBox(kolom);
-		searchingComboBox.setPreferredSize(new Dimension(132, 30));
+		searchingComboBox.setPreferredSize(new Dimension(160, 30));
 		searchingComboBox.removeItemAt(0);
 		searchingPanel.add(searchingComboBox);
 
@@ -268,7 +271,7 @@ public class PegawaiIndex extends JInternalFrame {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 2) {
-					_pegawaiTambah.setVisible((Pegawai) table.getModel().getValueAt(
+					_customerTambah.setVisible((Customer) table.getModel().getValueAt(
 							table.getSelectedRow(), kolom.length));
 				}
 			}
@@ -387,6 +390,7 @@ public class PegawaiIndex extends JInternalFrame {
 	}
 	
 	public Criteria setCriteriaCondition(Criteria criteria) {
+		criteria.add(Restrictions.not(Restrictions.in("jenisCustomer", jenisCustomersNotShow)));
 		String searchText = searchTextbox.getText();
 		if (!searchText.isEmpty()) {
 			if (searchingComboBox.getSelectedItem().equals(kolom[1])) {
@@ -394,7 +398,7 @@ public class PegawaiIndex extends JInternalFrame {
 			} else if (searchingComboBox.getSelectedItem().equals(kolom[2])) {
 				criteria.add(Restrictions.like("detail", "%"+searchText+"%").ignoreCase());
 			} else if (searchingComboBox.getSelectedItem().equals(kolom[3])) {
-				criteria.add(Restrictions.like("divisi", searchText+"%").ignoreCase());
+				criteria.add(Restrictions.like("jenisCustomer", searchText+"%").ignoreCase());
 			}
 		}
 		return criteria;
@@ -405,7 +409,7 @@ public class PegawaiIndex extends JInternalFrame {
 		_session = _service.getConnectionDB(_session);
 		_session.clear();
 		
-		Criteria criteria = _session.createCriteria(Pegawai.class)
+		Criteria criteria = _session.createCriteria(Customer.class)
 				.setProjection(Projections.rowCount());
 		criteria = setCriteriaCondition(criteria);
 		
@@ -436,20 +440,20 @@ public class PegawaiIndex extends JInternalFrame {
 			buttonPrevious.setEnabled(true);
 		}
 		
-		criteria = _session.createCriteria(Pegawai.class);
+		criteria = _session.createCriteria(Customer.class);
 		criteria = setCriteriaCondition(criteria);
 		criteria.setFirstResult(startRow);
 		criteria.setMaxResults(Long.valueOf(countRows).intValue());
 
-		List<Pegawai> dataList = criteria.list();
+		List<Customer> dataList = criteria.list();
 		
-		for (Pegawai pegawai : dataList) {
+		for (Customer customer : dataList) {
 			Vector<Object> data1 = new Vector<Object>();
 			data1.addElement(false);
-			data1.addElement(pegawai.getNama());
-			data1.addElement(pegawai.getDetail());
-			data1.addElement(pegawai.getDivisi());
-			data1.addElement(pegawai);
+			data1.addElement(customer.getNama());
+			data1.addElement(customer.getDetail());
+			data1.addElement(customer.getJenisCustomer());
+			data1.addElement(customer);
 			dataVector.add(data1);
 		}
 		table.tableChanged(new javax.swing.event.TableModelEvent(tableModel));
@@ -473,16 +477,16 @@ public class PegawaiIndex extends JInternalFrame {
 		_frame.setVisible(true);
 	}
 	
-	public void setPegawaiTambah(PegawaiTambah pegawaiTambah) {
-		_pegawaiTambah = pegawaiTambah;
+	public void setCustomerTambah(CustomerTambah customerTambah) {
+		_customerTambah = customerTambah;
 	}
 	
 	public void showUpdateForm() {
 		int countSelected = 0;
-		List<Pegawai> pegawais = new ArrayList<Pegawai>();
+		List<Customer> customers = new ArrayList<Customer>();
 		for (int i = 0; i < table.getRowCount(); i++) {
 			if ((boolean) table.getValueAt(i, 0)) {
-				pegawais.add((Pegawai) table.getModel().getValueAt(i,
+				customers.add((Customer) table.getModel().getValueAt(i,
 						kolom.length));
 				countSelected++;
 			}
@@ -493,7 +497,7 @@ public class PegawaiIndex extends JInternalFrame {
 					"Klik data yang akan diubah", "Informasi",
 					JOptionPane.INFORMATION_MESSAGE);
 		} else if (countSelected == 1) {
-			_pegawaiTambah.setVisible(pegawais.get(0));
+			_customerTambah.setVisible(customers.get(0));
 		} else {
 			JOptionPane.showMessageDialog(null,
 					"Klik 1 data yang akan diubah", "Informasi",

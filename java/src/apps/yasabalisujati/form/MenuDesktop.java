@@ -29,8 +29,15 @@ public class MenuDesktop extends JFrame {
 	
 	private UserIndex userIndex;
 	private UserTambah userTambah;
+	
 	private PegawaiIndex pegawaiIndex;
 	private PegawaiTambah pegawaiTambah;
+	
+	private CustomerIndex customerIndex;
+	private CustomerTambah customerTambah;
+	
+	private ShipperIndex shipperIndex;
+	private ShipperTambah shipperTambah;
 	
 	
 	private Session _session;
@@ -63,12 +70,25 @@ public class MenuDesktop extends JFrame {
 		_desktopPane.add(userIndex);
 		userTambah = new UserTambah(_session, _service, _simpleDateFormat);
 		_desktopPane.add(userTambah);
+		customerIndex = new CustomerIndex(_session, _service, _simpleDateFormat);
+		_desktopPane.add(customerIndex);
+		customerTambah = new CustomerTambah(_session, _service, _simpleDateFormat);
+		_desktopPane.add(customerTambah);
+		shipperIndex = new ShipperIndex(_session, _service, _simpleDateFormat);
+		_desktopPane.add(shipperIndex);
+		shipperTambah = new ShipperTambah(_session, _service, _simpleDateFormat);
+		_desktopPane.add(shipperTambah);
 		
 		
 		userIndex.setUserTambah(userTambah);
 		userTambah.setUserIndex(userIndex);
 		pegawaiIndex.setPegawaiTambah(pegawaiTambah);
 		pegawaiTambah.setPegawaiIndex(pegawaiIndex);
+		customerIndex.setCustomerTambah(customerTambah);
+		customerTambah.setCustomerIndex(customerIndex);
+		customerTambah.setShipperIndex(shipperIndex);
+		shipperIndex.setShipperTambah(shipperTambah);
+		shipperTambah.setShipperIndex(shipperIndex);
 		
 		
 		JMenuBar menuBar = new JMenuBar();
@@ -103,6 +123,32 @@ public class MenuDesktop extends JFrame {
 			}
 		});
 		menu.add(pegawaiMenuItem);
+		
+		JMenuItem customerMenuItem = new JMenuItem("Customer");
+		customerMenuItem.setFont(usersMenuItem.getFont());
+		customerMenuItem.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/people.png")));
+		customerMenuItem.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				customerIndex.refreshTable();
+				customerIndex.setVisible();
+			}
+		});
+		menu.add(customerMenuItem);
+		
+		JMenuItem shipperMenuItem = new JMenuItem("Shipper");
+		shipperMenuItem.setFont(usersMenuItem.getFont());
+		shipperMenuItem.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/people.png")));
+		shipperMenuItem.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				shipperIndex.refreshTable();
+				shipperIndex.setVisible();
+			}
+		});
+		menu.add(shipperMenuItem);
 		
 		menu.add(new JSeparator());
 		JMenuItem logoutMenuItem = new JMenuItem("Logout");

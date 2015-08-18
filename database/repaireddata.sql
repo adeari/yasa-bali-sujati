@@ -9,3 +9,4 @@ ALTER TABLE customers DROP COLUMN contact_person;
 ALTER TABLE customers DROP COLUMN alamat;
 ALTER TABLE customers DROP COLUMN telepon;
 ALTER TABLE customers DROP COLUMN email;
+ALTER TABLE customers DROP COLUMN islengkap;

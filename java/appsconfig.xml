@@ -14,6 +14,7 @@
   
   <mapping class="apps.yasabalisujati.database.entity.Pegawai"/>
   <mapping class="apps.yasabalisujati.database.entity.User"/>
+  <mapping class="apps.yasabalisujati.database.entity.Customer"/>
   
  </session-factory>
 </hibernate-configuration>

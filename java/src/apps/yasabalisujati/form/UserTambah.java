@@ -154,12 +154,12 @@ public class UserTambah extends JInternalFrame {
 		if (_user == null) {
 			_frame.setFrameIcon(new ImageIcon(getClass().getClassLoader()
 					.getResource("icons/addpeople.png")));
-			_frame.setTitle("Tambah user");
+			_frame.setTitle("Tambah User");
 			usernameTextbox.setEditable(true);
 		} else {
 			_frame.setFrameIcon(new ImageIcon(getClass().getClassLoader()
 					.getResource("icons/edit.png")));
-			_frame.setTitle("Ubah user");
+			_frame.setTitle("Ubah User");
 			usernameTextbox.setText(user.getName());
 			divisiComboBox.setSelectedItem(user.getDivisi());
 			usernameTextbox.setEditable(false);
