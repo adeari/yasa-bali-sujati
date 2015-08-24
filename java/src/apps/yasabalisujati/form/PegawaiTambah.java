@@ -202,6 +202,7 @@ public class PegawaiTambah extends JInternalFrame {
 		
 		
 		_frame.setVisible(true);
+		_frame.moveToFront();
 	}
 	
 	public void clearForm() {

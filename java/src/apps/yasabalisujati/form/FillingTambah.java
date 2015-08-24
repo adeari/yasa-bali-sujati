@@ -168,16 +168,17 @@ public class FillingTambah extends JInternalFrame {
 		if (_filling == null) {
 			_frame.setFrameIcon(new ImageIcon(getClass().getClassLoader()
 					.getResource("icons/add.png")));
-			_frame.setTitle("Tambah Aturan");
+			_frame.setTitle("Tambah Aturan Penomoran Dokumen");
 		} else {
 			_frame.setFrameIcon(new ImageIcon(getClass().getClassLoader()
 					.getResource("icons/edit.png")));
-			_frame.setTitle("Ubah Aturan");
+			_frame.setTitle("Ubah Aturan Penomoran Dokumen");
 			warnaTextbox.setText(""+filling.getWarna());
 			kodeAwalTextbox.setText(filling.getHuruf());
 			digitTextbox.setText(String.valueOf(filling.getDigit()));
 		}
 		_frame.setVisible(true);
+		_frame.moveToFront();
 	}
 	
 	public void clearForm() {

@@ -193,6 +193,7 @@ public class UserTambah extends JInternalFrame {
 			passwordbox.requestFocus();
 		}
 		_frame.setVisible(true);
+		_frame.moveToFront();
 	}
 	
 	public void clearForm() {

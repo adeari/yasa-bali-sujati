@@ -61,7 +61,7 @@ public class JoborderTambah extends JInternalFrame {
 
 	public JoborderTambah(Session session, Service service,
 			SimpleDateFormat simpleDateFormat) {
-		super("a", false, true, false, true); 
+		super("a", false, true, true, true); 
 		_frame = this;
 		_frame.setLayout(new FlowLayout(FlowLayout.LEADING));
 		_frame.setPreferredSize(new Dimension(550, 300));
@@ -208,6 +208,7 @@ public class JoborderTambah extends JInternalFrame {
 		
 		
 		_frame.setVisible(true);
+		_frame.moveToFront();
 	}
 	
 	public void clearForm() {

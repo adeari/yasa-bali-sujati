@@ -144,15 +144,16 @@ public class AturanTambah extends JInternalFrame {
 		if (_validasiRule == null) {
 			_frame.setFrameIcon(new ImageIcon(getClass().getClassLoader()
 					.getResource("icons/add.png")));
-			_frame.setTitle("Tambah Aturan");
+			_frame.setTitle("Tambah Aturan Validasi");
 		} else {
 			_frame.setFrameIcon(new ImageIcon(getClass().getClassLoader()
 					.getResource("icons/edit.png")));
-			_frame.setTitle("Ubah Aturan");
+			_frame.setTitle("Ubah Aturan Validasi");
 			urutanTextbox.setText(""+validasiRules.getUrutan());
 			aturanTextbox.setText(validasiRules.getAturan());
 		}
 		_frame.setVisible(true);
+		_frame.moveToFront();
 	}
 	
 	public void clearForm() {

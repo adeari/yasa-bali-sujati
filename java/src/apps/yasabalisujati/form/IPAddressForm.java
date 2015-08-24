@@ -118,7 +118,7 @@ public class IPAddressForm extends JInternalFrame {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
+		_frame.moveToFront();
 	}
 	
 	public void closeEvent() {

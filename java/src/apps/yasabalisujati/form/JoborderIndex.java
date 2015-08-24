@@ -44,6 +44,7 @@ import javax.swing.table.TableRowSorter;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.Projection;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
@@ -53,6 +54,7 @@ import apps.yasabalisujati.components.Label;
 import apps.yasabalisujati.components.Table;
 import apps.yasabalisujati.components.Textbox;
 import apps.yasabalisujati.database.entity.Customer;
+import apps.yasabalisujati.database.entity.Filling;
 import apps.yasabalisujati.service.Service;
 
 public class JoborderIndex extends JInternalFrame {
@@ -88,6 +90,7 @@ public class JoborderIndex extends JInternalFrame {
 	private JoborderTambah _joborderTambah;
 	
 	private String[] jenisCustomersNotShow = new String[] {"Exportir", "Importir" };
+	boolean fillingExist = true;
 
 	public JoborderIndex(Session session, Service service, SimpleDateFormat simpleDateFormat) {
 		super("Job Order", true, true, true, true);
@@ -443,6 +446,7 @@ public class JoborderIndex extends JInternalFrame {
 	}
 	
 	public void refreshTable() {
+		refreshKodeIndex();
 		dataVector.clear();
 		_session = _service.getConnectionDB(_session);
 		_session.clear();
@@ -512,7 +516,10 @@ public class JoborderIndex extends JInternalFrame {
 		
 	}
 	public void setVisible() {
-		_frame.setVisible(true);
+		if (fillingExist) {
+			_frame.setVisible(true);
+			_frame.moveToFront();
+		}
 	}
 	
 	public void setJoborderTambah(JoborderTambah joborderTambah) {
@@ -576,6 +583,22 @@ public class JoborderIndex extends JInternalFrame {
 				}
 				refreshTable();
 			}
+		}
+	}
+	
+	private void refreshKodeIndex() {
+		_session = _service.getConnectionDB(_session);
+		_session.clear();
+		Criteria criteria = _session.createCriteria(Filling.class).setProjection(Projections.rowCount());
+		if ((long) criteria.uniqueResult() == 0) {
+			_frame.setVisible(false);
+			fillingExist = false;
+			JOptionPane.showMessageDialog(null,
+					"Job Order belum bisa dipakai karena Aturan penomoran dokumen blum diisi", "Informasi",
+					JOptionPane.INFORMATION_MESSAGE);
+			return;
+		} else {
+			fillingExist = true;
 		}
 	}
 }

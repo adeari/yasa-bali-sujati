@@ -194,6 +194,7 @@ public class ShipperTambah extends JInternalFrame {
 		
 		
 		_frame.setVisible(true);
+		_frame.moveToFront();
 	}
 	
 	public void clearForm() {

@@ -521,6 +521,7 @@ public class FillingIndex extends JInternalFrame {
 
 	public void setVisible() {
 		_frame.setVisible(true);
+		_frame.moveToFront();
 	}
 	
 	public void showUpdateForm() {
