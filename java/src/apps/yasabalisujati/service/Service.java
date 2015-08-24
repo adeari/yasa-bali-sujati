@@ -12,12 +12,19 @@ import org.hibernate.Session;
 import apps.yasabalisujati.database.DatabaseHelper;
 
 public class Service {
+	
+	private String _ipAddress = "localhost";
+	
+	public void setIpAddress(String ipAddress) {
+		_ipAddress = ipAddress;
+	}
+	
 	public Session getConnectionDB(Session session) {
 		if (session == null) {
-			session = DatabaseHelper.getConnection();
+			session = DatabaseHelper.getConnection(_ipAddress);
 			return session;
 		} else if (!session.isConnected() || !session.isOpen()) {
-			session = DatabaseHelper.getConnection();
+			session = DatabaseHelper.getConnection(_ipAddress);
 			return session;
 		}
 		return session;

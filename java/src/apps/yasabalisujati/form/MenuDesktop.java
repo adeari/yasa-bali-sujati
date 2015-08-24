@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyVetoException;
 import java.text.SimpleDateFormat;
 
 import javax.swing.ImageIcon;
@@ -14,6 +15,8 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JSeparator;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 
 import org.hibernate.Session;
 
@@ -39,6 +42,17 @@ public class MenuDesktop extends JFrame {
 	private ShipperIndex shipperIndex;
 	private ShipperTambah shipperTambah;
 	
+	private AturanIndex aturanIndex;
+	private AturanTambah aturanTambah;
+	
+	private FillingIndex fillingIndex;
+	private FillingTambah fillingTambah;
+	
+	private JoborderIndex joborderIndex;
+	private JoborderTambah joborderTambah;
+	
+	private IPAddressForm ipAddressForm;
+	
 	
 	private Session _session;
 	private Service _service;
@@ -47,7 +61,7 @@ public class MenuDesktop extends JFrame {
 	public MenuDesktop(Login login, Session session, Service service) {
 		super("Yasa Bali Sujati");
 		_frame = this;
-		_frame.setIconImage(new ImageIcon(getClass().getClassLoader().getResource("icons/key.png")).getImage());
+		_frame.setIconImage(new ImageIcon(getClass().getClassLoader().getResource("icons/star.png")).getImage());
 		_frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		
 		_frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -78,6 +92,20 @@ public class MenuDesktop extends JFrame {
 		_desktopPane.add(shipperIndex);
 		shipperTambah = new ShipperTambah(_session, _service, _simpleDateFormat);
 		_desktopPane.add(shipperTambah);
+		aturanIndex = new AturanIndex(_session, _service, _simpleDateFormat);
+		_desktopPane.add(aturanIndex);
+		aturanTambah = new AturanTambah(_session, _service, _simpleDateFormat);
+		_desktopPane.add(aturanTambah);
+		fillingIndex = new FillingIndex(_session, _service, _simpleDateFormat);
+		_desktopPane.add(fillingIndex);
+		fillingTambah = new  FillingTambah(_session, _service, _simpleDateFormat);
+		_desktopPane.add(fillingTambah);
+		joborderIndex = new JoborderIndex(_session, _service, _simpleDateFormat);
+		_desktopPane.add(joborderIndex);
+		joborderTambah = new  JoborderTambah(_session, _service, _simpleDateFormat);
+		_desktopPane.add(joborderTambah);
+		ipAddressForm = new IPAddressForm();
+		_desktopPane.add(ipAddressForm);
 		
 		
 		userIndex.setUserTambah(userTambah);
@@ -89,6 +117,22 @@ public class MenuDesktop extends JFrame {
 		customerTambah.setShipperIndex(shipperIndex);
 		shipperIndex.setShipperTambah(shipperTambah);
 		shipperTambah.setShipperIndex(shipperIndex);
+		aturanIndex.setAturanTambah(aturanTambah);
+		aturanTambah.setAturanIndex(aturanIndex);
+		fillingIndex.setFillingTambah(fillingTambah);
+		fillingTambah.setFillingIndex(fillingIndex);
+		joborderIndex.setJoborderTambah(joborderTambah);
+		try {
+			joborderIndex.setMaximum(true);
+		} catch (PropertyVetoException e1) {
+			e1.printStackTrace();
+		}
+		joborderTambah.setJoborderIndex(joborderIndex);
+		try {
+			joborderTambah.setMaximum(true);
+		} catch (PropertyVetoException e1) {
+			e1.printStackTrace();
+		}
 		
 		
 		JMenuBar menuBar = new JMenuBar();
@@ -150,7 +194,45 @@ public class MenuDesktop extends JFrame {
 		});
 		menu.add(shipperMenuItem);
 		
+		JMenuItem aturanMenuItem = new JMenuItem("Aturan Validasi");
+		aturanMenuItem.setFont(usersMenuItem.getFont());
+		aturanMenuItem.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/star.png")));
+		aturanMenuItem.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				aturanIndex.refreshTable();
+				aturanIndex.setVisible();
+			}
+		});
+		menu.add(aturanMenuItem);
+		
+		JMenuItem fillingMenuItem = new JMenuItem("Aturan Penomoran");
+		fillingMenuItem.setFont(usersMenuItem.getFont());
+		fillingMenuItem.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/star.png")));
+		fillingMenuItem.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				fillingIndex.refreshTable();
+				fillingIndex.setVisible();
+			}
+		});
+		menu.add(fillingMenuItem);
+		
 		menu.add(new JSeparator());
+		JMenuItem ipDatabaseMenuItem = new JMenuItem("IP Database");
+		ipDatabaseMenuItem.setFont(usersMenuItem.getFont());
+		ipDatabaseMenuItem.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/bullet_connect.png")));
+		ipDatabaseMenuItem.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ipAddressForm.setVisible();
+			}
+		});
+		menu.add(ipDatabaseMenuItem);
+		
 		JMenuItem logoutMenuItem = new JMenuItem("Logout");
 		logoutMenuItem.setFont(usersMenuItem.getFont());
 		logoutMenuItem.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/key.png")));
@@ -164,6 +246,7 @@ public class MenuDesktop extends JFrame {
 			}
 		});
 		menu.add(logoutMenuItem);
+		
 		JMenuItem tutupMenuItem = new JMenuItem("Tutup");
 		tutupMenuItem.setFont(usersMenuItem.getFont());
 		tutupMenuItem.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/logout.png")));
@@ -175,6 +258,32 @@ public class MenuDesktop extends JFrame {
 			}
 		});
 		menu.add(tutupMenuItem);
+		
+		JMenu jobOrderMenu = new JMenu("Job Order");
+		jobOrderMenu.setFont(new Font(null, Font.BOLD, 15));
+		jobOrderMenu.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/star.png")));
+		jobOrderMenu.addMenuListener(new MenuListener() {
+			
+			@Override
+			public void menuSelected(MenuEvent arg0) {
+				joborderIndex.refreshTable();
+				joborderIndex.setVisible();
+			}
+			
+			@Override
+			public void menuDeselected(MenuEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void menuCanceled(MenuEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		menuBar.add(jobOrderMenu);
+		
 		
 		
 		_frame.getContentPane().add(_desktopPane, BorderLayout.CENTER);

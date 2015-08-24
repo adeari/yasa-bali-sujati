@@ -7,11 +7,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.Timestamp;
@@ -20,10 +20,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -31,6 +34,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 import javax.swing.table.AbstractTableModel;
@@ -48,6 +52,7 @@ import apps.yasabalisujati.components.ComboBox;
 import apps.yasabalisujati.components.Label;
 import apps.yasabalisujati.components.Table;
 import apps.yasabalisujati.components.Textbox;
+import apps.yasabalisujati.database.entity.Pegawai;
 import apps.yasabalisujati.database.entity.User;
 import apps.yasabalisujati.service.Service;
 
@@ -63,7 +68,7 @@ public class UserIndex extends JInternalFrame {
 	private Textbox searchTextbox;
 	private Button searchButton;
 	private final String[] kolom = new String[] { "", "Username", "Divisi",
-			"Terakhir Login" };
+			"Terakhir Login", "" };
 	private TableModel tableModel;
 	private Dimension tableDimension;
 	private Vector<Object> dataVector;
@@ -116,9 +121,31 @@ public class UserIndex extends JInternalFrame {
 		tableDimension = new Dimension();
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.LEADING));
 		buttonPanel.setBorder(BorderFactory.createTitledBorder(""));
+		
+		KeyStroke escapeKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false);
+		Action escapeAction = new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
+			public void actionPerformed(ActionEvent e) {
+		    	_frame.setVisible(false);
+		    }
+		}; 
+		_frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(escapeKeyStroke, "ESCAPE");
+		_frame.getRootPane().getActionMap().put("ESCAPE", escapeAction);
+		
+		KeyStroke refreshKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0, false);
+		Action refreshAction = new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+			
+			public void actionPerformed(ActionEvent e) {
+				refreshTable();
+			}
+		}; 
+		_frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(refreshKeyStroke, "REFRESH");
+		_frame.getRootPane().getActionMap().put("REFRESH", refreshAction);
 
 		Button baruButton = new Button(new ImageIcon(getClass()
-				.getClassLoader().getResource("icons/addpeople.png")), "Baru");
+				.getClassLoader().getResource("icons/addpeople.png")), "(Ctrl+N)  Baru");
 		baruButton.addActionListener(new ActionListener() {
 
 			@Override
@@ -127,8 +154,20 @@ public class UserIndex extends JInternalFrame {
 			}
 		});
 		buttonPanel.add(baruButton);
+		
+		KeyStroke newKeyStroke = KeyStroke.getKeyStroke((KeyEvent.VK_N), InputEvent.CTRL_MASK, false);
+		Action newAction = new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+			
+		    public void actionPerformed(ActionEvent e) {
+		    	_userTambah.setVisible(null);
+		    }
+		}; 
+		_frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(newKeyStroke, "NEW");
+		_frame.getRootPane().getActionMap().put("NEW", newAction);
+		
 		Button ubahButton = new Button(new ImageIcon(getClass()
-				.getClassLoader().getResource("icons/edit.png")), "Ubah");
+				.getClassLoader().getResource("icons/edit.png")), "(Ctrl+E) Ubah");
 		ubahButton.addActionListener(new ActionListener() {
 
 			@Override
@@ -137,52 +176,41 @@ public class UserIndex extends JInternalFrame {
 			}
 		});
 		buttonPanel.add(ubahButton);
+		
+		KeyStroke ubahKeyStroke = KeyStroke.getKeyStroke((KeyEvent.VK_E), InputEvent.CTRL_MASK, false);
+		Action ubahAction = new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+			
+		    public void actionPerformed(ActionEvent e) {
+		    	showUpdateForm();
+		    }
+		}; 
+		_frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(ubahKeyStroke, "UBAH");
+		_frame.getRootPane().getActionMap().put("UBAH", ubahAction);
+		
 		JLabel blank = new JLabel();
 		blank.setPreferredSize(new Dimension(200, 10));
 		buttonPanel.add(blank);
 		Button hapusButton = new Button(new ImageIcon(getClass()
-				.getClassLoader().getResource("icons/delete.png")), "Hapus");
+				.getClassLoader().getResource("icons/delete.png")), "(DEL) Hapus");
 		hapusButton.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-
-				int countSelected = 0;
-				List<User> users = new ArrayList<User>();
-				for (int i = 0; i < table.getRowCount(); i++) {
-					if ((boolean) table.getValueAt(i, 0)) {
-						users.add((User) table.getModel().getValueAt(i,
-								kolom.length));
-						countSelected++;
-					}
-				}
-
-				if (countSelected == 0) {
-					JOptionPane.showMessageDialog(null,
-							"Klik data yang akan di hapus", "Informasi",
-							JOptionPane.INFORMATION_MESSAGE);
-					return;
-				} else {
-					if (JOptionPane.showConfirmDialog(null,
-							"Apakah data ini ingin di hapus ?", "Informasi",
-							JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-						_session = _service.getConnectionDB(_session);
-						boolean isDeleted = false;
-						for (User user : users) {
-							if (user.getId() > 1 && user.isDeleted()) {
-								_session.delete(user);
-								isDeleted = true;
-							}
-						}
-						if (isDeleted) {
-							_session.flush();
-						}
-						refreshTable();
-					}
-				}
+				hapus();
 			}
 		});
 		buttonPanel.add(hapusButton);
+		
+		KeyStroke hapusKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0, false);
+		Action hapusAction = new AbstractAction() { private static final long serialVersionUID = 1L;
+			
+		    public void actionPerformed(ActionEvent e) {
+		    	hapus();
+		    }
+		}; 
+		_frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(hapusKeyStroke, "HAPUS");
+		_frame.getRootPane().getActionMap().put("HAPUS", hapusAction);
 
 		_frame.add(buttonPanel);
 
@@ -194,6 +222,7 @@ public class UserIndex extends JInternalFrame {
 		searchingComboBox = new ComboBox(kolom);
 		searchingComboBox.setPreferredSize(new Dimension(132, 30));
 		searchingComboBox.removeItemAt(0);
+		searchingComboBox.removeItemAt(kolom.length - 2);
 		searchingPanel.add(searchingComboBox);
 
 		searchTextbox = new Textbox("");
@@ -257,6 +286,8 @@ public class UserIndex extends JInternalFrame {
 			public Class<?> getColumnClass(int column) {
 				if (column == 0) {
 					return Boolean.class;
+				} else if (column == kolom.length -1 ) {
+					return User.class;
 				} else {
 					return String.class;
 				}
@@ -270,6 +301,11 @@ public class UserIndex extends JInternalFrame {
 		table.getColumnModel().getColumn(1).setPreferredWidth(200);
 		table.getColumnModel().getColumn(2).setPreferredWidth(200);
 		table.getColumnModel().getColumn(3).setPreferredWidth(200);
+		
+		table.getColumnModel().getColumn(4).setPreferredWidth(0);
+		table.getColumnModel().getColumn(4).setMinWidth(0);
+		table.getColumnModel().getColumn(4).setMaxWidth(0);
+		table.getColumnModel().getColumn(4).setWidth(0);
 
 		TableRowSorter<TableModel> sorter = new TableRowSorter<>(
 				table.getModel());
@@ -281,8 +317,8 @@ public class UserIndex extends JInternalFrame {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 2) {
-					_userTambah.setVisible((User) table.getModel().getValueAt(
-							table.getSelectedRow(), kolom.length));
+					_userTambah.setVisible((User) table.getValueAt(
+							table.getSelectedRow(), kolom.length - 1));
 				}
 			}
 		});
@@ -389,7 +425,6 @@ public class UserIndex extends JInternalFrame {
 		_frame.pack();
 
 		reSizePanel();
-		refreshTable();
 	}
 
 	public Criteria setCriteriaCondition(Criteria criteria) {
@@ -520,8 +555,8 @@ public class UserIndex extends JInternalFrame {
 		List<User> users = new ArrayList<User>();
 		for (int i = 0; i < table.getRowCount(); i++) {
 			if ((boolean) table.getValueAt(i, 0)) {
-				users.add((User) table.getModel().getValueAt(i,
-						kolom.length));
+				users.add((User) table.getValueAt(i,
+						kolom.length - 1));
 				countSelected++;
 			}
 		}
@@ -541,5 +576,41 @@ public class UserIndex extends JInternalFrame {
 
 	public void setUserTambah(UserTambah userTambah) {
 		_userTambah = userTambah;
+	}
+	
+	public void hapus() {
+		int countSelected = 0;
+		List<User> users = new ArrayList<User>();
+		for (int i = 0; i < table.getRowCount(); i++) {
+			if ((boolean) table.getValueAt(i, 0)) {
+				users.add((User) table.getValueAt(i,
+						kolom.length - 1));
+				countSelected++;
+			}
+		}
+
+		if (countSelected == 0) {
+			JOptionPane.showMessageDialog(null,
+					"Klik data yang akan di hapus", "Informasi",
+					JOptionPane.INFORMATION_MESSAGE);
+			return;
+		} else {
+			if (JOptionPane.showConfirmDialog(null,
+					"Apakah data ini ingin di hapus ?", "Informasi",
+					JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+				_session = _service.getConnectionDB(_session);
+				boolean isDeleted = false;
+				for (User user : users) {
+					if (user.getId() > 1 && user.isDeleted()) {
+						_session.delete(user);
+						isDeleted = true;
+					}
+				}
+				if (isDeleted) {
+					_session.flush();
+				}
+				refreshTable();
+			}
+		}
 	}
 }

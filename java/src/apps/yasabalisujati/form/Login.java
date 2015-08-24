@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.Date;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -31,7 +32,7 @@ import apps.yasabalisujati.service.Service;
 public class Login extends JFrame {
 	private static final long serialVersionUID = 9103684027426550046L;
 	private int height = 180;
-	private int width = 300;
+	private int width = 320;
 	private JFrame _frame;
 	private Session _session;
 	private Service _service;
@@ -42,13 +43,14 @@ public class Login extends JFrame {
 	private Passwordbox passwordbox;
 	private ComboBox divisiComboBox;
 
-	public Login(String title) {
-		super(title);
+	public Login(Session session, Service service) {
+		super("L O G I N");
 		_frame = this;
 		_frame.setPreferredSize(new Dimension(width, height));
 		_frame.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		_frame.setIconImage(new ImageIcon(getClass().getClassLoader().getResource("icons/key.png")).getImage());
-		_service = new Service();
+		_service = service;
+		_session = session;
 
 		_frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		menuDesktop = new MenuDesktop(this, _session, _service);
@@ -191,9 +193,10 @@ public class Login extends JFrame {
 			if (_service.passwordMatch(password, user.getPassword())) {
 				if (!user.getPassword().equalsIgnoreCase(encrryptedPassword)) {
 					user.setPassword(encrryptedPassword);
-					_session.update(user);
-					_session.flush();
 				}
+				user.setLastLogin(new java.sql.Timestamp((new Date()).getTime()));
+				_session.update(user);
+				_session.flush();
 
 				_frame.setVisible(false);
 				menuDesktop.setVisible(true);
@@ -208,9 +211,5 @@ public class Login extends JFrame {
 
 	private void close() {
 		System.exit(0);
-	}
-
-	public static void main(String[] args) {
-		new Login("Login");
 	}
 }

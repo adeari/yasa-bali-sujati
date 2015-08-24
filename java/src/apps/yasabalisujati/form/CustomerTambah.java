@@ -5,19 +5,24 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.KeyStroke;
 import javax.swing.WindowConstants;
 
 import org.hibernate.Criteria;
@@ -132,7 +137,7 @@ public class CustomerTambah extends JInternalFrame {
 		container.add(buttonSavePanel);
 		
 		Button saveButton = new Button(new ImageIcon(
-				getClass().getClassLoader().getResource("icons/save.png")), "SIMPAN");
+				getClass().getClassLoader().getResource("icons/save.png")), "(Ctrl+S)  SIMPAN");
 		saveButton.addActionListener(new ActionListener() {
 
 			@Override
@@ -141,6 +146,28 @@ public class CustomerTambah extends JInternalFrame {
 			}
 		});
 		buttonSavePanel.add(saveButton);
+		
+		KeyStroke newKeyStroke = KeyStroke.getKeyStroke((KeyEvent.VK_S), InputEvent.CTRL_MASK, false);
+		Action newAction = new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+			
+		    public void actionPerformed(ActionEvent e) {
+		    	save();
+		    }
+		}; 
+		_frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(newKeyStroke, "SAVED");
+		_frame.getRootPane().getActionMap().put("SAVED", newAction);
+		
+		KeyStroke escapeKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false);
+		Action escapeAction = new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
+			public void actionPerformed(ActionEvent e) {
+				closeEvent();
+		    }
+		}; 
+		_frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(escapeKeyStroke, "ESCAPE");
+		_frame.getRootPane().getActionMap().put("ESCAPE", escapeAction);
 		
 		JLabel blankLabel = new JLabel("");
 		blankLabel.setPreferredSize(new Dimension(100, 30));
@@ -183,6 +210,7 @@ public class CustomerTambah extends JInternalFrame {
 	
 	public void clearForm() {
 		namaTextbox.setText("");
+		namaTextbox.requestFocus();
 		detailTextboxArea.setText("");
 		jenisCustomerTextbox.setText("");
 	}

@@ -6,7 +6,6 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -17,11 +16,10 @@ import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JInternalFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
 import org.hibernate.Criteria;
@@ -30,34 +28,31 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
 import apps.yasabalisujati.components.Button;
-import apps.yasabalisujati.components.ComboBox;
 import apps.yasabalisujati.components.Label;
 import apps.yasabalisujati.components.Textbox;
-import apps.yasabalisujati.components.TextboxArea;
-import apps.yasabalisujati.database.entity.Customer;
-import apps.yasabalisujati.database.entity.Pegawai;
+import apps.yasabalisujati.database.entity.ValidasiRules;
 import apps.yasabalisujati.service.Service;
 
-public class ShipperTambah extends JInternalFrame {
+public class AturanTambah extends JInternalFrame {
 	private static final long serialVersionUID = -113509224699880126L;
 	private JInternalFrame _frame;
 	private Session _session;
 	private Service _service;
 	private SimpleDateFormat _simpleDateFormat;
 	
-	private Textbox namaTextbox;
-	private TextboxArea detailTextboxArea;
-	private ComboBox jenisShipperComboBox;
+	private Textbox urutanTextbox;
+	private Textbox aturanTextbox;
 	
-	private ShipperIndex _shipperIndex;
-	private Customer _customer;
+	private AturanIndex _aturanIndex;
+	private ValidasiRules _validasiRule;
+	
 
-	public ShipperTambah(Session session, Service service,
+	public AturanTambah(Session session, Service service,
 			SimpleDateFormat simpleDateFormat) {
 		super("a", false, true, false, true); 
 		_frame = this;
 		_frame.setLayout(new FlowLayout(FlowLayout.LEADING));
-		_frame.setPreferredSize(new Dimension(550, 300));
+		_frame.setPreferredSize(new Dimension(550, 250));
 		_frame.setSize(_frame.getPreferredSize());
 		_frame.setLocation(10, 10);
 		_frame.setDefaultCloseOperation(
@@ -70,53 +65,24 @@ public class ShipperTambah extends JInternalFrame {
 		
 		Container container = _frame.getContentPane();
 		
-		Dimension labelDimension = new Dimension(100, 30);
-		Dimension textDimension = new Dimension(400, 30);
+		Dimension labelDimension = new Dimension(150, 30);
+		Dimension textDimension = new Dimension(370, 30);
 		
-		Label usernameLabel = new Label("Nama");
+		Label usernameLabel = new Label("Urutan");
 		usernameLabel.setPreferredSize(labelDimension);
 		container.add(usernameLabel);
-		namaTextbox = new Textbox("");
-		namaTextbox.setPreferredSize(textDimension);
-		container.add(namaTextbox);
+		urutanTextbox = new Textbox("");
+		urutanTextbox.setHorizontalAlignment(SwingConstants.RIGHT);
+		urutanTextbox.setPreferredSize(textDimension);
+		container.add(urutanTextbox);
 		
-		Label detailLabel = new Label("Detail");
-		detailLabel.setPreferredSize(new Dimension(100, 90));
-		container.add(detailLabel);
-		detailTextboxArea = new TextboxArea("");
-		detailTextboxArea.addKeyListener(new KeyAdapter() {
-			public void keyReleased(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_TAB) {
-					if (detailTextboxArea.getText().length() > 0) {
-						String checkAkhiran = detailTextboxArea.getText()
-								.substring(
-										detailTextboxArea.getText().length() - 1,
-										detailTextboxArea.getText().length());
-						if ((int) checkAkhiran.charAt(0) == 9) {
-							detailTextboxArea
-									.setText(detailTextboxArea.getText()
-											.substring(
-													0,
-													detailTextboxArea.getText()
-															.length() - 1));
-							jenisShipperComboBox.requestFocus();
-						}
-
-					}
-				}
-			}
-		});
-		JScrollPane alamatScrollPane  = new JScrollPane(detailTextboxArea );
-		alamatScrollPane.setPreferredSize(new Dimension(400, 90));
-		alamatScrollPane.setBorder(new Textbox(null).getBorderCustom());
-		container.add(alamatScrollPane);
+		Label aturanLabel = new Label("Aturan");
+		aturanLabel.setPreferredSize(labelDimension);
+		container.add(aturanLabel);
+		aturanTextbox = new Textbox("");
+		aturanTextbox.setPreferredSize(textDimension);
+		container.add(aturanTextbox);
 		
-		Label divisiLabel = new Label("Divisi");
-		divisiLabel.setPreferredSize(labelDimension);
-		container.add(divisiLabel);
-		jenisShipperComboBox = new ComboBox(new String[] { "Exportir", "Importir" });
-		jenisShipperComboBox.setPreferredSize(textDimension);
-		container.add(jenisShipperComboBox);
 		
 		JPanel buttonSavePanel = new JPanel();
 		buttonSavePanel.setPreferredSize(new Dimension(Double.valueOf(
@@ -155,12 +121,8 @@ public class ShipperTambah extends JInternalFrame {
 		    }
 		}; 
 		_frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(escapeKeyStroke, "ESCAPE");
-		_frame.getRootPane().getActionMap().put("ESCAPE", escapeAction);		
+		_frame.getRootPane().getActionMap().put("ESCAPE", escapeAction);
 		
-		
-		JLabel blankLabel = new JLabel("");
-		blankLabel.setPreferredSize(new Dimension(100, 30));
-		buttonSavePanel.add(blankLabel);
 		
 		Button closeButton = new Button(new ImageIcon(
 				getClass().getClassLoader().getResource("icons/cancel.png")), "TUTUP");
@@ -176,49 +138,54 @@ public class ShipperTambah extends JInternalFrame {
 		_frame.pack();
 	}
 	
-	public void setVisible(Customer customer) {
+	public void setVisible(ValidasiRules validasiRules) {
 		clearForm();
-		_customer = customer;
-		if (_customer == null) {
+		_validasiRule = validasiRules;
+		if (_validasiRule == null) {
 			_frame.setFrameIcon(new ImageIcon(getClass().getClassLoader()
-					.getResource("icons/addpeople.png")));
-			_frame.setTitle("Tambah Shipper");
+					.getResource("icons/add.png")));
+			_frame.setTitle("Tambah Aturan");
 		} else {
 			_frame.setFrameIcon(new ImageIcon(getClass().getClassLoader()
 					.getResource("icons/edit.png")));
-			_frame.setTitle("Ubah Shipper");
-			namaTextbox.setText(_customer.getNama());
-			detailTextboxArea.setText(_customer.getDetail());
-			jenisShipperComboBox.setSelectedItem(_customer.getJenisCustomer());
+			_frame.setTitle("Ubah Aturan");
+			urutanTextbox.setText(""+validasiRules.getUrutan());
+			aturanTextbox.setText(validasiRules.getAturan());
 		}
-		
-		
 		_frame.setVisible(true);
 	}
 	
 	public void clearForm() {
-		namaTextbox.setText("");
-		namaTextbox.requestFocus();
-		detailTextboxArea.setText("");
+		urutanTextbox.setText("");
+		aturanTextbox.setText("");
+		aturanTextbox.requestFocus();
 	}
 	
 	
 	public void save() {
-		if (namaTextbox.getText().isEmpty()) {
-			namaTextbox.requestFocus();
-			JOptionPane.showMessageDialog(null, "Isi nama pegawai", "Informasi",
+		if (urutanTextbox.getText().isEmpty()) {
+			urutanTextbox.requestFocus();
+			JOptionPane.showMessageDialog(null, "Isi Urutan aturan", "Informasi",
+					JOptionPane.INFORMATION_MESSAGE);
+			return;
+		}
+		
+		if (aturanTextbox.getText().isEmpty()) {
+			aturanTextbox.requestFocus();
+			JOptionPane.showMessageDialog(null, "Isi Nama Aturan", "Informasi",
 					JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}
 		
 		
-		if (_customer == null) {
+		
+		if (_validasiRule == null) {
 			_session = _service.getConnectionDB(_session);
-			Criteria citeria = _session.createCriteria(Pegawai.class).setProjection(Projections.rowCount());
-			citeria.add(Restrictions.eq("nama", namaTextbox.getText()));
+			Criteria citeria = _session.createCriteria(ValidasiRules.class).setProjection(Projections.rowCount());
+			citeria.add(Restrictions.eq("aturan", aturanTextbox.getText()));
 			if ((long) citeria.uniqueResult() > 0) {
-				namaTextbox.requestFocus();
-				JOptionPane.showMessageDialog(null, "Nama pegawai "+namaTextbox.getText()+" sudah terdaftar", "Informasi",
+				urutanTextbox.requestFocus();
+				JOptionPane.showMessageDialog(null, "Aturan "+urutanTextbox.getText()+" sudah terdaftar", "Informasi",
 						JOptionPane.INFORMATION_MESSAGE);
 				return;
 			}
@@ -228,28 +195,26 @@ public class ShipperTambah extends JInternalFrame {
 		Date nowDate = new Date();
 		java.sql.Timestamp nowSqlDate = new java.sql.Timestamp(nowDate.getTime());
 		
-		Customer customer = new Customer();
-		if (_customer != null) {
-			customer = _customer;
+		ValidasiRules validasiRule = new ValidasiRules();
+		if (_validasiRule != null) {
+			validasiRule = _validasiRule;
 		} else {
-			customer.setCreatedAt(nowSqlDate);
+			validasiRule.setCreatedAt(nowSqlDate);
 		}
-		customer.setUpdatedAt(nowSqlDate);
+		validasiRule.setUpdatedAt(nowSqlDate);
 		
-		customer.setJenisCustomer(jenisShipperComboBox.getSelectedItem().toString());
-		customer.setNama(namaTextbox.getText());
-		customer.setDetail(detailTextboxArea.getText());
-		
-		if (_customer == null) {
-			customer.setDeleted(true);
-			_session.save(customer);
+		validasiRule.setAturan(aturanTextbox.getText());
+		validasiRule.setUrutan(Integer.valueOf(urutanTextbox.getText()));
+		if (_validasiRule == null) {
+			validasiRule.setDeleted(true);
+			_session.save(validasiRule);
 		} else {
-			_session.update(customer);
+			_session.update(validasiRule);
 			_session.flush();
 		}
 		
-		_shipperIndex.refreshTable();
-		if (_customer == null) {
+		_aturanIndex.refreshTable();
+		if (_validasiRule == null) {
 			clearForm();
 		} else {
 			closeEvent();
@@ -260,7 +225,7 @@ public class ShipperTambah extends JInternalFrame {
 		_frame.setVisible(false);
 	}
 	
-	public void setShipperIndex(ShipperIndex shipperIndex) {
-		_shipperIndex = shipperIndex;
+	public void setAturanIndex(AturanIndex aturanIndex) {
+		_aturanIndex = aturanIndex;
 	}
 }

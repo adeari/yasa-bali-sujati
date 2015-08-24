@@ -6,7 +6,6 @@
   <!-- Database connection settings -->
 	<property name="hibernate.current_session_context_class">thread</property>
 	<property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
-  <property name="hibernate.connection.url">jdbc:postgresql://localhost:5432/dbybs</property>
   <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
   <property name="connection.autocommit">true</property>   
   
@@ -15,6 +14,8 @@
   <mapping class="apps.yasabalisujati.database.entity.Pegawai"/>
   <mapping class="apps.yasabalisujati.database.entity.User"/>
   <mapping class="apps.yasabalisujati.database.entity.Customer"/>
+  <mapping class="apps.yasabalisujati.database.entity.ValidasiRules"/>
+  <mapping class="apps.yasabalisujati.database.entity.Filling"/>
   
  </session-factory>
 </hibernate-configuration>
