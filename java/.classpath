@@ -14,5 +14,6 @@
 	<classpathentry kind="lib" path="F:/agung/ybs/apps/libraryjar/database/jboss-logging-annotations-1.2.0.Beta1.jar"/>
 	<classpathentry kind="lib" path="F:/agung/ybs/apps/libraryjar/database/jboss-transaction-api_1.2_spec-1.0.0.Final.jar"/>
 	<classpathentry kind="lib" path="F:/agung/ybs/apps/libraryjar/database/postgresql-9.1-902.jdbc4.jar"/>
+	<classpathentry kind="lib" path="F:/sudiatmikasms/src/java/libraryjar/jcalendar-1.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

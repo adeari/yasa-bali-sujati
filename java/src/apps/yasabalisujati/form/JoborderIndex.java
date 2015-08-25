@@ -594,7 +594,7 @@ public class JoborderIndex extends JInternalFrame {
 			_frame.setVisible(false);
 			fillingExist = false;
 			JOptionPane.showMessageDialog(null,
-					"Job Order belum bisa dipakai karena Aturan penomoran dokumen blum diisi", "Informasi",
+					"Job Order belum bisa dipakai karena Aturan penomoran dokumen belum diisi", "Informasi",
 					JOptionPane.INFORMATION_MESSAGE);
 			return;
 		} else {
