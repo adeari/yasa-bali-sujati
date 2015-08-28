@@ -55,6 +55,7 @@ import apps.yasabalisujati.components.Table;
 import apps.yasabalisujati.components.Textbox;
 import apps.yasabalisujati.database.entity.Customer;
 import apps.yasabalisujati.database.entity.Filling;
+import apps.yasabalisujati.database.entity.Joborder;
 import apps.yasabalisujati.service.Service;
 
 public class JoborderIndex extends JInternalFrame {
@@ -313,7 +314,7 @@ public class JoborderIndex extends JInternalFrame {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 2) {
-					_joborderTambah.setVisible((Customer) table.getValueAt(
+					_joborderTambah.setVisible((Joborder) table.getValueAt(
 							table.getSelectedRow(), kolom.length - 1));
 				}
 			}
@@ -528,10 +529,10 @@ public class JoborderIndex extends JInternalFrame {
 	
 	public void showUpdateForm() {
 		int countSelected = 0;
-		List<Customer> customers = new ArrayList<Customer>();
+		List<Joborder> joborders = new ArrayList<Joborder>();
 		for (int i = 0; i < table.getRowCount(); i++) {
 			if ((boolean) table.getValueAt(i, 0)) {
-				customers.add((Customer) table.getValueAt(i,
+				joborders.add((Joborder) table.getValueAt(i,
 						kolom.length - 1));
 				countSelected++;
 			}
@@ -542,7 +543,7 @@ public class JoborderIndex extends JInternalFrame {
 					"Klik data yang akan diubah", "Informasi",
 					JOptionPane.INFORMATION_MESSAGE);
 		} else if (countSelected == 1) {
-			_joborderTambah.setVisible(customers.get(0));
+			_joborderTambah.setVisible(joborders.get(0));
 		} else {
 			JOptionPane.showMessageDialog(null,
 					"Klik 1 data yang akan diubah", "Informasi",

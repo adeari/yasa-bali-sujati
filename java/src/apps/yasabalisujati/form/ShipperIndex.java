@@ -573,7 +573,12 @@ public class ShipperIndex extends JInternalFrame {
 					_session.flush();
 				}
 				refreshTable();
+				_shipperTambah.getJoborderTambah().refreshShipper();
 			}
 		}
+	}
+	
+	public String[] getJenisShipperShow() {
+		return jenisShipperShow;
 	}
 }

@@ -57,6 +57,7 @@ public class CustomerTambah extends JInternalFrame {
 	
 	private String[] jenisCustomersSet = new String[] {"Rekanan", "Exportir", "Importir" };
 	
+	private JoborderTambah _joborderTambah;
 
 	public CustomerTambah(Session session, Service service,
 			SimpleDateFormat simpleDateFormat) {
@@ -286,6 +287,7 @@ public class CustomerTambah extends JInternalFrame {
 		}
 		
 		refreshDivisiCustomer();
+		_joborderTambah.refreshCustomer();
 		if (jenisCustomer.equalsIgnoreCase("Exportir") || jenisCustomer.equalsIgnoreCase("Importir")) {
 			_shipperIndex.refreshTable();
 		} else {
@@ -308,5 +310,11 @@ public class CustomerTambah extends JInternalFrame {
 	}
 	public void setShipperIndex(ShipperIndex shipperIndex) {
 		_shipperIndex = shipperIndex;
+	}
+	public void setJoborderTambah(JoborderTambah joborderTambah) {
+		_joborderTambah = joborderTambah;
+	}
+	public JoborderTambah getJoborderTambah() {
+		return _joborderTambah;
 	}
 }

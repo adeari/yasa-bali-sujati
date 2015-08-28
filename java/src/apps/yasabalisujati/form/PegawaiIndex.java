@@ -569,6 +569,7 @@ public class PegawaiIndex extends JInternalFrame {
 					_session.flush();
 				}
 				refreshTable();
+				_pegawaiTambah.getJoborderTambah().refreshPegawai();
 			}
 		}
 	}

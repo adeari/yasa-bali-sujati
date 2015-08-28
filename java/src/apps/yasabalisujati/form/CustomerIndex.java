@@ -573,7 +573,12 @@ public class CustomerIndex extends JInternalFrame {
 					_session.flush();
 				}
 				refreshTable();
+				_customerTambah.getJoborderTambah().refreshCustomer();
 			}
 		}
+	}
+	
+	public String[] getjenisCustomersNotShow () {
+		return jenisCustomersNotShow;
 	}
 }

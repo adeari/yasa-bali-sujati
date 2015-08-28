@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Date;
@@ -77,6 +79,19 @@ public class Login extends JFrame {
 			}
 
 		});
+		usernameTextbox.addFocusListener(new FocusListener() {
+			
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				usernameTextbox.selectAll();
+			}
+		});
 		formPanel.add(usernameTextbox);
 
 		Label passwordLabel = new Label("Password");
@@ -84,6 +99,19 @@ public class Login extends JFrame {
 		formPanel.add(passwordLabel);
 		passwordbox = new Passwordbox();
 		passwordbox.setPreferredSize(new Dimension(200, 26));
+		passwordbox.addFocusListener(new FocusListener() {
+			
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				passwordbox.selectAll();
+			}
+		});
 		passwordbox.addKeyListener(new KeyAdapter() {
 
 			@Override
@@ -199,7 +227,7 @@ public class Login extends JFrame {
 				_session.flush();
 
 				_frame.setVisible(false);
-				menuDesktop.setVisible(true);
+				menuDesktop.setVisible(user);
 			} else {
 				passwordbox.requestFocus();
 				JOptionPane.showMessageDialog(null, "Password salah",

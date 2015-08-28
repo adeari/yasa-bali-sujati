@@ -19,6 +19,10 @@ public class Service {
 		_ipAddress = ipAddress;
 	}
 	
+	public String getIpAddress() {
+		return _ipAddress;
+	}
+	
 	public Session getConnectionDB(Session session) {
 		if (session == null) {
 			session = DatabaseHelper.getConnection(_ipAddress);

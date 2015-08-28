@@ -10,3 +10,13 @@ ALTER TABLE customers DROP COLUMN alamat;
 ALTER TABLE customers DROP COLUMN telepon;
 ALTER TABLE customers DROP COLUMN email;
 ALTER TABLE customers DROP COLUMN islengkap;
+
+
+ALTER TABLE joborder ADD COLUMN customername character varying;
+ALTER TABLE joborder ADD COLUMN pegawainame character varying;
+
+ALTER TABLE joborder_pegawai ADD COLUMN id bigserial NOT NULL;
+ALTER TABLE ONLY joborder_pegawai ADD CONSTRAINT pkfdg454ee PRIMARY KEY (id);
+
+ALTER TABLE joborder_validasi_rules ADD COLUMN id bigserial NOT NULL;
+ALTER TABLE ONLY joborder_validasi_rules ADD CONSTRAINT pkfdg4464d PRIMARY KEY (id);

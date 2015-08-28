@@ -50,6 +50,8 @@ public class FillingTambah extends JInternalFrame {
 	
 	private FillingIndex _fillingIndex;
 	private Filling _filling;
+	
+	private JoborderTambah _joborderTambah;
 
 	public FillingTambah(Session session, Service service,
 			SimpleDateFormat simpleDateFormat) {
@@ -251,6 +253,7 @@ public class FillingTambah extends JInternalFrame {
 		}
 		
 		_fillingIndex.refreshTable();
+		_joborderTambah.refreshValidasiRules();
 		if (_filling == null) {
 			clearForm();
 		} else {
@@ -264,5 +267,9 @@ public class FillingTambah extends JInternalFrame {
 	
 	public void setFillingIndex(FillingIndex fillingIndex) {
 		_fillingIndex = fillingIndex;
+	}
+	
+	public void setJoborderTambah(JoborderTambah joborderTambah) {
+		_joborderTambah = joborderTambah;
 	}
 }

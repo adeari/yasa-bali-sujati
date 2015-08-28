@@ -87,8 +87,6 @@ public class AturanIndex extends JInternalFrame {
 
 	private AturanTambah _aturanTambah;
 	
-	private java.sql.Timestamp _timeBegin;
-	private java.sql.Timestamp _timeEnd;
 
 	public AturanIndex(Session session, Service service,
 			SimpleDateFormat simpleDateFormat) {
@@ -111,9 +109,6 @@ public class AturanIndex extends JInternalFrame {
 		_service = service;
 		_simpleDateFormat = simpleDateFormat;
 		
-		_timeBegin = new Timestamp(0);
-		_timeEnd = new Timestamp(0);
-
 		buttonPanel = new JPanel();
 		rowDimension = new Dimension();
 		tableDimension = new Dimension();
@@ -576,6 +571,7 @@ public class AturanIndex extends JInternalFrame {
 					_session.flush();
 				}
 				refreshTable();
+				_aturanTambah.getJoborderTambah().refreshValidasiRules();
 			}
 		}
 	}

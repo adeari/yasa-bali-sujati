@@ -51,6 +51,8 @@ public class ShipperTambah extends JInternalFrame {
 	
 	private ShipperIndex _shipperIndex;
 	private Customer _customer;
+	
+	private JoborderTambah _joborderTambah;
 
 	public ShipperTambah(Session session, Service service,
 			SimpleDateFormat simpleDateFormat) {
@@ -250,6 +252,7 @@ public class ShipperTambah extends JInternalFrame {
 		}
 		
 		_shipperIndex.refreshTable();
+		_joborderTambah.refreshShipper();
 		if (_customer == null) {
 			clearForm();
 		} else {
@@ -263,5 +266,13 @@ public class ShipperTambah extends JInternalFrame {
 	
 	public void setShipperIndex(ShipperIndex shipperIndex) {
 		_shipperIndex = shipperIndex;
+	}
+	
+	public void setJoborderTambah(JoborderTambah joborderTambah) {
+		_joborderTambah = joborderTambah;
+	}
+	
+	public JoborderTambah getJoborderTambah() {
+		return _joborderTambah;
 	}
 }

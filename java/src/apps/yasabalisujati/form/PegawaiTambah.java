@@ -52,6 +52,7 @@ public class PegawaiTambah extends JInternalFrame {
 	
 	private PegawaiIndex _pegawaiIndex;
 	private Pegawai _pegawai;
+	private JoborderTambah _joborderTambah;
 	
 
 	public PegawaiTambah(Session session, Service service,
@@ -277,6 +278,7 @@ public class PegawaiTambah extends JInternalFrame {
 		}
 		
 		refreshDivisiPegawai();
+		_joborderTambah.refreshPegawai();
 		_pegawaiIndex.refreshTable();
 		if (_pegawai == null) {
 			clearForm();
@@ -291,5 +293,11 @@ public class PegawaiTambah extends JInternalFrame {
 	
 	public void setPegawaiIndex(PegawaiIndex pegawaiIndex) {
 		_pegawaiIndex = pegawaiIndex;
+	}
+	public void setJoborderTambah(JoborderTambah joborderTambah) {
+		_joborderTambah = joborderTambah;
+	}
+	public JoborderTambah getJoborderTambah() {
+		return _joborderTambah;
 	}
 }

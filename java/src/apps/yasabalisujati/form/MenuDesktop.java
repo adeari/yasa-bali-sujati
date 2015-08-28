@@ -20,6 +20,7 @@ import javax.swing.event.MenuListener;
 
 import org.hibernate.Session;
 
+import apps.yasabalisujati.database.entity.User;
 import apps.yasabalisujati.service.Service;
 
 public class MenuDesktop extends JFrame {
@@ -57,6 +58,10 @@ public class MenuDesktop extends JFrame {
 	private Session _session;
 	private Service _service;
 	private SimpleDateFormat _simpleDateFormat;
+	
+	private JMenuItem ipDatabaseMenuItem;
+	
+	private User userLogin;
 	
 	public MenuDesktop(Login login, Session session, Service service) {
 		super("Yasa Bali Sujati");
@@ -112,15 +117,20 @@ public class MenuDesktop extends JFrame {
 		userTambah.setUserIndex(userIndex);
 		pegawaiIndex.setPegawaiTambah(pegawaiTambah);
 		pegawaiTambah.setPegawaiIndex(pegawaiIndex);
+		pegawaiTambah.setJoborderTambah(joborderTambah);
 		customerIndex.setCustomerTambah(customerTambah);
 		customerTambah.setCustomerIndex(customerIndex);
 		customerTambah.setShipperIndex(shipperIndex);
+		customerTambah.setJoborderTambah(joborderTambah);
 		shipperIndex.setShipperTambah(shipperTambah);
 		shipperTambah.setShipperIndex(shipperIndex);
+		shipperTambah.setJoborderTambah(joborderTambah);
 		aturanIndex.setAturanTambah(aturanTambah);
 		aturanTambah.setAturanIndex(aturanIndex);
+		aturanTambah.setJoborderTambah(joborderTambah);
 		fillingIndex.setFillingTambah(fillingTambah);
 		fillingTambah.setFillingIndex(fillingIndex);
+		fillingTambah.setJoborderTambah(joborderTambah);
 		joborderIndex.setJoborderTambah(joborderTambah);
 		try {
 			joborderIndex.setMaximum(true);
@@ -128,6 +138,8 @@ public class MenuDesktop extends JFrame {
 			e1.printStackTrace();
 		}
 		joborderTambah.setJoborderIndex(joborderIndex);
+		joborderTambah.setShipperIndex(shipperIndex);
+		joborderTambah.setCustomerIndex(customerIndex);
 		try {
 			joborderTambah.setMaximum(true);
 		} catch (PropertyVetoException e1) {
@@ -221,7 +233,7 @@ public class MenuDesktop extends JFrame {
 		menu.add(fillingMenuItem);
 		
 		menu.add(new JSeparator());
-		JMenuItem ipDatabaseMenuItem = new JMenuItem("IP Database");
+		ipDatabaseMenuItem = new JMenuItem("IP Database");
 		ipDatabaseMenuItem.setFont(usersMenuItem.getFont());
 		ipDatabaseMenuItem.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/bullet_connect.png")));
 		ipDatabaseMenuItem.addActionListener(new ActionListener() {
@@ -232,6 +244,7 @@ public class MenuDesktop extends JFrame {
 			}
 		});
 		menu.add(ipDatabaseMenuItem);
+		ipDatabaseMenuItem.setVisible(false);
 		
 		JMenuItem logoutMenuItem = new JMenuItem("Logout");
 		logoutMenuItem.setFont(usersMenuItem.getFont());
@@ -289,6 +302,15 @@ public class MenuDesktop extends JFrame {
 		_frame.getContentPane().add(_desktopPane, BorderLayout.CENTER);
 		_frame.setResizable(true);
 		_frame.pack();
+	}
+	
+	public void setVisible(User user) {
+		if (_service.getIpAddress().equalsIgnoreCase("localhost")) {
+			ipDatabaseMenuItem.setVisible(true);
+		}
+		userLogin = user;
+		joborderTambah.setUserLogin(user);
+		_frame.setVisible(true);
 	}
 	
 	public void closeEvent() {

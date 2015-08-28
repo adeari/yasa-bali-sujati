@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.text.SimpleDateFormat;
@@ -46,6 +48,8 @@ public class AturanTambah extends JInternalFrame {
 	private AturanIndex _aturanIndex;
 	private ValidasiRules _validasiRule;
 	
+	private JoborderTambah _joborderTambah;
+	
 
 	public AturanTambah(Session session, Service service,
 			SimpleDateFormat simpleDateFormat) {
@@ -74,6 +78,19 @@ public class AturanTambah extends JInternalFrame {
 		urutanTextbox = new Textbox("");
 		urutanTextbox.setHorizontalAlignment(SwingConstants.RIGHT);
 		urutanTextbox.setPreferredSize(textDimension);
+		urutanTextbox.addFocusListener(new FocusListener() {
+			
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				urutanTextbox.selectAll();
+			}
+		});
 		container.add(urutanTextbox);
 		
 		Label aturanLabel = new Label("Aturan");
@@ -215,6 +232,7 @@ public class AturanTambah extends JInternalFrame {
 		}
 		
 		_aturanIndex.refreshTable();
+		_joborderTambah.refreshValidasiRules();
 		if (_validasiRule == null) {
 			clearForm();
 		} else {
@@ -228,5 +246,12 @@ public class AturanTambah extends JInternalFrame {
 	
 	public void setAturanIndex(AturanIndex aturanIndex) {
 		_aturanIndex = aturanIndex;
+	}
+	
+	public void setJoborderTambah(JoborderTambah joborderTambah) {
+		_joborderTambah = joborderTambah;
+	}
+	public JoborderTambah getJoborderTambah() {
+		return _joborderTambah;
 	}
 }
