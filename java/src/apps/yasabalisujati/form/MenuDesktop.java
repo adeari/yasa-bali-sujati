@@ -5,6 +5,8 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyVetoException;
 import java.text.SimpleDateFormat;
 
@@ -15,8 +17,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JSeparator;
-import javax.swing.event.MenuEvent;
-import javax.swing.event.MenuListener;
 
 import org.hibernate.Session;
 
@@ -140,6 +140,8 @@ public class MenuDesktop extends JFrame {
 		joborderTambah.setJoborderIndex(joborderIndex);
 		joborderTambah.setShipperIndex(shipperIndex);
 		joborderTambah.setCustomerIndex(customerIndex);
+		joborderTambah.setPegawaiIndex(pegawaiIndex);
+		joborderTambah.setPegawaiIndex(pegawaiIndex);
 		try {
 			joborderTambah.setMaximum(true);
 		} catch (PropertyVetoException e1) {
@@ -275,29 +277,14 @@ public class MenuDesktop extends JFrame {
 		JMenu jobOrderMenu = new JMenu("Job Order");
 		jobOrderMenu.setFont(new Font(null, Font.BOLD, 15));
 		jobOrderMenu.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/star.png")));
-		jobOrderMenu.addMenuListener(new MenuListener() {
-			
+		jobOrderMenu.addMouseListener(new MouseAdapter() {
 			@Override
-			public void menuSelected(MenuEvent arg0) {
+			public void mouseClicked(MouseEvent arg0) {
 				joborderIndex.refreshTable();
 				joborderIndex.setVisible();
 			}
-			
-			@Override
-			public void menuDeselected(MenuEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void menuCanceled(MenuEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
 		});
 		menuBar.add(jobOrderMenu);
-		
-		
 		
 		_frame.getContentPane().add(_desktopPane, BorderLayout.CENTER);
 		_frame.setResizable(true);

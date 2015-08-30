@@ -1,7 +1,5 @@
 package apps.yasabalisujati.database;
 
-import java.io.File;
-
 import org.hibernate.Session;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
@@ -15,9 +13,8 @@ public class DatabaseHelper {
 			configuration.setProperty("hibernate.connection.username", "ade");
 			configuration.setProperty("hibernate.connection.password", "1234");
 			configuration.setProperty("hibernate.connection.url", urll);
+			configuration.configure(DatabaseHelper.class.getResource("appsconfig.xml"));
 			
-			File f = new File("D:\\yasabalisujati\\appsconfig.xml");
-			configuration.configure(f);
 			ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties()).build();                
 			return  configuration.buildSessionFactory(serviceRegistry).openSession();
 		} catch (Exception ex) {

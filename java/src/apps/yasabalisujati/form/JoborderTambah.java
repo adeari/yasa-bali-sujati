@@ -7,13 +7,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
 import javax.swing.AbstractAction;
@@ -48,9 +47,10 @@ import apps.yasabalisujati.components.ButtonEditorValidasiSelected;
 import apps.yasabalisujati.components.ComboBox;
 import apps.yasabalisujati.components.Datebox;
 import apps.yasabalisujati.components.Label;
-import apps.yasabalisujati.components.Table;
 import apps.yasabalisujati.components.Textbox;
 import apps.yasabalisujati.components.TextboxArea;
+import apps.yasabalisujati.components.table.JoborderTableRenderer;
+import apps.yasabalisujati.components.table.Table;
 import apps.yasabalisujati.database.entity.Customer;
 import apps.yasabalisujati.database.entity.Filling;
 import apps.yasabalisujati.database.entity.Joborder;
@@ -72,6 +72,7 @@ public class JoborderTambah extends JInternalFrame {
 
 	private ComboBox fillingComboBox;
 	private List<Filling> fillingList;
+	private Label fillingLabel;
 	
 	private ComboBox customerComboBox;
 	private List<Customer> customerList;
@@ -96,6 +97,7 @@ public class JoborderTambah extends JInternalFrame {
 	private ComboBox statusComboBox;
 	
 	private Textbox komodityTextbox;
+	private Textbox nomorKode;
 	private Textbox partaiTextbox;
 	private Textbox destinasiTextbox;
 	private Textbox customerTextbox;
@@ -109,8 +111,7 @@ public class JoborderTambah extends JInternalFrame {
 	private ShipperIndex _shipperIndex;
 	private CustomerIndex _customerIndex;
 	private Joborder _joborder;
-
-	private boolean fillingExist = true;
+	private PegawaiIndex _pegawaiIndex;
 
 	public JoborderTambah(Session session, Service service,
 			SimpleDateFormat simpleDateFormat) {
@@ -148,13 +149,19 @@ public class JoborderTambah extends JInternalFrame {
 		Dimension textDimension = new Dimension(250, 30);
 		Dimension blankLabelDimension = new Dimension(100, 30);
 
-		Label fillingLabel = new Label("Pilih aturan Nomer");
+		fillingLabel = new Label("Pilih aturan Nomer");
 		fillingLabel.setPreferredSize(labelDimension);
 		leftPanel.add(fillingLabel);
+		
 		fillingList = new ArrayList<Filling>();
 		fillingComboBox = new ComboBox(new String[] { "" });
 		fillingComboBox.setPreferredSize(textDimension);
 		leftPanel.add(fillingComboBox);
+		
+		nomorKode = new Textbox("");
+		nomorKode.setEditable(false);
+		nomorKode.setPreferredSize(textDimension);
+		leftPanel.add(nomorKode);
 		
 		
 		Label komoditiLabel = new Label("Komoditi");
@@ -340,6 +347,7 @@ public class JoborderTambah extends JInternalFrame {
 				""));
 		petugasTable.getColumnModel().getColumn(0).setCellEditor(new ButtonEditorPegawaiSelected(new JCheckBox(), new ImageIcon(getClass()
 				.getClassLoader().getResource("icons/remove_outline.png")), "", this ));
+		
 		petugasTable.getColumnModel().getColumn(1).setPreferredWidth(470);
 		
 		petugasTable.getColumnModel().getColumn(2).setPreferredWidth(0);
@@ -522,12 +530,25 @@ public class JoborderTambah extends JInternalFrame {
 		refreshCustomer();
 		clearForm();
 		_joborder = joborder;
+		
+		if (_joborder == null) {
+			fillingLabel.setText("Pilih Kode");
+			fillingComboBox.setVisible(true);
+			nomorKode.setVisible(false);
+		} else {
+			fillingLabel.setText("Kode");
+			fillingComboBox.setVisible(false);
+			nomorKode.setVisible(true);
+			nomorKode.setText(joborder.getKode());
+		}
+		
 		_frame.setVisible(true);
 		_frame.moveToFront();
 	}
 
 	public void clearForm() {
 		komodityTextbox.setText("");
+		nomorKode.setText("");
 		partaiTextbox.setText("");
 		destinasiTextbox.setText("");
 		customerTextbox.setText("");
@@ -568,8 +589,6 @@ public class JoborderTambah extends JInternalFrame {
 	}
 
 	public void save() {
-		
-		
 		Date nowDate = new Date();
 		java.sql.Timestamp nowSqlDate = new java.sql.Timestamp(nowDate.getTime());
 		
@@ -588,18 +607,34 @@ public class JoborderTambah extends JInternalFrame {
 		
 		Customer customer = null;
 		
+		Customer customerBefore = null;
+		Customer shipperBefore = null;
+		
+		
 		if (customerTextbox.getText().isEmpty()) {
 			if (customerComboBox.getItemCount() > 0) {
 				customer = customerList.get(customerComboBox.getSelectedIndex());
+				if (customer.isDeleted()) {
+					customer.setDeleted(false);
+					_session.update(customer);
+					_session.flush();
+					_customerIndex.refreshTable();
+				}
 			}
 		} else {
 			customer = new Customer();
 			customer.setCreatedAt(nowSqlDate);
 			customer.setUpdatedAt(nowSqlDate);
 			customer.setNama(customerTextbox.getText());
+			customer.setDeleted(false);
+			customer.setJenisCustomer("Rekanan");
 			_session.save(customer);
+			_customerIndex.refreshTable();
 		}
 		
+		if (joborder.getCustomer() != null) {
+			customerBefore = joborder.getCustomer();
+		}
 		joborder.setCustomer(customer);
 		
 		Customer shipper = null;
@@ -607,16 +642,30 @@ public class JoborderTambah extends JInternalFrame {
 		if (customerTextbox.getText().isEmpty()) {
 			if (shipperComboBox.getItemCount() > 0) {
 				shipper = shipperList.get(shipperComboBox.getSelectedIndex());
+				if (shipper.isDeleted()) {
+					shipper.setDeleted(false);
+					_session.update(shipper);
+					_session.flush();
+					_shipperIndex.refreshTable();
+				}
 			}
 		} else {
 			shipper = new Customer();
 			shipper.setCreatedAt(nowSqlDate);
 			shipper.setUpdatedAt(nowSqlDate);
 			shipper.setNama(shipperTextbox.getText());
+			shipper.setDeleted(false);
+			shipper.setJenisCustomer(_shipperIndex.getJenisShipperShow()[0]);
 			_session.save(shipper);
+			_shipperIndex.refreshTable();
+		}
+		
+		if (joborder.getExportir() != null) {
+			shipperBefore = joborder.getExportir();
 		}
 		
 		joborder.setExportir(shipper);
+		
 		joborder.setJenis_kegiatan(jenisKegiatanTextbox.getText());
 		if (waktuPelaksanaanDatebox.getDate() != null) {
 			joborder.setTgl_pelaksanaan(new java.sql.Timestamp(waktuPelaksanaanDatebox.getDate().getTime()));
@@ -632,12 +681,16 @@ public class JoborderTambah extends JInternalFrame {
 			_session.save(joborder);
 		}
 		
+		Set<Pegawai> pegawaiSet = new HashSet<Pegawai>();
 		Criteria criteria = _session.createCriteria(JoborderPegawai.class);
 		criteria.add(Restrictions.eq("joborder", joborder));
 		List<JoborderPegawai> joborderPegawais = criteria.list();
 		for (JoborderPegawai joborderPegawai : joborderPegawais) {
+			pegawaiSet.add(joborderPegawai.getPegawai());
 			_session.delete(joborderPegawai);
 		}
+		_session.flush();
+		
 		
 		String petugas = "";
 		
@@ -651,8 +704,23 @@ public class JoborderTambah extends JInternalFrame {
 			JoborderPegawai joborderPegawai = new JoborderPegawai();
 			joborderPegawai.setJoborder(joborder);
 			joborderPegawai.setPegawai(pegawai);
+			if (pegawai.isDeleted()) {
+				pegawai.setDeleted(false);
+				_session.update(pegawai);
+			}
+			_session.flush();
 			_session.save(joborderPegawai);
 		}
+		
+		Set<ValidasiRules> validasiRuless = new HashSet<ValidasiRules>();
+		criteria = _session.createCriteria(JoborderValidasi.class);
+		criteria.add(Restrictions.eq("joborder", joborder));
+		List<JoborderValidasi> joborderValidasis = criteria.list();
+		for (JoborderValidasi joborderValidasi : joborderValidasis) {
+			validasiRuless.add(joborderValidasi.getValidasiRules());
+			_session.delete(joborderValidasi);
+		}
+		_session.flush();
 		
 		String validasis = "";
 		for (int i = 0; i < validasiTable.getRowCount(); i++) {
@@ -665,14 +733,34 @@ public class JoborderTambah extends JInternalFrame {
 			JoborderValidasi joborderValidasi = new JoborderValidasi();
 			joborderValidasi.setJoborder(joborder);
 			joborderValidasi.setValidasiRules(validasiRules);
+			if (validasiRules.isDeleted()) {
+				validasiRules.setDeleted(false);
+				_session.update(validasiRules);
+			}
 			_session.save(joborderValidasi);
 		}
 		
 		joborder.setPegawainame(petugas);
 		joborder.setValidasiname(validasis);
-		
 		_session.update(joborder);
+		
+		if (customerBefore != null) {
+			_service.setIsDeletedCustomer(_session, customerBefore);
+		}
+		if (shipperBefore != null) {
+			_service.setIsDeletedCustomer(_session, shipperBefore);
+		}
+		
+		for (Pegawai pegawai : pegawaiSet) {
+			_service.setIsDeletedPegawai(_session, pegawai);
+		}
+		
+		for (ValidasiRules validasiRules : validasiRuless) {
+			_service.setIsDeletedValidasirules(_session, validasiRules);
+		}
+		
 		_session.flush();
+		_pegawaiIndex.refreshTable();
 	}
 
 	public void closeEvent() {
@@ -700,14 +788,12 @@ public class JoborderTambah extends JInternalFrame {
 		Criteria criteria = _session.createCriteria(Filling.class);
 		List<Filling> fillings = criteria.list();
 		if (fillings.size() > 0) {
-			fillingExist = false;
 			for (Filling filling : fillings) {
 				fillingList.add(filling);
 				fillingComboBox.addItem(
-						filling.getHuruf() + filling.getWarna() );
+						"(" + filling.getWarna() +") - " + getNomorKode(filling) );
 			}
 		} else {
-			fillingExist = true;
 			_frame.setVisible(false);
 			_joborderIndex.setVisible(false);
 			JOptionPane
@@ -828,5 +914,9 @@ public class JoborderTambah extends JInternalFrame {
 	
 	public void setUserLogin(User user) {
 		userLogin = user;
+	}
+	
+	public void setPegawaiIndex(PegawaiIndex pegawaiIndex) {
+		_pegawaiIndex = pegawaiIndex;
 	}
 }

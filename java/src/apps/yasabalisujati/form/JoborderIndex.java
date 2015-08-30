@@ -14,7 +14,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.beans.PropertyVetoException;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +27,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -44,15 +43,16 @@ import javax.swing.table.TableRowSorter;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Projection;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
 import apps.yasabalisujati.components.Button;
 import apps.yasabalisujati.components.ComboBox;
 import apps.yasabalisujati.components.Label;
-import apps.yasabalisujati.components.Table;
 import apps.yasabalisujati.components.Textbox;
+import apps.yasabalisujati.components.table.JoborderTableRenderer;
+import apps.yasabalisujati.components.table.Table;
 import apps.yasabalisujati.database.entity.Customer;
 import apps.yasabalisujati.database.entity.Filling;
 import apps.yasabalisujati.database.entity.Joborder;
@@ -69,7 +69,10 @@ public class JoborderIndex extends JInternalFrame {
 	private ComboBox searchingComboBox;
 	private Textbox searchTextbox;
 	private Button searchButton;
-	private final String[] kolom = new String[] { "", "Nama Perusahaan", "Detail", "Jenis Customer", "" };
+	private final String[] kolom = new String[] { "", 
+			"Kode", "Waktu Pelaksanaan", "Jenis Kegiatan",
+			"Tempat Pelaksanaan", "Destinasi", "Komoditi", "Partai", "Petugas",
+			"Validasi", "Customer", "Shipper", "Status Job Order", "" };
 	private TableModel tableModel;
 	private Dimension tableDimension;
 	private Vector<Object> dataVector;
@@ -87,21 +90,25 @@ public class JoborderIndex extends JInternalFrame {
 	private SimpleDateFormat _simpleDateFormat;
 
 	private JInternalFrame _frame;
-	
+
 	private JoborderTambah _joborderTambah;
-	
-	private String[] jenisCustomersNotShow = new String[] {"Exportir", "Importir" };
+
+	private String[] jenisCustomersNotShow = new String[] { "Exportir",
+			"Importir" };
 	boolean fillingExist = true;
 
-	public JoborderIndex(Session session, Service service, SimpleDateFormat simpleDateFormat) {
+	private java.sql.Timestamp _timeBegin;
+	private java.sql.Timestamp _timeEnd;
+
+	public JoborderIndex(Session session, Service service,
+			SimpleDateFormat simpleDateFormat) {
 		super("Job Order", true, true, true, true);
 		_frame = this;
 		_frame.setLayout(new FlowLayout(FlowLayout.LEADING));
 		_frame.setPreferredSize(new Dimension(800, 600));
 		_frame.setSize(_frame.getPreferredSize());
 		_frame.setLocation(10, 10);
-		_frame.setDefaultCloseOperation(
-                WindowConstants.HIDE_ON_CLOSE);
+		_frame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		_frame.setFrameIcon(new ImageIcon(getClass().getClassLoader()
 				.getResource("icons/people.png")));
 		_frame.addComponentListener(new ComponentAdapter() {
@@ -109,44 +116,50 @@ public class JoborderIndex extends JInternalFrame {
 				reSizePanel();
 			}
 		});
-		
-		
+
+		_timeBegin = new Timestamp(0);
+		_timeEnd = new Timestamp(0);
+
 		_session = session;
 		_service = service;
 		_simpleDateFormat = simpleDateFormat;
 
 		rowDimension = new Dimension();
 		tableDimension = new Dimension();
-		
-		
+
 		buttonPanel = new JPanel();
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.LEADING));
 		buttonPanel.setBorder(BorderFactory.createTitledBorder(""));
-		
-		KeyStroke escapeKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false);
+
+		KeyStroke escapeKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,
+				0, false);
 		Action escapeAction = new AbstractAction() {
 			private static final long serialVersionUID = 1L;
 
 			public void actionPerformed(ActionEvent e) {
-		    	_frame.setVisible(false);
-		    }
-		}; 
-		_frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(escapeKeyStroke, "ESCAPE");
+				_frame.setVisible(false);
+			}
+		};
+		_frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+				.put(escapeKeyStroke, "ESCAPE");
 		_frame.getRootPane().getActionMap().put("ESCAPE", escapeAction);
-		
-		KeyStroke refreshKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0, false);
+
+		KeyStroke refreshKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0,
+				false);
 		Action refreshAction = new AbstractAction() {
 			private static final long serialVersionUID = 1L;
-			
+
 			public void actionPerformed(ActionEvent e) {
 				refreshTable();
 			}
-		}; 
-		_frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(refreshKeyStroke, "REFRESH");
+		};
+		_frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+				.put(refreshKeyStroke, "REFRESH");
 		_frame.getRootPane().getActionMap().put("REFRESH", refreshAction);
 
-		Button baruButton = new Button(new ImageIcon(
-				getClass().getClassLoader().getResource("icons/addpeople.png")), "(Ctrl+N)  Baru");
+		Button baruButton = new Button(new ImageIcon(getClass()
+				.getClassLoader().getResource("icons/addpeople.png")),
+				"(Ctrl+N)  Baru");
 		baruButton.addActionListener(new ActionListener() {
 
 			@Override
@@ -155,20 +168,23 @@ public class JoborderIndex extends JInternalFrame {
 			}
 		});
 		buttonPanel.add(baruButton);
-		
-		KeyStroke newKeyStroke = KeyStroke.getKeyStroke((KeyEvent.VK_N), InputEvent.CTRL_MASK, false);
+
+		KeyStroke newKeyStroke = KeyStroke.getKeyStroke((KeyEvent.VK_N),
+				InputEvent.CTRL_MASK, false);
 		Action newAction = new AbstractAction() {
 			private static final long serialVersionUID = 1L;
-			
-		    public void actionPerformed(ActionEvent e) {
-		    	_joborderTambah.setVisible(null);
-		    }
-		}; 
-		_frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(newKeyStroke, "NEW");
+
+			public void actionPerformed(ActionEvent e) {
+				_joborderTambah.setVisible(null);
+			}
+		};
+		_frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+				.put(newKeyStroke, "NEW");
 		_frame.getRootPane().getActionMap().put("NEW", newAction);
-		
-		Button ubahButton = new Button(new ImageIcon(
-				getClass().getClassLoader().getResource("icons/edit.png")), "(Ctrl+E) Ubah");
+
+		Button ubahButton = new Button(new ImageIcon(getClass()
+				.getClassLoader().getResource("icons/edit.png")),
+				"(Ctrl+E) Ubah");
 		ubahButton.addActionListener(new ActionListener() {
 
 			@Override
@@ -177,23 +193,26 @@ public class JoborderIndex extends JInternalFrame {
 			}
 		});
 		buttonPanel.add(ubahButton);
-		
-		KeyStroke ubahKeyStroke = KeyStroke.getKeyStroke((KeyEvent.VK_E), InputEvent.CTRL_MASK, false);
+
+		KeyStroke ubahKeyStroke = KeyStroke.getKeyStroke((KeyEvent.VK_E),
+				InputEvent.CTRL_MASK, false);
 		Action ubahAction = new AbstractAction() {
 			private static final long serialVersionUID = 1L;
-			
-		    public void actionPerformed(ActionEvent e) {
-		    	showUpdateForm();
-		    }
-		}; 
-		_frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(ubahKeyStroke, "UBAH");
+
+			public void actionPerformed(ActionEvent e) {
+				showUpdateForm();
+			}
+		};
+		_frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+				.put(ubahKeyStroke, "UBAH");
 		_frame.getRootPane().getActionMap().put("UBAH", ubahAction);
-		
+
 		JLabel blank = new JLabel();
 		blank.setPreferredSize(new Dimension(200, 10));
 		buttonPanel.add(blank);
-		Button hapusButton = new Button(new ImageIcon(
-				getClass().getClassLoader().getResource("icons/delete.png")), "(DEL) Hapus");
+		Button hapusButton = new Button(new ImageIcon(getClass()
+				.getClassLoader().getResource("icons/delete.png")),
+				"(DEL) Hapus");
 		hapusButton.addActionListener(new ActionListener() {
 
 			@Override
@@ -202,15 +221,18 @@ public class JoborderIndex extends JInternalFrame {
 			}
 		});
 		buttonPanel.add(hapusButton);
-		
-		KeyStroke hapusKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0, false);
-		Action hapusAction = new AbstractAction() { private static final long serialVersionUID = 1L;
-			
-		    public void actionPerformed(ActionEvent e) {
-		    	hapus();
-		    }
-		}; 
-		_frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(hapusKeyStroke, "HAPUS");
+
+		KeyStroke hapusKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE,
+				0, false);
+		Action hapusAction = new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
+			public void actionPerformed(ActionEvent e) {
+				hapus();
+			}
+		};
+		_frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+				.put(hapusKeyStroke, "HAPUS");
 		_frame.getRootPane().getActionMap().put("HAPUS", hapusAction);
 
 		_frame.add(buttonPanel);
@@ -221,7 +243,7 @@ public class JoborderIndex extends JInternalFrame {
 		searchingPanel.setBorder(BorderFactory.createTitledBorder(""));
 
 		searchingComboBox = new ComboBox(kolom);
-		searchingComboBox.setPreferredSize(new Dimension(160, 30));
+		searchingComboBox.setPreferredSize(new Dimension(180, 30));
 		searchingComboBox.removeItemAt(0);
 		searchingComboBox.removeItemAt(kolom.length - 2);
 		searchingPanel.add(searchingComboBox);
@@ -231,26 +253,25 @@ public class JoborderIndex extends JInternalFrame {
 		searchTextbox.addKeyListener(new KeyAdapter() {
 			public void keyReleased(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					 refreshTable();
+					refreshTable();
 				}
 			}
 		});
 		searchingPanel.add(searchTextbox);
 
-		searchButton = new Button(new ImageIcon(
-				getClass().getClassLoader().getResource("icons/search.png")), "Cari");
+		searchButton = new Button(new ImageIcon(getClass().getClassLoader()
+				.getResource("icons/search.png")), "Cari");
 		searchButton.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				 refreshTable();
+				refreshTable();
 			}
 
 		});
 		searchingPanel.add(searchButton);
 		_frame.add(searchingPanel);
-		
-		
+
 		dataVector = new Vector<Object>();
 		tableModel = new AbstractTableModel() {
 			private static final long serialVersionUID = 9194573404469074938L;
@@ -288,27 +309,44 @@ public class JoborderIndex extends JInternalFrame {
 			public Class<?> getColumnClass(int column) {
 				if (column == 0) {
 					return Boolean.class;
-				} else if (column == kolom.length -1 ) {
+				} else if (column == kolom.length - 1) {
 					return Customer.class;
 				} else {
 					return String.class;
 				}
 			}
 		};
-		
+
 		table = new Table(tableModel);
-		
+
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		table.getColumnModel().getColumn(0).setPreferredWidth(30);
-		table.getColumnModel().getColumn(1).setPreferredWidth(400);
-		table.getColumnModel().getColumn(2).setPreferredWidth(200);
-		table.getColumnModel().getColumn(3).setPreferredWidth(200);
 		
-		table.getColumnModel().getColumn(4).setPreferredWidth(0);
-		table.getColumnModel().getColumn(4).setMinWidth(0);
-		table.getColumnModel().getColumn(4).setMaxWidth(0);
-		table.getColumnModel().getColumn(4).setWidth(0);
+		table.getColumnModel().getColumn(1).setPreferredWidth(150);
+		table.getColumnModel().getColumn(1)
+				.setCellRenderer(new JoborderTableRenderer());
+
+		table.getColumnModel().getColumn(2).setPreferredWidth(150);
+		table.getColumnModel().getColumn(3).setPreferredWidth(150);
+		table.getColumnModel().getColumn(4).setPreferredWidth(170);
+		table.getColumnModel().getColumn(5).setPreferredWidth(150);
+		table.getColumnModel().getColumn(6).setPreferredWidth(150);
+		table.getColumnModel().getColumn(7).setPreferredWidth(150);
+		table.getColumnModel().getColumn(8).setPreferredWidth(150);
+		table.getColumnModel().getColumn(9).setPreferredWidth(150);
+		table.getColumnModel().getColumn(10).setPreferredWidth(150);
+		table.getColumnModel().getColumn(11).setPreferredWidth(150);
 		
+		table.getColumnModel().getColumn(12).setPreferredWidth(0);
+		table.getColumnModel().getColumn(12).setMinWidth(0);
+		table.getColumnModel().getColumn(12).setMaxWidth(0);
+		table.getColumnModel().getColumn(12).setWidth(0);
+
+		table.getColumnModel().getColumn(13).setPreferredWidth(0);
+		table.getColumnModel().getColumn(13).setMinWidth(0);
+		table.getColumnModel().getColumn(13).setMaxWidth(0);
+		table.getColumnModel().getColumn(13).setWidth(0);
+
 		table.addMouseListener(new MouseAdapter() {
 
 			@Override
@@ -319,22 +357,20 @@ public class JoborderIndex extends JInternalFrame {
 				}
 			}
 		});
-		
+
 		TableRowSorter<TableModel> sorter = new TableRowSorter<>(
 				table.getModel());
 		table.setRowSorter(sorter);
 		sorter.setSortable(0, false);
-		
+
 		jscoJScrollPane = new JScrollPane(table);
 		_frame.add(jscoJScrollPane);
-		
-		
+
 		paginationPanel = new JPanel();
 		paginationPanel.setLayout(new FlowLayout(FlowLayout.LEADING));
 		paginationPanel.setBorder(BorderFactory.createTitledBorder(""));
 		_frame.add(paginationPanel);
-		
-		
+
 		rowSelectComboBox = new JComboBox<Long>();
 		rowSelectComboBox.setFont(new Font(null, Font.BOLD, 15));
 		((JLabel) rowSelectComboBox.getRenderer())
@@ -419,7 +455,7 @@ public class JoborderIndex extends JInternalFrame {
 
 		});
 		paginationPanel.add(buttonLast);
-		
+
 		countPageLabel = new Label("Halaman");
 		countPageLabel.setPreferredSize(new Dimension(300, 30));
 		countPageLabel.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -430,32 +466,101 @@ public class JoborderIndex extends JInternalFrame {
 
 		reSizePanel();
 	}
-	
+
 	public Criteria setCriteriaCondition(Criteria criteria) {
-		criteria.add(Restrictions.not(Restrictions.in("jenisCustomer", jenisCustomersNotShow)));
 		String searchText = searchTextbox.getText();
-		if (!searchText.isEmpty()) {
-			if (searchingComboBox.getSelectedItem().equals(kolom[1])) {
-				criteria.add(Restrictions.like("nama", searchText+"%").ignoreCase());
+		if (searchText.isEmpty()) {
+			if (searchingComboBox.getSelectedItem().equals(kolom[12])) {
+				criteria.add(Restrictions.like("status", searchText)
+						.ignoreCase());
+			}
+		} else {
+			if (searchingComboBox.getSelectedItem().equals(kolom[12])) {
+				criteria.add(Restrictions.like("status", searchText + "%")
+						.ignoreCase());
+			} else if (searchingComboBox.getSelectedItem().equals(kolom[1])) {
+				criteria.add(Restrictions.like("kode", searchText + "%")
+						.ignoreCase());
 			} else if (searchingComboBox.getSelectedItem().equals(kolom[2])) {
-				criteria.add(Restrictions.like("detail", "%"+searchText+"%").ignoreCase());
+				if (_service.convertStringToDate("dd/MM/yyyy HH:mm:ss",
+						searchTextbox.getText(), _simpleDateFormat) != null) {
+					_timeBegin.setTime(_service.convertStringToDate(
+							"dd/MM/yyyy HH:mm:ss", searchTextbox.getText(),
+							_simpleDateFormat).getTime());
+					criteria.add(Restrictions.eq("tgl_pelaksanaan", _timeBegin));
+				} else if (_service.convertStringToDate("dd/MM/yyyy HH:mm",
+						searchTextbox.getText(), _simpleDateFormat) != null) {
+
+					_timeBegin.setTime(_service.convertStringToDate(
+							"dd/MM/yyyy HH:mm:ss",
+							searchTextbox.getText() + ":00", _simpleDateFormat)
+							.getTime());
+
+					_timeEnd.setTime(_service.convertStringToDate(
+							"dd/MM/yyyy HH:mm:ss",
+							searchTextbox.getText() + ":59", _simpleDateFormat)
+							.getTime());
+					criteria.add(Restrictions.between("tgl_pelaksanaan",
+							_timeBegin, _timeEnd));
+				} else if (_service.convertStringToDate("dd/MM/yyyy",
+						searchTextbox.getText(), _simpleDateFormat) != null) {
+
+					_timeBegin.setTime(_service.convertStringToDate(
+							"dd/MM/yyyy HH:mm:ss",
+							searchTextbox.getText() + " 00:00:00",
+							_simpleDateFormat).getTime());
+
+					_timeEnd.setTime(_service.convertStringToDate(
+							"dd/MM/yyyy HH:mm:ss",
+							searchTextbox.getText() + " 23:59:59",
+							_simpleDateFormat).getTime());
+					criteria.add(Restrictions.between("tgl_pelaksanaan",
+							_timeBegin, _timeEnd));
+				}
 			} else if (searchingComboBox.getSelectedItem().equals(kolom[3])) {
-				criteria.add(Restrictions.like("jenisCustomer", searchText+"%").ignoreCase());
+				criteria.add(Restrictions.like("jenis_kegiatan",
+						"%" + searchText).ignoreCase());
+			} else if (searchingComboBox.getSelectedItem().equals(kolom[4])) {
+				criteria.add(Restrictions.like("t4Pelaksanaan",
+						searchText + "%").ignoreCase());
+			} else if (searchingComboBox.getSelectedItem().equals(kolom[5])) {
+				criteria.add(Restrictions.like("destinasi", searchText + "%")
+						.ignoreCase());
+			} else if (searchingComboBox.getSelectedItem().equals(kolom[6])) {
+				criteria.add(Restrictions.like("komoditi", searchText + "%")
+						.ignoreCase());
+			} else if (searchingComboBox.getSelectedItem().equals(kolom[7])) {
+				criteria.add(Restrictions.like("partai", searchText + "%")
+						.ignoreCase());
+			} else if (searchingComboBox.getSelectedItem().equals(kolom[8])) {
+				criteria.add(Restrictions.like("pegawainame",
+						"%" + searchText + "%").ignoreCase());
+			} else if (searchingComboBox.getSelectedItem().equals(kolom[9])) {
+				criteria.add(Restrictions.like("validasiname",
+						"%" + searchText + "%").ignoreCase());
+			} else if (searchingComboBox.getSelectedItem().equals(kolom[10])) {
+				criteria.createAlias("customer", "customer1");
+				criteria.add(Restrictions.like("customer1.nama",
+						"%" + searchText).ignoreCase());
+			} else if (searchingComboBox.getSelectedItem().equals(kolom[11])) {
+				criteria.createAlias("exportir", "exportir1");
+				criteria.add(Restrictions.like("exportir1.nama",
+						"%" + searchText).ignoreCase());
 			}
 		}
 		return criteria;
 	}
-	
+
 	public void refreshTable() {
 		refreshKodeIndex();
 		dataVector.clear();
 		_session = _service.getConnectionDB(_session);
 		_session.clear();
-		
-		Criteria criteria = _session.createCriteria(Customer.class)
+
+		Criteria criteria = _session.createCriteria(Joborder.class)
 				.setProjection(Projections.rowCount());
 		criteria = setCriteriaCondition(criteria);
-		
+
 		long countData = (long) criteria.uniqueResult();
 		long pageNow = Integer.valueOf(pageNowField.getText()).intValue();
 		long countRows = ((Long) rowSelectComboBox.getSelectedItem())
@@ -464,9 +569,8 @@ public class JoborderIndex extends JInternalFrame {
 		countPage = (int) countData / countRows;
 		if ((countData % countRows) > 0)
 			countPage++;
-		countPageLabel.setText(countPage+" Halaman");
-		
-		
+		countPageLabel.setText(countPage + " Halaman");
+
 		int startRow = Long.valueOf((pageNow * countRows) - countRows)
 				.intValue();
 
@@ -482,21 +586,46 @@ public class JoborderIndex extends JInternalFrame {
 		} else {
 			buttonPrevious.setEnabled(true);
 		}
-		
-		criteria = _session.createCriteria(Customer.class);
+
+		criteria = _session.createCriteria(Joborder.class);
 		criteria = setCriteriaCondition(criteria);
+		criteria.addOrder(Order.asc("tgl_pelaksanaan"));
 		criteria.setFirstResult(startRow);
 		criteria.setMaxResults(Long.valueOf(countRows).intValue());
 
-		List<Customer> dataList = criteria.list();
-		
-		for (Customer customer : dataList) {
+		List<Joborder> dataList = criteria.list();
+
+		for (Joborder joborder : dataList) {
 			Vector<Object> data1 = new Vector<Object>();
 			data1.addElement(false);
-			data1.addElement(customer.getNama());
-			data1.addElement(customer.getDetail());
-			data1.addElement(customer.getJenisCustomer());
-			data1.addElement(customer);
+			
+			data1.addElement(joborder.getKode());
+			if (joborder.getTgl_pelaksanaan() == null) {
+				data1.addElement("");
+			} else {
+				data1.addElement(_service.convertStringFromDate(
+						"dd/MM/yyyy HH:mm", joborder.getTgl_pelaksanaan(),
+						_simpleDateFormat));
+			}
+			data1.addElement(joborder.getJenis_kegiatan());
+			data1.addElement(joborder.getT4Pelaksanaan());
+			data1.addElement(joborder.getDestinasi());
+			data1.addElement(joborder.getKomoditi());
+			data1.addElement(joborder.getPartai());
+			data1.addElement(joborder.getPegawainame());
+			data1.addElement(joborder.getValidasiname());
+			if (joborder.getCustomer() == null) {
+				data1.addElement("");
+			} else {
+				data1.addElement(joborder.getCustomer().getNama());
+			}
+			if (joborder.getExportir() == null) {
+				data1.addElement("");
+			} else {
+				data1.addElement(joborder.getExportir().getNama());
+			}
+			data1.addElement(joborder.getStatus());
+			data1.addElement(joborder);
 			dataVector.add(data1);
 		}
 		table.tableChanged(new javax.swing.event.TableModelEvent(tableModel));
@@ -510,62 +639,58 @@ public class JoborderIndex extends JInternalFrame {
 		searchingPanel.setPreferredSize(buttonPanel.getPreferredSize());
 		paginationPanel.setPreferredSize(buttonPanel.getPreferredSize());
 
-		tableDimension.setSize(_frame.getWidth() - 25,
-				_frame.getHeight() - 200);
+		tableDimension
+				.setSize(_frame.getWidth() - 25, _frame.getHeight() - 200);
 		jscoJScrollPane.setPreferredSize(tableDimension);
 		jscoJScrollPane.setSize(jscoJScrollPane.getPreferredSize());
-		
+
 	}
+
 	public void setVisible() {
 		if (fillingExist) {
 			_frame.setVisible(true);
 			_frame.moveToFront();
 		}
 	}
-	
+
 	public void setJoborderTambah(JoborderTambah joborderTambah) {
 		_joborderTambah = joborderTambah;
 	}
-	
+
 	public void showUpdateForm() {
 		int countSelected = 0;
 		List<Joborder> joborders = new ArrayList<Joborder>();
 		for (int i = 0; i < table.getRowCount(); i++) {
 			if ((boolean) table.getValueAt(i, 0)) {
-				joborders.add((Joborder) table.getValueAt(i,
-						kolom.length - 1));
-				countSelected++;
-			}
-		}
-		
-		if (countSelected == 0) {
-			JOptionPane.showMessageDialog(null,
-					"Klik data yang akan diubah", "Informasi",
-					JOptionPane.INFORMATION_MESSAGE);
-		} else if (countSelected == 1) {
-			_joborderTambah.setVisible(joborders.get(0));
-		} else {
-			JOptionPane.showMessageDialog(null,
-					"Klik 1 data yang akan diubah", "Informasi",
-					JOptionPane.INFORMATION_MESSAGE);
-		}
-	}
-	
-	public void hapus() {
-		int countSelected = 0;
-		List<Customer> customers = new ArrayList<Customer>();
-		for (int i = 0; i < table.getRowCount(); i++) {
-			if ((boolean) table.getValueAt(i, 0)) {
-				customers.add((Customer) table.getValueAt(i,
-						kolom.length - 1));
+				joborders.add((Joborder) table.getValueAt(i, kolom.length - 1));
 				countSelected++;
 			}
 		}
 
 		if (countSelected == 0) {
-			JOptionPane.showMessageDialog(null,
-					"Klik data yang akan di hapus", "Informasi",
-					JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(null, "Klik data yang akan diubah",
+					"Informasi", JOptionPane.INFORMATION_MESSAGE);
+		} else if (countSelected == 1) {
+			_joborderTambah.setVisible(joborders.get(0));
+		} else {
+			JOptionPane.showMessageDialog(null, "Klik 1 data yang akan diubah",
+					"Informasi", JOptionPane.INFORMATION_MESSAGE);
+		}
+	}
+
+	public void hapus() {
+		int countSelected = 0;
+		List<Joborder> joborders = new ArrayList<Joborder>();
+		for (int i = 0; i < table.getRowCount(); i++) {
+			if ((boolean) table.getValueAt(i, 0)) {
+				joborders.add((Joborder) table.getValueAt(i, kolom.length - 1));
+				countSelected++;
+			}
+		}
+
+		if (countSelected == 0) {
+			JOptionPane.showMessageDialog(null, "Klik data yang akan di hapus",
+					"Informasi", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		} else {
 			if (JOptionPane.showConfirmDialog(null,
@@ -573,30 +698,28 @@ public class JoborderIndex extends JInternalFrame {
 					JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 				_session = _service.getConnectionDB(_session);
 				boolean isDeleted = false;
-				for (Customer customer : customers) {
-					if (customer.isDeleted()) {
-						_session.delete(customer);
-						isDeleted = true;
-					}
+				for (Joborder joborder : joborders) {
+					_session.delete(joborder);
 				}
-				if (isDeleted) {
-					_session.flush();
-				}
+				_session.flush();
 				refreshTable();
 			}
 		}
 	}
-	
+
 	private void refreshKodeIndex() {
 		_session = _service.getConnectionDB(_session);
 		_session.clear();
-		Criteria criteria = _session.createCriteria(Filling.class).setProjection(Projections.rowCount());
+		Criteria criteria = _session.createCriteria(Filling.class)
+				.setProjection(Projections.rowCount());
 		if ((long) criteria.uniqueResult() == 0) {
 			_frame.setVisible(false);
 			fillingExist = false;
-			JOptionPane.showMessageDialog(null,
-					"Job Order belum bisa dipakai karena Aturan penomoran dokumen belum diisi", "Informasi",
-					JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane
+					.showMessageDialog(
+							null,
+							"Job Order belum bisa dipakai karena Aturan penomoran dokumen belum diisi",
+							"Informasi", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		} else {
 			fillingExist = true;

@@ -50,8 +50,8 @@ import org.hibernate.criterion.Restrictions;
 import apps.yasabalisujati.components.Button;
 import apps.yasabalisujati.components.ComboBox;
 import apps.yasabalisujati.components.Label;
-import apps.yasabalisujati.components.Table;
 import apps.yasabalisujati.components.Textbox;
+import apps.yasabalisujati.components.table.Table;
 import apps.yasabalisujati.database.entity.ValidasiRules;
 import apps.yasabalisujati.service.Service;
 

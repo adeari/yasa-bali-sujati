@@ -7,9 +7,18 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
 
+import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 
 import apps.yasabalisujati.database.DatabaseHelper;
+import apps.yasabalisujati.database.entity.Customer;
+import apps.yasabalisujati.database.entity.Joborder;
+import apps.yasabalisujati.database.entity.JoborderPegawai;
+import apps.yasabalisujati.database.entity.JoborderValidasi;
+import apps.yasabalisujati.database.entity.Pegawai;
+import apps.yasabalisujati.database.entity.ValidasiRules;
 
 public class Service {
 	
@@ -79,5 +88,52 @@ public class Service {
 			}
 		}
 		return null;
+	}
+	
+	public void setIsDeletedPegawai(Session session, Pegawai pegawai) {
+		long pegawaiCount = 0;
+		Criteria criteria = session.createCriteria(JoborderPegawai.class).setProjection(Projections.rowCount());
+		criteria.add(Restrictions.eq("pegawai", pegawai));
+		pegawaiCount += (long) criteria.uniqueResult();
+		
+		if (pegawaiCount > 0 && pegawai.isDeleted()) {
+			pegawai.setDeleted(false);
+			session.update(pegawai);
+		} else if (pegawaiCount <= 0 && !pegawai.isDeleted()) {
+			pegawai.setDeleted(true);
+			session.update(pegawai);
+		}
+	}
+	
+	public void setIsDeletedCustomer(Session session, Customer customer) {
+		long customerCount = 0;
+		Criteria criteria = session.createCriteria(Joborder.class).setProjection(Projections.rowCount());
+		criteria.add(Restrictions.or(Restrictions.eq("customer", customer),
+				Restrictions.eq("exportir", customer)
+				));
+		customerCount += (long) criteria.uniqueResult();
+		
+		if (customerCount > 0 && customer.isDeleted()) {
+			customer.setDeleted(false);
+			session.update(customer);
+		} else if (customerCount <= 0 && !customer.isDeleted()) {
+			customer.setDeleted(true);
+			session.update(customer);
+		}
+	}
+	
+	public void setIsDeletedValidasirules(Session session, ValidasiRules validasiRules) {
+		long validasiCount = 0;
+		Criteria criteria = session.createCriteria(JoborderValidasi.class).setProjection(Projections.rowCount());
+		criteria.add(Restrictions.eq("validasiRules", validasiRules));
+		validasiCount += (long) criteria.uniqueResult();
+		
+		if (validasiCount > 0 && validasiRules.isDeleted()) {
+			validasiRules.setDeleted(false);
+			session.update(validasiRules);
+		} else if (validasiCount <= 0 && !validasiRules.isDeleted()) {
+			validasiRules.setDeleted(true);
+			session.update(validasiRules);
+		}
 	}
 }
