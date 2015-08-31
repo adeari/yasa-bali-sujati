@@ -519,7 +519,7 @@ public class JoborderIndex extends JInternalFrame {
 				}
 			} else if (searchingComboBox.getSelectedItem().equals(kolom[3])) {
 				criteria.add(Restrictions.like("jenis_kegiatan",
-						"%" + searchText).ignoreCase());
+						searchText + "%").ignoreCase());
 			} else if (searchingComboBox.getSelectedItem().equals(kolom[4])) {
 				criteria.add(Restrictions.like("t4Pelaksanaan",
 						searchText + "%").ignoreCase());
@@ -541,11 +541,11 @@ public class JoborderIndex extends JInternalFrame {
 			} else if (searchingComboBox.getSelectedItem().equals(kolom[10])) {
 				criteria.createAlias("customer", "customer1");
 				criteria.add(Restrictions.like("customer1.nama",
-						"%" + searchText).ignoreCase());
+						 searchText + "%").ignoreCase());
 			} else if (searchingComboBox.getSelectedItem().equals(kolom[11])) {
 				criteria.createAlias("exportir", "exportir1");
 				criteria.add(Restrictions.like("exportir1.nama",
-						"%" + searchText).ignoreCase());
+						 searchText + "%").ignoreCase());
 			}
 		}
 		return criteria;
@@ -556,6 +556,7 @@ public class JoborderIndex extends JInternalFrame {
 		dataVector.clear();
 		_session = _service.getConnectionDB(_session);
 		_session.clear();
+		table.tableChanged(new javax.swing.event.TableModelEvent(tableModel));
 
 		Criteria criteria = _session.createCriteria(Joborder.class)
 				.setProjection(Projections.rowCount());

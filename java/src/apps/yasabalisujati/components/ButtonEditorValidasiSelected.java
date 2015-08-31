@@ -3,7 +3,6 @@ package apps.yasabalisujati.components;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Vector;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.Icon;
@@ -27,6 +26,7 @@ public class ButtonEditorValidasiSelected  extends DefaultCellEditor {
             @Override
             public void actionPerformed(ActionEvent e) {
                 fireEditingStopped();
+                _joborderTambah.requestFocus();
             }
         });
         _joborderTambah = joborderTambah;

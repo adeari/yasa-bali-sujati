@@ -92,6 +92,7 @@ public class Service {
 	
 	public void setIsDeletedPegawai(Session session, Pegawai pegawai) {
 		long pegawaiCount = 0;
+		session.clear();
 		Criteria criteria = session.createCriteria(JoborderPegawai.class).setProjection(Projections.rowCount());
 		criteria.add(Restrictions.eq("pegawai", pegawai));
 		pegawaiCount += (long) criteria.uniqueResult();
@@ -107,6 +108,7 @@ public class Service {
 	
 	public void setIsDeletedCustomer(Session session, Customer customer) {
 		long customerCount = 0;
+		session.clear();
 		Criteria criteria = session.createCriteria(Joborder.class).setProjection(Projections.rowCount());
 		criteria.add(Restrictions.or(Restrictions.eq("customer", customer),
 				Restrictions.eq("exportir", customer)
@@ -124,6 +126,7 @@ public class Service {
 	
 	public void setIsDeletedValidasirules(Session session, ValidasiRules validasiRules) {
 		long validasiCount = 0;
+		session.clear();
 		Criteria criteria = session.createCriteria(JoborderValidasi.class).setProjection(Projections.rowCount());
 		criteria.add(Restrictions.eq("validasiRules", validasiRules));
 		validasiCount += (long) criteria.uniqueResult();

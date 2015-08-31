@@ -3,7 +3,6 @@ package apps.yasabalisujati.components;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Vector;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.Icon;
@@ -16,7 +15,6 @@ public class ButtonEditorPegawaiSelected  extends DefaultCellEditor {
 	private static final long serialVersionUID = 6951562338233919355L;
 	protected Button button;
     private String label;
-    private boolean isPushed;
     private JoborderTambah _joborderTambah;
 
     public ButtonEditorPegawaiSelected(JCheckBox checkBox, Icon icon, String title, JoborderTambah joborderTambah) {
@@ -27,6 +25,7 @@ public class ButtonEditorPegawaiSelected  extends DefaultCellEditor {
             @Override
             public void actionPerformed(ActionEvent e) {
                 fireEditingStopped();
+                _joborderTambah.requestFocus();
             }
         });
         _joborderTambah = joborderTambah;
@@ -41,13 +40,11 @@ public class ButtonEditorPegawaiSelected  extends DefaultCellEditor {
 
     @Override
     public Object getCellEditorValue() {
-        isPushed = false;
         return label;
     }
 
     @Override
     public boolean stopCellEditing() {
-        isPushed = false;
         return true;
     }
 
