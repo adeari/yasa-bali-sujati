@@ -14,10 +14,12 @@ import org.hibernate.criterion.Restrictions;
 
 import apps.yasabalisujati.database.DatabaseHelper;
 import apps.yasabalisujati.database.entity.Customer;
+import apps.yasabalisujati.database.entity.Filling;
 import apps.yasabalisujati.database.entity.Joborder;
 import apps.yasabalisujati.database.entity.JoborderPegawai;
 import apps.yasabalisujati.database.entity.JoborderValidasi;
 import apps.yasabalisujati.database.entity.Pegawai;
+import apps.yasabalisujati.database.entity.User;
 import apps.yasabalisujati.database.entity.ValidasiRules;
 
 public class Service {
@@ -103,6 +105,40 @@ public class Service {
 		} else if (pegawaiCount <= 0 && !pegawai.isDeleted()) {
 			pegawai.setDeleted(true);
 			session.update(pegawai);
+		}
+	}
+	
+	public void setIsDeletedUser(Session session, User user) {
+		long userCount = 0;
+		session.clear();
+		Criteria criteria = session.createCriteria(Joborder.class).setProjection(Projections.rowCount());
+		criteria.add(Restrictions.or(Restrictions.eq("createBy", user),
+				Restrictions.eq("updatedBy", user)
+				));
+		userCount += (long) criteria.uniqueResult();
+		
+		if (userCount > 0 && user.isDeleted()) {
+			user.setDeleted(false);
+			session.update(user);
+		} else if (userCount <= 0 && !user.isDeleted()) {
+			user.setDeleted(true);
+			session.update(user);
+		}
+	}
+	
+	public void setIsDeletedFilling(Session session, Filling filling) {
+		long fillingCount = 0;
+		session.clear();
+		Criteria criteria = session.createCriteria(Joborder.class).setProjection(Projections.rowCount());
+		criteria.add(Restrictions.eq("filling", filling));
+		fillingCount += (long) criteria.uniqueResult();
+		
+		if (fillingCount > 0 && filling.isDeleted()) {
+			filling.setDeleted(false);
+			session.update(filling);
+		} else if (fillingCount <= 0 && !filling.isDeleted()) {
+			filling.setDeleted(true);
+			session.update(filling);
 		}
 	}
 	

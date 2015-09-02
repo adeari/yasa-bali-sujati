@@ -131,17 +131,29 @@ public class MenuDesktop extends JFrame {
 		fillingIndex.setFillingTambah(fillingTambah);
 		fillingTambah.setFillingIndex(fillingIndex);
 		fillingTambah.setJoborderTambah(joborderTambah);
+		
+		
 		joborderIndex.setJoborderTambah(joborderTambah);
+		joborderIndex.setShipperIndex(shipperIndex);
+		joborderIndex.setCustomerIndex(customerIndex);
+		joborderIndex.setPegawaiIndex(pegawaiIndex);
+		joborderIndex.setAturanIndex(aturanIndex);
+		joborderIndex.setFillingIndex(fillingIndex);
+		joborderIndex.setUserIndex(userIndex);
 		try {
 			joborderIndex.setMaximum(true);
 		} catch (PropertyVetoException e1) {
 			e1.printStackTrace();
 		}
+		
+		
 		joborderTambah.setJoborderIndex(joborderIndex);
 		joborderTambah.setShipperIndex(shipperIndex);
 		joborderTambah.setCustomerIndex(customerIndex);
 		joborderTambah.setPegawaiIndex(pegawaiIndex);
-		joborderTambah.setPegawaiIndex(pegawaiIndex);
+		joborderTambah.setAturanIndex(aturanIndex);
+		joborderTambah.setFillingIndex(fillingIndex);
+		joborderTambah.setUserIndex(userIndex);
 		try {
 			joborderTambah.setMaximum(true);
 		} catch (PropertyVetoException e1) {

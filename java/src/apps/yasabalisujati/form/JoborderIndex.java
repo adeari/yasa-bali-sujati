@@ -17,7 +17,9 @@ import java.awt.event.MouseEvent;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
 import javax.swing.AbstractAction;
@@ -56,6 +58,11 @@ import apps.yasabalisujati.components.table.Table;
 import apps.yasabalisujati.database.entity.Customer;
 import apps.yasabalisujati.database.entity.Filling;
 import apps.yasabalisujati.database.entity.Joborder;
+import apps.yasabalisujati.database.entity.JoborderPegawai;
+import apps.yasabalisujati.database.entity.JoborderValidasi;
+import apps.yasabalisujati.database.entity.Pegawai;
+import apps.yasabalisujati.database.entity.User;
+import apps.yasabalisujati.database.entity.ValidasiRules;
 import apps.yasabalisujati.service.Service;
 
 public class JoborderIndex extends JInternalFrame {
@@ -69,10 +76,10 @@ public class JoborderIndex extends JInternalFrame {
 	private ComboBox searchingComboBox;
 	private Textbox searchTextbox;
 	private Button searchButton;
-	private final String[] kolom = new String[] { "", 
-			"Kode", "Waktu Pelaksanaan", "Jenis Kegiatan",
-			"Tempat Pelaksanaan", "Destinasi", "Komoditi", "Partai", "Petugas",
-			"Validasi", "Customer", "Shipper", "Status Job Order", "" };
+	private final String[] kolom = new String[] { "", "Kode",
+			"Waktu Pelaksanaan", "Jenis Kegiatan", "Tempat Pelaksanaan",
+			"Destinasi", "Komoditi", "Partai", "Petugas", "Validasi",
+			"Customer", "Shipper", "Status Job Order", "" };
 	private TableModel tableModel;
 	private Dimension tableDimension;
 	private Vector<Object> dataVector;
@@ -100,6 +107,13 @@ public class JoborderIndex extends JInternalFrame {
 	private java.sql.Timestamp _timeBegin;
 	private java.sql.Timestamp _timeEnd;
 
+	private ShipperIndex _shipperIndex;
+	private CustomerIndex _customerIndex;
+	private PegawaiIndex _pegawaiIndex;
+	private AturanIndex _aturanIndex;
+	private FillingIndex _fillingIndex;
+	private UserIndex _userIndex;
+
 	public JoborderIndex(Session session, Service service,
 			SimpleDateFormat simpleDateFormat) {
 		super("Job Order", true, true, true, true);
@@ -110,7 +124,7 @@ public class JoborderIndex extends JInternalFrame {
 		_frame.setLocation(10, 10);
 		_frame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		_frame.setFrameIcon(new ImageIcon(getClass().getClassLoader()
-				.getResource("icons/people.png")));
+				.getResource("icons/star.png")));
 		_frame.addComponentListener(new ComponentAdapter() {
 			public void componentResized(ComponentEvent evt) {
 				reSizePanel();
@@ -321,7 +335,7 @@ public class JoborderIndex extends JInternalFrame {
 
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		table.getColumnModel().getColumn(0).setPreferredWidth(30);
-		
+
 		table.getColumnModel().getColumn(1).setPreferredWidth(150);
 		table.getColumnModel().getColumn(1)
 				.setCellRenderer(new JoborderTableRenderer());
@@ -336,7 +350,7 @@ public class JoborderIndex extends JInternalFrame {
 		table.getColumnModel().getColumn(9).setPreferredWidth(150);
 		table.getColumnModel().getColumn(10).setPreferredWidth(150);
 		table.getColumnModel().getColumn(11).setPreferredWidth(150);
-		
+
 		table.getColumnModel().getColumn(12).setPreferredWidth(0);
 		table.getColumnModel().getColumn(12).setMinWidth(0);
 		table.getColumnModel().getColumn(12).setMaxWidth(0);
@@ -465,6 +479,42 @@ public class JoborderIndex extends JInternalFrame {
 		_frame.pack();
 
 		reSizePanel();
+
+		KeyStroke selectAllKeyStroke = KeyStroke.getKeyStroke((KeyEvent.VK_Q),
+				InputEvent.CTRL_MASK, false);
+		Action selectAllAction = new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
+			public void actionPerformed(ActionEvent e) {
+				for (int i = 0; i < table.getRowCount(); i++) {
+					table.setValueAt(true, i, 0);
+				}
+				table.tableChanged(new javax.swing.event.TableModelEvent(
+						tableModel));
+			}
+		};
+		_frame.getRootPane()
+				.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+				.put(selectAllKeyStroke, "SELECTALL");
+		_frame.getRootPane().getActionMap().put("SELECTALL", selectAllAction);
+		KeyStroke deselectAllKeyStroke = KeyStroke.getKeyStroke(
+				(KeyEvent.VK_Z), InputEvent.CTRL_MASK, false);
+		Action deselectAllAction = new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
+			public void actionPerformed(ActionEvent e) {
+				for (int i = 0; i < table.getRowCount(); i++) {
+					table.setValueAt(false, i, 0);
+				}
+				table.tableChanged(new javax.swing.event.TableModelEvent(
+						tableModel));
+			}
+		};
+		_frame.getRootPane()
+				.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+				.put(deselectAllKeyStroke, "DESELECTALL");
+		_frame.getRootPane().getActionMap()
+				.put("DESELECTALL", deselectAllAction);
 	}
 
 	public Criteria setCriteriaCondition(Criteria criteria) {
@@ -541,11 +591,11 @@ public class JoborderIndex extends JInternalFrame {
 			} else if (searchingComboBox.getSelectedItem().equals(kolom[10])) {
 				criteria.createAlias("customer", "customer1");
 				criteria.add(Restrictions.like("customer1.nama",
-						 searchText + "%").ignoreCase());
+						searchText + "%").ignoreCase());
 			} else if (searchingComboBox.getSelectedItem().equals(kolom[11])) {
 				criteria.createAlias("exportir", "exportir1");
 				criteria.add(Restrictions.like("exportir1.nama",
-						 searchText + "%").ignoreCase());
+						searchText + "%").ignoreCase());
 			}
 		}
 		return criteria;
@@ -599,7 +649,7 @@ public class JoborderIndex extends JInternalFrame {
 		for (Joborder joborder : dataList) {
 			Vector<Object> data1 = new Vector<Object>();
 			data1.addElement(false);
-			
+
 			data1.addElement(joborder.getKode());
 			if (joborder.getTgl_pelaksanaan() == null) {
 				data1.addElement("");
@@ -694,15 +744,95 @@ public class JoborderIndex extends JInternalFrame {
 					"Informasi", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		} else {
+			
 			if (JOptionPane.showConfirmDialog(null,
 					"Apakah data ini ingin di hapus ?", "Informasi",
 					JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 				_session = _service.getConnectionDB(_session);
-				boolean isDeleted = false;
+				
+				Criteria criteria = null;
+				Set<Customer> customerCheck = new HashSet<Customer>();
+				Set<User> userCheck = new HashSet<User>();
+				Set<Filling> fillingCheck = new HashSet<Filling>();
+				Set<Pegawai> pegawaiCheck = new HashSet<Pegawai>();
+				Set<ValidasiRules> validasiRulesCheck = new HashSet<ValidasiRules>();
 				for (Joborder joborder : joborders) {
+					
+					if (joborder.getCustomer() != null) {
+						customerCheck.add(joborder.getCustomer());
+					}
+					if (joborder.getExportir() != null) {
+						customerCheck.add(joborder.getExportir());
+					}
+					
+					if (joborder.getCreateBy() != null) {
+						userCheck.add(joborder.getCreateBy());
+					}
+					if (joborder.getUpdatedBy() != null) {
+						userCheck.add(joborder.getUpdatedBy());
+					}
+					
+					if (joborder.getFilling() != null) {
+						fillingCheck.add(joborder.getFilling());
+					}
+					
+					criteria = _session.createCriteria(JoborderPegawai.class);
+					criteria.add(Restrictions.eq("joborder", joborder));
+					List<JoborderPegawai> joborderPegawais = criteria.list();
+					for (JoborderPegawai joborderPegawai : joborderPegawais) {
+						pegawaiCheck.add(joborderPegawai.getPegawai());
+						_session.delete(joborderPegawai);
+						_session.flush();
+					}
+					
+					criteria = _session.createCriteria(JoborderValidasi.class);
+					criteria.add(Restrictions.eq("joborder", joborder));
+					List<JoborderValidasi> joborderValidasis = criteria.list();
+					for (JoborderValidasi joborderValidasi : joborderValidasis) {
+						validasiRulesCheck.add(joborderValidasi.getValidasiRules());
+						_session.delete(joborderValidasi);
+						_session.flush();
+					}
+
 					_session.delete(joborder);
+					_session.flush();
 				}
-				_session.flush();
+
+				for (User user : userCheck) {
+					_service.setIsDeletedUser(_session, user);
+					_session.flush();
+				}
+				
+				for (Filling filling : fillingCheck) {
+					_service.setIsDeletedFilling(_session, filling);
+					_session.flush();
+				}
+				
+				for (Customer customer : customerCheck) {
+					_service.setIsDeletedCustomer(_session, customer);
+					_session.flush();
+				}
+				for (Pegawai pegawai : pegawaiCheck) {
+					_service.setIsDeletedPegawai(_session, pegawai);
+					_session.flush();
+				}
+				for (ValidasiRules validasiRules : validasiRulesCheck) {
+					_service.setIsDeletedValidasirules(_session, validasiRules);
+					_session.flush();
+				}
+
+				_joborderTambah.refreshCustomer();
+				_joborderTambah.refreshKodeIndex();
+				_joborderTambah.refreshPegawai();
+				_joborderTambah.refreshShipper();
+				_joborderTambah.refreshValidasiRules();
+				
+				_shipperIndex.refreshTable();
+				_customerIndex.refreshTable();
+				_pegawaiIndex.refreshTable();
+				_aturanIndex.refreshTable();
+				_fillingIndex.refreshTable();
+				_userIndex.refreshTable();
 				refreshTable();
 			}
 		}
@@ -725,5 +855,29 @@ public class JoborderIndex extends JInternalFrame {
 		} else {
 			fillingExist = true;
 		}
+	}
+
+	public void setShipperIndex(ShipperIndex shipperIndex) {
+		_shipperIndex = shipperIndex;
+	}
+
+	public void setCustomerIndex(CustomerIndex customerIndex) {
+		_customerIndex = customerIndex;
+	}
+
+	public void setAturanIndex(AturanIndex aturanIndex) {
+		_aturanIndex  = aturanIndex;
+	}
+
+	public void setPegawaiIndex(PegawaiIndex pegawaiIndex) {
+		_pegawaiIndex = pegawaiIndex;
+	}
+
+	public void setFillingIndex(FillingIndex fillingIndex) {
+		_fillingIndex = fillingIndex;
+	}
+
+	public void setUserIndex(UserIndex userIndex) {
+		_userIndex = userIndex;
 	}
 }

@@ -109,8 +109,12 @@ public class JoborderTambah extends JInternalFrame {
 	private JoborderIndex _joborderIndex;
 	private ShipperIndex _shipperIndex;
 	private CustomerIndex _customerIndex;
-	private Joborder _joborder;
 	private PegawaiIndex _pegawaiIndex;
+	private AturanIndex _aturanIndex;
+	private FillingIndex _fillingIndex;
+	private UserIndex _userIndex;
+	
+	private Joborder _joborder;
 
 	public JoborderTambah(Session session, Service service,
 			SimpleDateFormat simpleDateFormat) {
@@ -118,7 +122,7 @@ public class JoborderTambah extends JInternalFrame {
 		_frame = this;
 		_frame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		_frame.setFrameIcon(new ImageIcon(getClass().getClassLoader()
-				.getResource("icons/people.png")));
+				.getResource("icons/star.png")));
 		_frame.setLayout(new FlowLayout(FlowLayout.LEADING));
 
 		_session = session;
@@ -631,14 +635,33 @@ public class JoborderTambah extends JInternalFrame {
 		
 		Filling filling = fillingList.get(fillingComboBox.getSelectedIndex());
 		
+		if (userLogin.isDeleted()) {
+			userLogin.setDeleted(false);
+			_session.update(userLogin);
+			_session.flush();
+		}
+		
 		if (_joborder == null) {
 			joborder =  new Joborder();
 			joborder.setCreatedAt(nowSqlDate);
 			joborder.setCreateBy(userLogin);
 			joborder.setKode(getNomorKode(filling));
+			if (filling.getNomorTerakhir() == null || (!filling.getNomorTerakhir().equals(joborder.getKode()))) {
+				filling.setNomorTerakhir(joborder.getKode());
+				_session.update(filling);
+				_session.flush();
+			}
 		} else {
 			joborder = _joborder;
 		}
+		
+		User userBefore = null;
+		if (joborder.getUpdatedBy() != null) {
+			userBefore = joborder.getUpdatedBy();
+		}
+		
+		joborder.setUpdatedBy(userLogin);
+		joborder.setUpdatedAt(nowSqlDate);
 		
 		Customer customer = null;
 		
@@ -660,7 +683,6 @@ public class JoborderTambah extends JInternalFrame {
 					customer.setDeleted(false);
 					_session.update(customer);
 					_session.flush();
-					_customerIndex.refreshTable();
 				}
 			}
 		} else {
@@ -671,7 +693,6 @@ public class JoborderTambah extends JInternalFrame {
 			customer.setDeleted(false);
 			customer.setJenisCustomer("Rekanan");
 			_session.save(customer);
-			_customerIndex.refreshTable();
 		}
 		
 		
@@ -686,7 +707,6 @@ public class JoborderTambah extends JInternalFrame {
 					shipper.setDeleted(false);
 					_session.update(shipper);
 					_session.flush();
-					_shipperIndex.refreshTable();
 				}
 			}
 		} else {
@@ -697,7 +717,6 @@ public class JoborderTambah extends JInternalFrame {
 			shipper.setDeleted(false);
 			shipper.setJenisCustomer(_shipperIndex.getJenisShipperShow()[0]);
 			_session.save(shipper);
-			_shipperIndex.refreshTable();
 		}
 		
 		joborder.setExportir(shipper);
@@ -707,6 +726,18 @@ public class JoborderTambah extends JInternalFrame {
 			joborder.setTgl_pelaksanaan(new java.sql.Timestamp(waktuPelaksanaanDatebox.getDate().getTime()));
 		}
 		joborder.setCatatan(catatanTextArea.getText());
+		
+		Filling fillingBefore = null;
+		if (joborder.getFilling() != null) {
+			fillingBefore = joborder.getFilling();
+		}
+		
+		if (filling.isDeleted()) {
+			filling.setDeleted(false);
+			_session.update(filling);
+			_session.flush();
+		}
+		
 		joborder.setFilling(filling);
 		joborder.setStatus(statusComboBox.getSelectedItem().toString());
 		joborder.setT4Pelaksanaan(tempatPelaksanaanTextArea.getText());
@@ -833,6 +864,16 @@ public class JoborderTambah extends JInternalFrame {
 			ex.printStackTrace();
 		}
 		
+		if (fillingBefore != null) {
+			_service.setIsDeletedFilling(_session, fillingBefore);
+			_session.flush();
+		}
+		
+		if (userBefore != null) {
+			_service.setIsDeletedUser(_session, userBefore);
+			_session.flush();
+		}
+		
 		if (shipperBefore != null) {
 			_service.setIsDeletedCustomer(_session, shipperBefore);
 			_session.flush();
@@ -855,6 +896,11 @@ public class JoborderTambah extends JInternalFrame {
 		
 		_joborderIndex.refreshTable();
 		_pegawaiIndex.refreshTable();
+		_aturanIndex.refreshTable();
+		_userIndex.refreshTable();
+		_customerIndex.refreshTable();
+		_shipperIndex.refreshTable();
+		_fillingIndex.refreshTable();
 		
 		if (_joborder == null) {
 			setVisible(null);
@@ -877,6 +923,22 @@ public class JoborderTambah extends JInternalFrame {
 	
 	public void setCustomerIndex(CustomerIndex customerIndex) {
 		_customerIndex = customerIndex;
+	}
+	
+	public void setAturanIndex(AturanIndex aturanIndex) {
+		_aturanIndex  = aturanIndex;
+	}
+	
+	public void setPegawaiIndex(PegawaiIndex pegawaiIndex) {
+		_pegawaiIndex = pegawaiIndex;
+	}
+	
+	public void setFillingIndex(FillingIndex fillingIndex) {
+		_fillingIndex = fillingIndex;
+	}
+	
+	public void setUserIndex(UserIndex userIndex) {
+		_userIndex = userIndex;
 	}
 
 	public void refreshKodeIndex() {
@@ -1014,10 +1076,6 @@ public class JoborderTambah extends JInternalFrame {
 	
 	public void setUserLogin(User user) {
 		userLogin = user;
-	}
-	
-	public void setPegawaiIndex(PegawaiIndex pegawaiIndex) {
-		_pegawaiIndex = pegawaiIndex;
 	}
 	
 	public void addPegawaiTable(Pegawai pegawaiChoosed) {

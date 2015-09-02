@@ -52,7 +52,6 @@ import apps.yasabalisujati.components.ComboBox;
 import apps.yasabalisujati.components.Label;
 import apps.yasabalisujati.components.Textbox;
 import apps.yasabalisujati.components.table.Table;
-import apps.yasabalisujati.database.entity.Pegawai;
 import apps.yasabalisujati.database.entity.User;
 import apps.yasabalisujati.service.Service;
 
@@ -425,6 +424,38 @@ public class UserIndex extends JInternalFrame {
 		_frame.pack();
 
 		reSizePanel();
+		
+		KeyStroke selectAllKeyStroke = KeyStroke.getKeyStroke((KeyEvent.VK_Q),
+				InputEvent.CTRL_MASK, false);
+		Action selectAllAction = new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
+			public void actionPerformed(ActionEvent e) {
+				for (int i = 0; i < table.getRowCount(); i++) {
+					table.setValueAt(true, i, 0);
+				}
+				table.tableChanged(new javax.swing.event.TableModelEvent(tableModel));
+			}
+		};
+		_frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+				.put(selectAllKeyStroke, "SELECTALL");
+		_frame.getRootPane().getActionMap().put("SELECTALL", selectAllAction);
+		
+		KeyStroke deselectAllKeyStroke = KeyStroke.getKeyStroke((KeyEvent.VK_Z),
+				InputEvent.CTRL_MASK, false);
+		Action deselectAllAction = new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+			
+			public void actionPerformed(ActionEvent e) {
+				for (int i = 0; i < table.getRowCount(); i++) {
+					table.setValueAt(false, i, 0);
+				}
+				table.tableChanged(new javax.swing.event.TableModelEvent(tableModel));
+			}
+		};
+		_frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+		.put(deselectAllKeyStroke, "DESELECTALL");
+		_frame.getRootPane().getActionMap().put("DESELECTALL", deselectAllAction);
 	}
 
 	public Criteria setCriteriaCondition(Criteria criteria) {
