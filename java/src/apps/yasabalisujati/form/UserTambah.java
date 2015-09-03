@@ -221,6 +221,9 @@ public class UserTambah extends JInternalFrame {
 	}
 	
 	public void save() {
+		_session = _service.getConnectionDB(_session);
+		_session.clear();
+		
 		if (usernameTextbox.getText().isEmpty()) {
 			usernameTextbox.requestFocus();
 			JOptionPane.showMessageDialog(null, "Isi Username", "Informasi",
@@ -254,7 +257,6 @@ public class UserTambah extends JInternalFrame {
 		}
 		
 		if (_user == null) {
-			_session = _service.getConnectionDB(_session);
 			Criteria citeria = _session.createCriteria(User.class).setProjection(Projections.rowCount());
 			citeria.add(Restrictions.eq("name", usernameTextbox.getText()));
 			if ((long) citeria.uniqueResult() > 0) {

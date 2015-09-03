@@ -192,6 +192,8 @@ public class FillingTambah extends JInternalFrame {
 	
 	
 	public void save() {
+		_session = _service.getConnectionDB(_session);
+		_session.clear();
 		if (warnaTextbox.getText().isEmpty()) {
 			warnaTextbox.requestFocus();
 			JOptionPane.showMessageDialog(null, "Isi Urutan aturan", "Informasi",
@@ -216,7 +218,6 @@ public class FillingTambah extends JInternalFrame {
 		}
 		
 		
-		_session = _service.getConnectionDB(_session);
 		Criteria citeria = _session.createCriteria(Filling.class).setProjection(Projections.rowCount());
 		citeria.add(Restrictions.eq("warna", warnaTextbox.getText()));
 		if (_filling != null) {
@@ -254,6 +255,8 @@ public class FillingTambah extends JInternalFrame {
 		
 		_fillingIndex.refreshTable();
 		_joborderTambah.refreshValidasiRules();
+		_joborderTambah.getJoborderIndex().refreshTable();
+		
 		if (_filling == null) {
 			clearForm();
 		} else {

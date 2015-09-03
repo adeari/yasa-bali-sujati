@@ -22,6 +22,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
 import org.hibernate.Criteria;
@@ -53,6 +54,7 @@ public class ShipperTambah extends JInternalFrame {
 	private Customer _customer;
 	
 	private JoborderTambah _joborderTambah;
+	private CertificateTambah _certificateTambah;
 
 	public ShipperTambah(Session session, Service service,
 			SimpleDateFormat simpleDateFormat) {
@@ -84,6 +86,7 @@ public class ShipperTambah extends JInternalFrame {
 		
 		Label detailLabel = new Label("Detail");
 		detailLabel.setPreferredSize(new Dimension(100, 90));
+		detailLabel.setVerticalAlignment(SwingConstants.TOP);
 		container.add(detailLabel);
 		detailTextboxArea = new TextboxArea("");
 		detailTextboxArea.addKeyListener(new KeyAdapter() {
@@ -207,6 +210,9 @@ public class ShipperTambah extends JInternalFrame {
 	
 	
 	public void save() {
+		_session = _service.getConnectionDB(_session);
+		_session.clear();
+		
 		if (namaTextbox.getText().isEmpty()) {
 			namaTextbox.requestFocus();
 			JOptionPane.showMessageDialog(null, "Isi nama pegawai", "Informasi",
@@ -216,7 +222,6 @@ public class ShipperTambah extends JInternalFrame {
 		
 		
 		if (_customer == null) {
-			_session = _service.getConnectionDB(_session);
 			Criteria citeria = _session.createCriteria(Pegawai.class).setProjection(Projections.rowCount());
 			citeria.add(Restrictions.eq("nama", namaTextbox.getText()));
 			if ((long) citeria.uniqueResult() > 0) {
@@ -253,6 +258,9 @@ public class ShipperTambah extends JInternalFrame {
 		
 		_shipperIndex.refreshTable();
 		_joborderTambah.refreshShipper();
+		_joborderTambah.getJoborderIndex().refreshTable();
+		_certificateTambah.getCertificateIndex().refreshTable();
+		
 		if (_customer == null) {
 			clearForm();
 		} else {
@@ -274,5 +282,9 @@ public class ShipperTambah extends JInternalFrame {
 	
 	public JoborderTambah getJoborderTambah() {
 		return _joborderTambah;
+	}
+	
+	public void setCerticateTambah(CertificateTambah certificateTambah) {
+		_certificateTambah = certificateTambah;
 	}
 }

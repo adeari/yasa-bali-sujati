@@ -181,6 +181,9 @@ public class AturanTambah extends JInternalFrame {
 	
 	
 	public void save() {
+		_session = _service.getConnectionDB(_session);
+		_session.clear();
+		
 		if (urutanTextbox.getText().isEmpty()) {
 			urutanTextbox.requestFocus();
 			JOptionPane.showMessageDialog(null, "Isi Urutan aturan", "Informasi",
@@ -198,7 +201,6 @@ public class AturanTambah extends JInternalFrame {
 		
 		
 		if (_validasiRule == null) {
-			_session = _service.getConnectionDB(_session);
 			Criteria citeria = _session.createCriteria(ValidasiRules.class).setProjection(Projections.rowCount());
 			citeria.add(Restrictions.eq("aturan", aturanTextbox.getText()));
 			if ((long) citeria.uniqueResult() > 0) {
@@ -233,6 +235,8 @@ public class AturanTambah extends JInternalFrame {
 		
 		_aturanIndex.refreshTable();
 		_joborderTambah.refreshValidasiRules();
+		_joborderTambah.getJoborderIndex().refreshTable();
+		
 		if (_validasiRule == null) {
 			clearForm();
 		} else {

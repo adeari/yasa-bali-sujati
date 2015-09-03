@@ -23,6 +23,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
 import org.hibernate.Criteria;
@@ -89,6 +90,7 @@ public class CustomerTambah extends JInternalFrame {
 		
 		Label detailLabel = new Label("Detail");
 		detailLabel.setPreferredSize(new Dimension(100, 90));
+		detailLabel.setVerticalAlignment(SwingConstants.TOP);
 		container.add(detailLabel);
 		detailTextboxArea = new TextboxArea("");
 		detailTextboxArea.addKeyListener(new KeyAdapter() {
@@ -238,6 +240,8 @@ public class CustomerTambah extends JInternalFrame {
 	}
 	
 	public void save() {
+		_session = _service.getConnectionDB(_session);
+		_session.clear();
 		if (namaTextbox.getText().isEmpty()) {
 			namaTextbox.requestFocus();
 			JOptionPane.showMessageDialog(null, "Isi nama pegawai", "Informasi",
@@ -247,7 +251,6 @@ public class CustomerTambah extends JInternalFrame {
 		
 		
 		if (_customer == null) {
-			_session = _service.getConnectionDB(_session);
 			Criteria citeria = _session.createCriteria(Pegawai.class).setProjection(Projections.rowCount());
 			citeria.add(Restrictions.eq("nama", namaTextbox.getText()));
 			if ((long) citeria.uniqueResult() > 0) {
@@ -288,6 +291,8 @@ public class CustomerTambah extends JInternalFrame {
 		
 		refreshDivisiCustomer();
 		_joborderTambah.refreshCustomer();
+		_joborderTambah.getJoborderIndex().refreshTable();
+		
 		if (jenisCustomer.equalsIgnoreCase("Exportir") || jenisCustomer.equalsIgnoreCase("Importir")) {
 			_shipperIndex.refreshTable();
 		} else {

@@ -52,6 +52,9 @@ public class MenuDesktop extends JFrame {
 	private JoborderIndex joborderIndex;
 	private JoborderTambah joborderTambah;
 	
+	private CertificateIndex certificateIndex;
+	private CertificateTambah certificateTambah;
+	
 	private IPAddressForm ipAddressForm;
 	
 	
@@ -109,6 +112,10 @@ public class MenuDesktop extends JFrame {
 		_desktopPane.add(joborderIndex);
 		joborderTambah = new  JoborderTambah(_session, _service, _simpleDateFormat);
 		_desktopPane.add(joborderTambah);
+		certificateIndex = new CertificateIndex(_session, _service, _simpleDateFormat);
+		_desktopPane.add(certificateIndex);
+		certificateTambah = new  CertificateTambah(_session, _service, _simpleDateFormat);
+		_desktopPane.add(certificateTambah);
 		ipAddressForm = new IPAddressForm();
 		_desktopPane.add(ipAddressForm);
 		
@@ -122,8 +129,11 @@ public class MenuDesktop extends JFrame {
 		customerTambah.setCustomerIndex(customerIndex);
 		customerTambah.setShipperIndex(shipperIndex);
 		customerTambah.setJoborderTambah(joborderTambah);
+		
 		shipperIndex.setShipperTambah(shipperTambah);
 		shipperTambah.setShipperIndex(shipperIndex);
+		shipperTambah.setCerticateTambah(certificateTambah);
+		
 		shipperTambah.setJoborderTambah(joborderTambah);
 		aturanIndex.setAturanTambah(aturanTambah);
 		aturanTambah.setAturanIndex(aturanIndex);
@@ -154,8 +164,38 @@ public class MenuDesktop extends JFrame {
 		joborderTambah.setAturanIndex(aturanIndex);
 		joborderTambah.setFillingIndex(fillingIndex);
 		joborderTambah.setUserIndex(userIndex);
+		joborderTambah.setCerticateTambah(certificateTambah);
 		try {
 			joborderTambah.setMaximum(true);
+		} catch (PropertyVetoException e1) {
+			e1.printStackTrace();
+		}
+		
+		certificateIndex.setJoborderTambah(joborderTambah);
+		certificateIndex.setShipperIndex(shipperIndex);
+		certificateIndex.setCustomerIndex(customerIndex);
+		certificateIndex.setPegawaiIndex(pegawaiIndex);
+		certificateIndex.setAturanIndex(aturanIndex);
+		certificateIndex.setFillingIndex(fillingIndex);
+		certificateIndex.setUserIndex(userIndex);
+		certificateIndex.setCertificateTambah(certificateTambah);
+		try {
+			certificateIndex.setMaximum(true);
+		} catch (PropertyVetoException e1) {
+			e1.printStackTrace();
+		}
+		
+		
+		certificateTambah.setJoborderIndex(joborderIndex);
+		certificateTambah.setShipperIndex(shipperIndex);
+		certificateTambah.setCustomerIndex(customerIndex);
+		certificateTambah.setPegawaiIndex(pegawaiIndex);
+		certificateTambah.setAturanIndex(aturanIndex);
+		certificateTambah.setFillingIndex(fillingIndex);
+		certificateTambah.setUserIndex(userIndex);
+		certificateTambah.setCertificateIndex(certificateIndex);
+		try {
+			certificateTambah.setMaximum(true);
 		} catch (PropertyVetoException e1) {
 			e1.printStackTrace();
 		}
@@ -298,6 +338,18 @@ public class MenuDesktop extends JFrame {
 		});
 		menuBar.add(jobOrderMenu);
 		
+		JMenu certificateMenu = new JMenu("Certificate");
+		certificateMenu.setFont(new Font(null, Font.BOLD, 15));
+		certificateMenu.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/star.png")));
+		certificateMenu.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				certificateIndex.refreshTable();
+				certificateIndex.setVisible();
+			}
+		});
+		menuBar.add(certificateMenu);
+		
 		_frame.getContentPane().add(_desktopPane, BorderLayout.CENTER);
 		_frame.setResizable(true);
 		_frame.pack();
@@ -309,6 +361,7 @@ public class MenuDesktop extends JFrame {
 		}
 		userLogin = user;
 		joborderTambah.setUserLogin(user);
+		certificateTambah.setUserLogin(user);
 		_frame.setVisible(true);
 	}
 	

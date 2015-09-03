@@ -23,6 +23,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
 import org.hibernate.Criteria;
@@ -85,6 +86,7 @@ public class PegawaiTambah extends JInternalFrame {
 		
 		Label detailLabel = new Label("Detail");
 		detailLabel.setPreferredSize(new Dimension(100, 90));
+		detailLabel.setVerticalAlignment(SwingConstants.TOP);
 		container.add(detailLabel);
 		detailTextboxArea = new TextboxArea("");
 		detailTextboxArea.addKeyListener(new KeyAdapter() {
@@ -232,6 +234,8 @@ public class PegawaiTambah extends JInternalFrame {
 	}
 	
 	public void save() {
+		_session = _service.getConnectionDB(_session);
+		_session.clear();
 		if (namaTextbox.getText().isEmpty()) {
 			namaTextbox.requestFocus();
 			JOptionPane.showMessageDialog(null, "Isi nama pegawai", "Informasi",
@@ -279,6 +283,8 @@ public class PegawaiTambah extends JInternalFrame {
 		
 		refreshDivisiPegawai();
 		_joborderTambah.refreshPegawai();
+		_joborderTambah.getJoborderIndex().refreshTable();
+		
 		_pegawaiIndex.refreshTable();
 		if (_pegawai == null) {
 			clearForm();

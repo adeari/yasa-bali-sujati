@@ -3,6 +3,7 @@ package apps.yasabalisujati.database.entity;
 import static javax.persistence.GenerationType.IDENTITY;
 
 import java.io.Serializable;
+import java.sql.Date;
 import java.sql.Timestamp;
 
 import javax.persistence.Column;
@@ -80,6 +81,54 @@ public class Joborder implements Serializable {
 	
 	@Column(name = "validasiname")
 	private String validasiname;
+	
+	@Column(name = "consignee")
+	private String consignee;
+	
+	@Column(name = "vessel")
+	private String vessel;
+	
+	@Column(name = "blno")
+	private String blno;
+	
+	@Column(name = "containerno")
+	private String containerno;
+	
+	@Column(name = "sealno")
+	private String sealno;
+	
+	@Column(name = "type_of_wood_packing")
+	private String type_of_wood_packing;
+	
+	@Column(name = "quantity")
+	private String quantity;
+	
+	@Column(name = "treatment")
+	private String treatment;
+	
+	@Column(name = "wood_core_temperatur")
+	private String wood_core_temperatur;
+	
+	@Column(name = "exposure_time")
+	private String exposure_time;
+	
+	@Column(name = "fumigant")
+	private String fumigant;
+	
+	@Column(name = "dosage_rate")
+	private String dosage_rate;
+	
+	@Column(name = "certificate_number")
+	private String certificate_number;
+	
+	@Column(name = "tgl_cetak")
+	private Date tgl_cetak;
+
+	@Column(name = "downloadpath")
+	private String downloadpath;
+	
+	@Column(name = "downloadpath_party")
+	private String downloadpathParty;
 
 	public Integer getId() {
 		return id;
@@ -232,6 +281,133 @@ public class Joborder implements Serializable {
 	public void setValidasiname(String validasiname) {
 		this.validasiname = validasiname;
 	}
-	
+
+	public String getConsignee() {
+		return consignee;
+	}
+
+	public void setConsignee(String consignee) {
+		this.consignee = consignee;
+	}
+
+	public String getVessel() {
+		return vessel;
+	}
+
+	public void setVessel(String vessel) {
+		this.vessel = vessel;
+	}
+
+	public String getBlno() {
+		return blno;
+	}
+
+	public void setBlno(String blno) {
+		this.blno = blno;
+	}
+
+	public String getContainerno() {
+		return containerno;
+	}
+
+	public void setContainerno(String containerno) {
+		this.containerno = containerno;
+	}
+
+	public String getSealno() {
+		return sealno;
+	}
+
+	public void setSealno(String sealno) {
+		this.sealno = sealno;
+	}
+
+	public String getType_of_wood_packing() {
+		return type_of_wood_packing;
+	}
+
+	public void setType_of_wood_packing(String type_of_wood_packing) {
+		this.type_of_wood_packing = type_of_wood_packing;
+	}
+
+	public String getQuantity() {
+		return quantity;
+	}
+
+	public void setQuantity(String quantity) {
+		this.quantity = quantity;
+	}
+
+	public String getTreatment() {
+		return treatment;
+	}
+
+	public void setTreatment(String treatment) {
+		this.treatment = treatment;
+	}
+
+	public String getWood_core_temperatur() {
+		return wood_core_temperatur;
+	}
+
+	public void setWood_core_temperatur(String wood_core_temperatur) {
+		this.wood_core_temperatur = wood_core_temperatur;
+	}
+
+	public String getExposure_time() {
+		return exposure_time;
+	}
+
+	public void setExposure_time(String exposure_time) {
+		this.exposure_time = exposure_time;
+	}
+
+	public String getFumigant() {
+		return fumigant;
+	}
+
+	public void setFumigant(String fumigant) {
+		this.fumigant = fumigant;
+	}
+
+	public String getDosage_rate() {
+		return dosage_rate;
+	}
+
+	public void setDosage_rate(String dosage_rate) {
+		this.dosage_rate = dosage_rate;
+	}
+
+	public String getCertificate_number() {
+		return certificate_number;
+	}
+
+	public void setCertificate_number(String certificate_number) {
+		this.certificate_number = certificate_number;
+	}
+
+	public Date getTgl_cetak() {
+		return tgl_cetak;
+	}
+
+	public void setTgl_cetak(Date tgl_cetak) {
+		this.tgl_cetak = tgl_cetak;
+	}
+
+	public String getDownloadpath() {
+		return downloadpath;
+	}
+
+	public void setDownloadpath(String downloadpath) {
+		this.downloadpath = downloadpath;
+	}
+
+	public String getDownloadpathParty() {
+		return downloadpathParty;
+	}
+
+	public void setDownloadpathParty(String downloadpathParty) {
+		this.downloadpathParty = downloadpathParty;
+	}
 	
 }

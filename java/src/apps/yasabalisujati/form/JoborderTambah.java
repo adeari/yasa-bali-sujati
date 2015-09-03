@@ -6,6 +6,7 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -113,6 +114,7 @@ public class JoborderTambah extends JInternalFrame {
 	private AturanIndex _aturanIndex;
 	private FillingIndex _fillingIndex;
 	private UserIndex _userIndex;
+	private CertificateTambah _certificateTambah;
 	
 	private Joborder _joborder;
 
@@ -237,6 +239,28 @@ public class JoborderTambah extends JInternalFrame {
 		tempatPelaksanaanLabel.setVerticalAlignment(SwingConstants.TOP);
 		leftPanel.add(tempatPelaksanaanLabel);
 		tempatPelaksanaanTextArea = new TextboxArea("");
+		tempatPelaksanaanTextArea.addKeyListener(new KeyAdapter() {
+			public void keyReleased(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_TAB) {
+					if (tempatPelaksanaanTextArea.getText().length() > 0) {
+						String checkAkhiran = tempatPelaksanaanTextArea.getText()
+								.substring(
+										tempatPelaksanaanTextArea.getText().length() - 1,
+										tempatPelaksanaanTextArea.getText().length());
+						if ((int) checkAkhiran.charAt(0) == 9) {
+							tempatPelaksanaanTextArea
+									.setText(tempatPelaksanaanTextArea.getText()
+											.substring(
+													0,
+													tempatPelaksanaanTextArea.getText()
+															.length() - 1));
+							catatanTextArea.requestFocus();
+						}
+
+					}
+				}
+			}
+		});
 		JScrollPane t4PelaksanaanScrollPane  = new JScrollPane(tempatPelaksanaanTextArea );
 		t4PelaksanaanScrollPane.setPreferredSize(textAreaDimension);
 		t4PelaksanaanScrollPane.setBorder(new Textbox(null).getBorderCustom());
@@ -247,6 +271,28 @@ public class JoborderTambah extends JInternalFrame {
 		catatanLabel.setVerticalAlignment(SwingConstants.TOP);
 		leftPanel.add(catatanLabel);
 		catatanTextArea = new TextboxArea("");
+		catatanTextArea.addKeyListener(new KeyAdapter() {
+			public void keyReleased(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_TAB) {
+					if (catatanTextArea.getText().length() > 0) {
+						String checkAkhiran = catatanTextArea.getText()
+								.substring(
+										catatanTextArea.getText().length() - 1,
+										catatanTextArea.getText().length());
+						if ((int) checkAkhiran.charAt(0) == 9) {
+							catatanTextArea
+									.setText(catatanTextArea.getText()
+											.substring(
+													0,
+													catatanTextArea.getText()
+															.length() - 1));
+							statusComboBox.requestFocus();
+						}
+
+					}
+				}
+			}
+		});
 		JScrollPane catatanScrollPane  = new JScrollPane(catatanTextArea );
 		catatanScrollPane.setPreferredSize(textAreaDimension);
 		catatanScrollPane.setBorder(new Textbox(null).getBorderCustom());
@@ -628,6 +674,9 @@ public class JoborderTambah extends JInternalFrame {
 	}
 
 	public void save() {
+		_session = _service.getConnectionDB(_session);
+		_session.clear();
+		
 		Date nowDate = new Date();
 		java.sql.Timestamp nowSqlDate = new java.sql.Timestamp(nowDate.getTime());
 		
@@ -901,6 +950,7 @@ public class JoborderTambah extends JInternalFrame {
 		_customerIndex.refreshTable();
 		_shipperIndex.refreshTable();
 		_fillingIndex.refreshTable();
+		_certificateTambah.getCertificateIndex().refreshTable();
 		
 		if (_joborder == null) {
 			setVisible(null);
@@ -948,6 +998,8 @@ public class JoborderTambah extends JInternalFrame {
 		_session = _service.getConnectionDB(_session);
 		_session.clear();
 		Criteria criteria = _session.createCriteria(Filling.class);
+		criteria.addOrder(Order.asc("warna"));
+		
 		List<Filling> fillings = criteria.list();
 		if (fillings.size() > 0) {
 			for (Filling filling : fillings) {
@@ -974,6 +1026,7 @@ public class JoborderTambah extends JInternalFrame {
 		_session = _service.getConnectionDB(_session);
 		_session.clear();
 		Criteria criteria = _session.createCriteria(Pegawai.class);
+		criteria.addOrder(Order.asc("nama"));
 		int petugasTableRows = petugasTable.getRowCount();
 		if (petugasTableRows > 0) {
 			Integer[] idss = new Integer[petugasTableRows];
@@ -996,6 +1049,7 @@ public class JoborderTambah extends JInternalFrame {
 		_session = _service.getConnectionDB(_session);
 		_session.clear();
 		Criteria criteria = _session.createCriteria(ValidasiRules.class);
+		criteria.addOrder(Order.asc("urutan"));
 		
 		int validasiTableRows = validasiTable.getRowCount();
 		if (validasiTableRows > 0) {
@@ -1021,6 +1075,7 @@ public class JoborderTambah extends JInternalFrame {
 		_session = _service.getConnectionDB(_session);
 		_session.clear();
 		Criteria criteria = _session.createCriteria(Customer.class);
+		criteria.addOrder(Order.asc("nama"));
 		criteria.add(Restrictions.in("jenisCustomer", _shipperIndex.getJenisShipperShow()));
 		List<Customer> shippers = criteria.list();
 		for (Customer shipper : shippers) {
@@ -1036,6 +1091,8 @@ public class JoborderTambah extends JInternalFrame {
 		_session = _service.getConnectionDB(_session);
 		_session.clear();
 		Criteria criteria = _session.createCriteria(Customer.class);
+		criteria.addOrder(Order.asc("nama"));
+		
 		criteria.add(Restrictions.not(Restrictions.in("jenisCustomer", _customerIndex.getjenisCustomersNotShow())));
 		List<Customer> customers = criteria.list();
 		for (Customer customer : customers) {
@@ -1094,5 +1151,13 @@ public class JoborderTambah extends JInternalFrame {
 		data1.add(validasiChoosed);
 		validasiVector.add(data1);
 		validasiTable.tableChanged(new javax.swing.event.TableModelEvent(validasiTableModel));
+	}
+	
+	public JoborderIndex getJoborderIndex() {
+		return  _joborderIndex;
+	}
+	
+	public void setCerticateTambah(CertificateTambah certificateTambah) {
+		_certificateTambah = certificateTambah;
 	}
 }
