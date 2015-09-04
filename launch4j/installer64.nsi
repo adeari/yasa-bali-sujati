@@ -31,12 +31,14 @@ Section "" ;No components page, name is not important
   File D:\software\javamaster\jre-7u80-windows-x64.exe
   File D:\yasabalisujati\apps.exe
   File D:\yasabalisujati\apps.jar
-  File D:\yasabalisujati\appsconfig.xml
+  File D:\yasabalisujati\exec64.bat
   File jalan64.bat
   
   ExecWait  'jalan64.bat'
   
   CreateShortCut "$DESKTOP\DataYasaBaliSujati.lnk" "D:\yasabalisujati\apps.exe"
   CreateShortCut "$SMPROGRAMS\DataYasaBaliSujati.lnk" "D:\yasabalisujati\apps.exe"
+  CreateShortCut "$DESKTOP\DataYasaBaliSujatia.lnk" "D:\yasabalisujati\exec64.bat"
+  CreateShortCut "$SMPROGRAMS\DataYasaBaliSujatia.lnk" "D:\yasabalisujati\exec64.bat"
   
 SectionEnd ; end the section

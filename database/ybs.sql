@@ -4,25 +4,7 @@
 
 -- Dumped from database version 9.4.1
 -- Dumped by pg_dump version 9.4.1
--- Started on 2015-08-11 21:45:48
-
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SET check_function_bodies = false;
-SET client_min_messages = warning;
-
-DROP DATABASE dbybs;
---
--- TOC entry 2086 (class 1262 OID 24960)
--- Name: dbybs; Type: DATABASE; Schema: -; Owner: -
---
-
-CREATE DATABASE dbybs WITH TEMPLATE = template0 ENCODING = 'UTF8' LC_COLLATE = 'Indonesian_Indonesia.1252' LC_CTYPE = 'Indonesian_Indonesia.1252';
-
-
-\connect dbybs
+-- Started on 2015-09-05 03:11:29
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -32,24 +14,7 @@ SET check_function_bodies = false;
 SET client_min_messages = warning;
 
 --
--- TOC entry 6 (class 2615 OID 2200)
--- Name: public; Type: SCHEMA; Schema: -; Owner: -
---
-
-CREATE SCHEMA public;
-
-
---
--- TOC entry 2087 (class 0 OID 0)
--- Dependencies: 6
--- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: -
---
-
-COMMENT ON SCHEMA public IS 'standard public schema';
-
-
---
--- TOC entry 187 (class 3079 OID 11855)
+-- TOC entry 191 (class 3079 OID 11855)
 -- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
 --
 
@@ -57,8 +22,8 @@ CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 
 
 --
--- TOC entry 2088 (class 0 OID 0)
--- Dependencies: 187
+-- TOC entry 2114 (class 0 OID 0)
+-- Dependencies: 191
 -- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: -
 --
 
@@ -77,15 +42,11 @@ SET default_with_oids = false;
 CREATE TABLE customers (
     id integer NOT NULL,
     nama_perusahaan character varying,
-    contact_person character varying,
-    alamat character varying,
-    telepon character varying,
-    email character varying,
     jenis_customer character varying,
     created_at timestamp with time zone,
     updated_at timestamp with time zone,
     isdeleted boolean DEFAULT true,
-    islengkap boolean DEFAULT false
+    detail character varying
 );
 
 
@@ -103,7 +64,7 @@ CREATE SEQUENCE customers_id_seq
 
 
 --
--- TOC entry 2089 (class 0 OID 0)
+-- TOC entry 2115 (class 0 OID 0)
 -- Dependencies: 174
 -- Name: customers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
@@ -142,7 +103,7 @@ CREATE SEQUENCE filling_id_seq
 
 
 --
--- TOC entry 2090 (class 0 OID 0)
+-- TOC entry 2116 (class 0 OID 0)
 -- Dependencies: 176
 -- Name: filling_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
@@ -183,7 +144,25 @@ CREATE TABLE joborder (
     t4_pelaksanaan character varying,
     komoditi character varying,
     partai character varying,
-    destinasi character varying
+    destinasi character varying,
+    pegawainame character varying,
+    validasiname character varying,
+    consignee character varying,
+    vessel character varying,
+    blno character varying,
+    containerno character varying,
+    sealno character varying,
+    type_of_wood_packing character varying,
+    quantity character varying,
+    treatment character varying,
+    wood_core_temperatur character varying,
+    exposure_time character varying,
+    fumigant character varying,
+    dosage_rate character varying,
+    certificate_number character varying,
+    tgl_cetak date,
+    downloadpath character varying,
+    downloadpath_party character varying
 );
 
 
@@ -201,7 +180,7 @@ CREATE SEQUENCE joborder_id_seq
 
 
 --
--- TOC entry 2091 (class 0 OID 0)
+-- TOC entry 2117 (class 0 OID 0)
 -- Dependencies: 180
 -- Name: joborder_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
@@ -216,8 +195,31 @@ ALTER SEQUENCE joborder_id_seq OWNED BY joborder.id;
 
 CREATE TABLE joborder_pegawai (
     joborder_id bigint,
-    pegawai_id integer
+    pegawai_id integer,
+    id bigint NOT NULL
 );
+
+
+--
+-- TOC entry 189 (class 1259 OID 50265)
+-- Name: joborder_pegawai_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE joborder_pegawai_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 2118 (class 0 OID 0)
+-- Dependencies: 189
+-- Name: joborder_pegawai_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE joborder_pegawai_id_seq OWNED BY joborder_pegawai.id;
 
 
 --
@@ -227,8 +229,31 @@ CREATE TABLE joborder_pegawai (
 
 CREATE TABLE joborder_validasi_rules (
     joborder_id bigint,
-    validasi_rules_id integer
+    validasi_rules_id integer,
+    id bigint NOT NULL
 );
+
+
+--
+-- TOC entry 190 (class 1259 OID 50273)
+-- Name: joborder_validasi_rules_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE joborder_validasi_rules_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 2119 (class 0 OID 0)
+-- Dependencies: 190
+-- Name: joborder_validasi_rules_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE joborder_validasi_rules_id_seq OWNED BY joborder_validasi_rules.id;
 
 
 --
@@ -239,12 +264,11 @@ CREATE TABLE joborder_validasi_rules (
 CREATE TABLE pegawai (
     id integer NOT NULL,
     nama character varying,
-    alamat character varying,
-    telepon character varying,
     divisi character varying,
     created_at timestamp with time zone,
     updated_at timestamp with time zone,
-    isdeleted boolean DEFAULT true
+    isdeleted boolean DEFAULT true,
+    detail character varying
 );
 
 
@@ -262,7 +286,7 @@ CREATE SEQUENCE pegawai_id_seq
 
 
 --
--- TOC entry 2092 (class 0 OID 0)
+-- TOC entry 2120 (class 0 OID 0)
 -- Dependencies: 172
 -- Name: pegawai_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
@@ -303,12 +327,52 @@ CREATE SEQUENCE users_id_seq
 
 
 --
--- TOC entry 2093 (class 0 OID 0)
+-- TOC entry 2121 (class 0 OID 0)
 -- Dependencies: 185
 -- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE users_id_seq OWNED BY users.id;
+
+
+--
+-- TOC entry 188 (class 1259 OID 50245)
+-- Name: users_java; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE users_java (
+    id integer NOT NULL,
+    name character varying,
+    password character varying,
+    divisi character varying,
+    created_at timestamp with time zone,
+    updated_at timestamp with time zone,
+    password_seen character varying,
+    last_login timestamp with time zone,
+    isdeleted boolean DEFAULT true
+);
+
+
+--
+-- TOC entry 187 (class 1259 OID 50243)
+-- Name: users_java_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE users_java_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 2122 (class 0 OID 0)
+-- Dependencies: 187
+-- Name: users_java_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE users_java_id_seq OWNED BY users_java.id;
 
 
 --
@@ -340,7 +404,7 @@ CREATE SEQUENCE validasi_rules_id_seq
 
 
 --
--- TOC entry 2094 (class 0 OID 0)
+-- TOC entry 2123 (class 0 OID 0)
 -- Dependencies: 178
 -- Name: validasi_rules_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
@@ -349,7 +413,7 @@ ALTER SEQUENCE validasi_rules_id_seq OWNED BY validasi_rules.id;
 
 
 --
--- TOC entry 1934 (class 2604 OID 50048)
+-- TOC entry 1944 (class 2604 OID 50048)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -357,7 +421,7 @@ ALTER TABLE ONLY customers ALTER COLUMN id SET DEFAULT nextval('customers_id_seq
 
 
 --
--- TOC entry 1936 (class 2604 OID 50049)
+-- TOC entry 1946 (class 2604 OID 50049)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -365,7 +429,7 @@ ALTER TABLE ONLY filling ALTER COLUMN id SET DEFAULT nextval('filling_id_seq'::r
 
 
 --
--- TOC entry 1939 (class 2604 OID 50050)
+-- TOC entry 1949 (class 2604 OID 50050)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -373,7 +437,23 @@ ALTER TABLE ONLY joborder ALTER COLUMN id SET DEFAULT nextval('joborder_id_seq':
 
 
 --
--- TOC entry 1931 (class 2604 OID 50051)
+-- TOC entry 1950 (class 2604 OID 50267)
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY joborder_pegawai ALTER COLUMN id SET DEFAULT nextval('joborder_pegawai_id_seq'::regclass);
+
+
+--
+-- TOC entry 1951 (class 2604 OID 50275)
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY joborder_validasi_rules ALTER COLUMN id SET DEFAULT nextval('joborder_validasi_rules_id_seq'::regclass);
+
+
+--
+-- TOC entry 1942 (class 2604 OID 50051)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -381,7 +461,7 @@ ALTER TABLE ONLY pegawai ALTER COLUMN id SET DEFAULT nextval('pegawai_id_seq'::r
 
 
 --
--- TOC entry 1941 (class 2604 OID 50052)
+-- TOC entry 1953 (class 2604 OID 50052)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -389,7 +469,15 @@ ALTER TABLE ONLY users ALTER COLUMN id SET DEFAULT nextval('users_id_seq'::regcl
 
 
 --
--- TOC entry 1938 (class 2604 OID 50053)
+-- TOC entry 1954 (class 2604 OID 50248)
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY users_java ALTER COLUMN id SET DEFAULT nextval('users_java_id_seq'::regclass);
+
+
+--
+-- TOC entry 1948 (class 2604 OID 50053)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -397,155 +485,211 @@ ALTER TABLE ONLY validasi_rules ALTER COLUMN id SET DEFAULT nextval('validasi_ru
 
 
 --
--- TOC entry 2070 (class 0 OID 24995)
+-- TOC entry 2092 (class 0 OID 24995)
 -- Dependencies: 175
 -- Data for Name: customers; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-INSERT INTO customers (id, nama_perusahaan, contact_person, alamat, telepon, email, jenis_customer, created_at, updated_at, isdeleted, islengkap) VALUES (34, 'Pt rikomin', 'pilhanm', 'alam rim', '56566', '', 'Rekanan', '2015-05-22 23:00:05+07', '2015-05-22 23:00:05+07', true, true);
-INSERT INTO customers (id, nama_perusahaan, contact_person, alamat, telepon, email, jenis_customer, created_at, updated_at, isdeleted, islengkap) VALUES (37, 'pt himm ranm', 'porinam', 'alam rikanm', '54545', '', 'teman', '2015-05-22 23:01:36+07', '2015-05-22 23:08:31+07', false, true);
-INSERT INTO customers (id, nama_perusahaan, contact_person, alamat, telepon, email, jenis_customer, created_at, updated_at, isdeleted, islengkap) VALUES (38, 'purrr', NULL, NULL, NULL, NULL, 'Importir', '2015-05-22 23:12:46+07', '2015-05-22 23:12:47+07', false, false);
-INSERT INTO customers (id, nama_perusahaan, contact_person, alamat, telepon, email, jenis_customer, created_at, updated_at, isdeleted, islengkap) VALUES (35, 'pt yuli', 'pildam', 'jl. polim', '45453', '', 'Exportir', '2015-05-22 23:00:28+07', '2015-05-22 23:17:56+07', false, true);
-INSERT INTO customers (id, nama_perusahaan, contact_person, alamat, telepon, email, jenis_customer, created_at, updated_at, isdeleted, islengkap) VALUES (36, 'pt ryuinim', 'pirdan', 'alammmm', '43545', '', 'Importir', '2015-05-22 23:00:45+07', '2015-05-22 23:19:27+07', false, true);
+INSERT INTO customers (id, nama_perusahaan, jenis_customer, created_at, updated_at, isdeleted, detail) VALUES (1, 'customer1', 'Rekanan', '2015-09-02 07:03:54.99+07', '2015-09-02 07:03:54.99+07', false, NULL);
+INSERT INTO customers (id, nama_perusahaan, jenis_customer, created_at, updated_at, isdeleted, detail) VALUES (5, 'kildan', 'Rekanan', '2015-09-02 19:13:34.18+07', '2015-09-02 19:13:34.18+07', false, NULL);
+INSERT INTO customers (id, nama_perusahaan, jenis_customer, created_at, updated_at, isdeleted, detail) VALUES (3, 'CUSTOMER2', 'Rekanan', '2015-09-02 07:05:23.516+07', '2015-09-02 07:05:23.516+07', false, NULL);
+INSERT INTO customers (id, nama_perusahaan, jenis_customer, created_at, updated_at, isdeleted, detail) VALUES (4, 'shipper2', 'Exportir', '2015-09-02 07:05:23.516+07', '2015-09-02 07:05:23.516+07', false, NULL);
+INSERT INTO customers (id, nama_perusahaan, jenis_customer, created_at, updated_at, isdeleted, detail) VALUES (9, 'zirmi', 'Rekanan', '2015-09-02 19:17:05.253+07', '2015-09-02 19:17:05.253+07', false, NULL);
+INSERT INTO customers (id, nama_perusahaan, jenis_customer, created_at, updated_at, isdeleted, detail) VALUES (10, 'zirma', 'Exportir', '2015-09-02 19:17:05.253+07', '2015-09-02 19:17:05.253+07', false, NULL);
+INSERT INTO customers (id, nama_perusahaan, jenis_customer, created_at, updated_at, isdeleted, detail) VALUES (8, 'muldin', 'Exportir', '2015-09-02 19:15:58.52+07', '2015-09-02 19:15:58.52+07', true, NULL);
+INSERT INTO customers (id, nama_perusahaan, jenis_customer, created_at, updated_at, isdeleted, detail) VALUES (7, 'muldan', 'Rekanan', '2015-09-02 19:15:50.532+07', '2015-09-02 19:15:50.532+07', true, NULL);
+INSERT INTO customers (id, nama_perusahaan, jenis_customer, created_at, updated_at, isdeleted, detail) VALUES (2, 'shipper1 mun', 'Exportir', '2015-09-02 07:03:54.99+07', '2015-09-04 01:35:29.097+07', false, 'jalan merani4444
+muna kito4545
+ada riaon kul
+');
+INSERT INTO customers (id, nama_perusahaan, jenis_customer, created_at, updated_at, isdeleted, detail) VALUES (6, 'shipperan', 'Exportir', '2015-09-02 19:13:34.18+07', '2015-09-02 19:13:34.18+07', false, 'milhan
+');
 
 
 --
--- TOC entry 2095 (class 0 OID 0)
+-- TOC entry 2124 (class 0 OID 0)
 -- Dependencies: 174
 -- Name: customers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('customers_id_seq', 38, true);
+SELECT pg_catalog.setval('customers_id_seq', 10, true);
 
 
 --
--- TOC entry 2072 (class 0 OID 25006)
+-- TOC entry 2094 (class 0 OID 25006)
 -- Dependencies: 177
 -- Data for Name: filling; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-INSERT INTO filling (id, warna, huruf, digit, nomor_terakhir, created_at, updated_at, isdeleted) VALUES (18, 'riss', 'PIR_', 5, NULL, '2015-05-22 23:03:03+07', '2015-05-22 23:09:52+07', false);
-INSERT INTO filling (id, warna, huruf, digit, nomor_terakhir, created_at, updated_at, isdeleted) VALUES (17, 'bitu', 'KOL_', 5, NULL, '2015-05-22 23:02:04+07', '2015-05-22 23:12:47+07', false);
+INSERT INTO filling (id, warna, huruf, digit, nomor_terakhir, created_at, updated_at, isdeleted) VALUES (2, 'Kuning', 'ku_93', 3, 'ku_930002', '2015-09-02 07:00:32.303+07', '2015-09-02 07:00:32.303+07', false);
+INSERT INTO filling (id, warna, huruf, digit, nomor_terakhir, created_at, updated_at, isdeleted) VALUES (1, 'Biru', 'BT_', 4, 'BT_0003', '2015-09-02 07:00:04.823+07', '2015-09-02 07:00:11.39+07', false);
 
 
 --
--- TOC entry 2096 (class 0 OID 0)
+-- TOC entry 2125 (class 0 OID 0)
 -- Dependencies: 176
 -- Name: filling_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('filling_id_seq', 18, true);
+SELECT pg_catalog.setval('filling_id_seq', 2, true);
 
 
 --
--- TOC entry 2077 (class 0 OID 41379)
+-- TOC entry 2099 (class 0 OID 41379)
 -- Dependencies: 182
 -- Data for Name: filling_validasi_rules; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-INSERT INTO filling_validasi_rules (validasi_rules_id, filling_id) VALUES (14, '18');
-INSERT INTO filling_validasi_rules (validasi_rules_id, filling_id) VALUES (15, '18');
-INSERT INTO filling_validasi_rules (validasi_rules_id, filling_id) VALUES (14, '17');
 
 
 --
--- TOC entry 2076 (class 0 OID 33198)
+-- TOC entry 2098 (class 0 OID 33198)
 -- Dependencies: 181
 -- Data for Name: joborder; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-INSERT INTO joborder (id, kode, customer, exportir, jenis_kegiatan, tgl_pelaksanaan, catatan, created_at, created_by, updated_at, updated_by, filling, status, t4_pelaksanaan, komoditi, partai, destinasi) VALUES (56, 'PIR_00002', 37, NULL, 'kegiatan baru', '2015-11-11 12:12:00+07', '', '2015-05-22 23:09:52+07', 1, '2015-05-22 23:09:52+07', 1, 18, 'Kosong', '', 'komoditi', '20 Feet', 'desss');
-INSERT INTO joborder (id, kode, customer, exportir, jenis_kegiatan, tgl_pelaksanaan, catatan, created_at, created_by, updated_at, updated_by, filling, status, t4_pelaksanaan, komoditi, partai, destinasi) VALUES (57, 'KOL_00001', 38, NULL, 'kegiatan baru', '2001-10-10 11:21:00+07', '', '2015-05-22 23:12:47+07', 1, '2015-05-22 23:15:46+07', 1, 17, 'Kosong', '', 'latt', 'pil', 'dess');
-INSERT INTO joborder (id, kode, customer, exportir, jenis_kegiatan, tgl_pelaksanaan, catatan, created_at, created_by, updated_at, updated_by, filling, status, t4_pelaksanaan, komoditi, partai, destinasi) VALUES (55, 'PIR_00001', 37, 35, 'kegiatan baru', '2015-11-11 12:12:00+07', '', '2015-05-22 23:08:30+07', 1, '2015-05-22 23:17:54+07', 1, 18, 'Kosong', '', 'komoditi', '20 Feet', 'desss');
-INSERT INTO joborder (id, kode, customer, exportir, jenis_kegiatan, tgl_pelaksanaan, catatan, created_at, created_by, updated_at, updated_by, filling, status, t4_pelaksanaan, komoditi, partai, destinasi) VALUES (58, 'KOL_00002', 37, 36, 'bersamaku', '2015-12-12 12:12:00+07', 'catat dia dulu', '2015-05-22 23:18:39+07', 1, '2015-05-22 23:21:52+07', 1, 17, 'Kosong', 'ada dehh', 'rilo', '20 Feet', '');
+INSERT INTO joborder (id, kode, customer, exportir, jenis_kegiatan, tgl_pelaksanaan, catatan, created_at, created_by, updated_at, updated_by, filling, status, t4_pelaksanaan, komoditi, partai, destinasi, pegawainame, validasiname, consignee, vessel, blno, containerno, sealno, type_of_wood_packing, quantity, treatment, wood_core_temperatur, exposure_time, fumigant, dosage_rate, certificate_number, tgl_cetak, downloadpath, downloadpath_party) VALUES (8, 'BT_0003', 1, 2, '', NULL, '', '2015-09-02 19:13:43.714+07', 1, '2015-09-02 19:13:43.714+07', 1, 1, 'Sebagian', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO joborder (id, kode, customer, exportir, jenis_kegiatan, tgl_pelaksanaan, catatan, created_at, created_by, updated_at, updated_by, filling, status, t4_pelaksanaan, komoditi, partai, destinasi, pegawainame, validasiname, consignee, vessel, blno, containerno, sealno, type_of_wood_packing, quantity, treatment, wood_core_temperatur, exposure_time, fumigant, dosage_rate, certificate_number, tgl_cetak, downloadpath, downloadpath_party) VALUES (7, 'ku_930002', 9, 10, '', NULL, 'cataad dehh', '2015-09-02 19:13:41.303+07', 1, '2015-09-02 19:20:38.181+07', 1, 1, 'Sebagian', 'tempat kita', 'komino', 'prtai', '', 'Limban', 'jika', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO joborder (id, kode, customer, exportir, jenis_kegiatan, tgl_pelaksanaan, catatan, created_at, created_by, updated_at, updated_by, filling, status, t4_pelaksanaan, komoditi, partai, destinasi, pegawainame, validasiname, consignee, vessel, blno, containerno, sealno, type_of_wood_packing, quantity, treatment, wood_core_temperatur, exposure_time, fumigant, dosage_rate, certificate_number, tgl_cetak, downloadpath, downloadpath_party) VALUES (4, 'BT_0001', 1, 2, 'kegiatan', '2015-09-09 19:12:31.478+07', 'catan
+kita d
+udlu', '2015-09-02 19:12:55.549+07', 1, '2015-09-04 02:33:05.865+07', 1, 1, 'Sebagian', 'tempat
+kita ada', 'komodita 555
+nuim mul', 'partaiku 88
+nuim', 'destinasi', 'Beruga', 'jika', 'consignee', 'vessel', 'blno', 'container', 'seal no', 'type of wood', '23333', 'HEAT TREATMENT (HT)', '45', 'timer expos', '', '', 'nommmm2323', '2015-09-23', 'C:\Users\ade\Documents\suratkerjarinor.odt', NULL);
+INSERT INTO joborder (id, kode, customer, exportir, jenis_kegiatan, tgl_pelaksanaan, catatan, created_at, created_by, updated_at, updated_by, filling, status, t4_pelaksanaan, komoditi, partai, destinasi, pegawainame, validasiname, consignee, vessel, blno, containerno, sealno, type_of_wood_packing, quantity, treatment, wood_core_temperatur, exposure_time, fumigant, dosage_rate, certificate_number, tgl_cetak, downloadpath, downloadpath_party) VALUES (5, 'ku_930001', 5, 6, 'kegi tuan', NULL, 'ceteat', '2015-09-02 19:13:34.18+07', 1, '2015-09-04 02:34:24.547+07', 1, 2, 'Sebagian', 't4', 'komitu 2
+SS
+ADA', 'partai kitaa', 'destinasi 2', '', '', 'consignee', 'vesselll', 'nooo bl', 'containerrr', 'sealll', 'ttpeee', 'quantityyy', 'FUMIGATION', '', 'timess', 'fumigant', 'dosage', 'certttt', '2015-09-16', NULL, 'C:\Users\ade\Documents\suratkerja.docx');
+INSERT INTO joborder (id, kode, customer, exportir, jenis_kegiatan, tgl_pelaksanaan, catatan, created_at, created_by, updated_at, updated_by, filling, status, t4_pelaksanaan, komoditi, partai, destinasi, pegawainame, validasiname, consignee, vessel, blno, containerno, sealno, type_of_wood_packing, quantity, treatment, wood_core_temperatur, exposure_time, fumigant, dosage_rate, certificate_number, tgl_cetak, downloadpath, downloadpath_party) VALUES (6, 'BT_0002', 3, 4, '', NULL, '', '2015-09-02 19:13:38.368+07', 1, '2015-09-02 19:13:38.368+07', 1, 1, 'Sebagian', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'C:\Users\ade\Documents\bengkel.mdb', 'C:\Users\ade\Documents\mundur.rtf');
 
 
 --
--- TOC entry 2097 (class 0 OID 0)
+-- TOC entry 2126 (class 0 OID 0)
 -- Dependencies: 180
 -- Name: joborder_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('joborder_id_seq', 58, true);
+SELECT pg_catalog.setval('joborder_id_seq', 8, true);
 
 
 --
--- TOC entry 2078 (class 0 OID 49591)
+-- TOC entry 2100 (class 0 OID 49591)
 -- Dependencies: 183
 -- Data for Name: joborder_pegawai; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-INSERT INTO joborder_pegawai (joborder_id, pegawai_id) VALUES (58, 19);
+INSERT INTO joborder_pegawai (joborder_id, pegawai_id, id) VALUES (4, 1, 3);
+INSERT INTO joborder_pegawai (joborder_id, pegawai_id, id) VALUES (7, 4, 5);
 
 
 --
--- TOC entry 2079 (class 0 OID 49599)
+-- TOC entry 2127 (class 0 OID 0)
+-- Dependencies: 189
+-- Name: joborder_pegawai_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('joborder_pegawai_id_seq', 5, true);
+
+
+--
+-- TOC entry 2101 (class 0 OID 49599)
 -- Dependencies: 184
 -- Data for Name: joborder_validasi_rules; Type: TABLE DATA; Schema: public; Owner: -
 --
 
+INSERT INTO joborder_validasi_rules (joborder_id, validasi_rules_id, id) VALUES (4, 2, 2);
+INSERT INTO joborder_validasi_rules (joborder_id, validasi_rules_id, id) VALUES (7, 2, 4);
 
 
 --
--- TOC entry 2068 (class 0 OID 24984)
+-- TOC entry 2128 (class 0 OID 0)
+-- Dependencies: 190
+-- Name: joborder_validasi_rules_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('joborder_validasi_rules_id_seq', 4, true);
+
+
+--
+-- TOC entry 2090 (class 0 OID 24984)
 -- Dependencies: 173
 -- Data for Name: pegawai; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-INSERT INTO pegawai (id, nama, alamat, telepon, divisi, created_at, updated_at, isdeleted) VALUES (19, 'Jaka1', 'jl. milham1', '945451', 'Kantor', '2015-05-22 22:59:04+07', '2015-05-22 23:21:52+07', false);
+INSERT INTO pegawai (id, nama, divisi, created_at, updated_at, isdeleted, detail) VALUES (2, 'Zildan', 'Karyawan', '2015-09-02 07:02:00.882+07', '2015-09-02 07:02:00.882+07', true, 'detail zildan');
+INSERT INTO pegawai (id, nama, divisi, created_at, updated_at, isdeleted, detail) VALUES (3, 'Milona', 'Karyawan', '2015-09-02 19:06:24.032+07', '2015-09-02 19:06:24.032+07', true, 'dess ritu');
+INSERT INTO pegawai (id, nama, divisi, created_at, updated_at, isdeleted, detail) VALUES (1, 'Beruga', 'Karyawan', '2015-09-02 07:01:43.297+07', '2015-09-02 07:01:43.297+07', false, 'jl beruga');
+INSERT INTO pegawai (id, nama, divisi, created_at, updated_at, isdeleted, detail) VALUES (4, 'Limban', 'Sales', '2015-09-02 19:06:37.461+07', '2015-09-02 19:06:37.461+07', false, 'Destailni');
 
 
 --
--- TOC entry 2098 (class 0 OID 0)
+-- TOC entry 2129 (class 0 OID 0)
 -- Dependencies: 172
 -- Name: pegawai_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('pegawai_id_seq', 19, true);
+SELECT pg_catalog.setval('pegawai_id_seq', 4, true);
 
 
 --
--- TOC entry 2081 (class 0 OID 49628)
+-- TOC entry 2103 (class 0 OID 49628)
 -- Dependencies: 186
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-INSERT INTO users (id, name, password, divisi, created_at, updated_at, remember_token, password_seen, last_login, isdeleted) VALUES (1, 'ade', '$2y$10$ahMMS0JRNSpgu1zIPJiwr.0F3RdWsZ.1ZtvDOq9pp1jlvGLvFSKT6', 'Admin', '2015-05-10 15:43:09.615+07', '2015-05-24 09:29:22+07', 'wFQ6Pbj0K811PpzEbySjYYRccFTBNr7N5o7AQAdJFWTpIMNTw5qLBvlFtntq', '1234', '2015-05-24 09:29:13+07', false);
-INSERT INTO users (id, name, password, divisi, created_at, updated_at, remember_token, password_seen, last_login, isdeleted) VALUES (3, 'rima', '$2y$10$LzS9ef0/QrzS5EqBLFQKaO.5gx6w55PWEvR.9i5G4Oi4kl056tfyC', 'Admin', '2015-05-24 09:29:29+07', '2015-05-24 09:29:29+07', NULL, '123456', NULL, true);
-INSERT INTO users (id, name, password, divisi, created_at, updated_at, remember_token, password_seen, last_login, isdeleted) VALUES (4, 'lisa', '$2y$10$19qW3sDW4fbOlzbMdSfYG.7.JUruSLMqfRgDn.aTnDm9xEcPgZhu6', 'Finanace', '2015-05-24 09:29:42+07', '2015-05-24 09:29:58+07', NULL, '1234', NULL, true);
+INSERT INTO users (id, name, password, divisi, created_at, updated_at, remember_token, password_seen, last_login, isdeleted) VALUES (1, 'ade', '$2a$08$cJk7IIoQ7Bal6GCR8Bmpee1uPFkmrB4teExWG4SDV0G8rfbMDcK/i', 'Admin', '2015-05-10 15:43:09.615+07', '2015-05-24 09:29:22+07', NULL, '1234', '2015-09-02 06:59:01.368+07', false);
 
 
 --
--- TOC entry 2099 (class 0 OID 0)
+-- TOC entry 2130 (class 0 OID 0)
 -- Dependencies: 185
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('users_id_seq', 4, true);
+SELECT pg_catalog.setval('users_id_seq', 1, true);
 
 
 --
--- TOC entry 2074 (class 0 OID 33187)
+-- TOC entry 2105 (class 0 OID 50245)
+-- Dependencies: 188
+-- Data for Name: users_java; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+INSERT INTO users_java (id, name, password, divisi, created_at, updated_at, password_seen, last_login, isdeleted) VALUES (2, 'dina', '$2a$08$oVjuftIBqAyKJz.YRqMesOG8q37DDmk0ce1MA71F4LdcYEwsR6vX.', 'Admin', '2015-09-02 06:59:32.446+07', '2015-09-02 06:59:32.446+07', '123456', '2015-09-02 06:59:40.605+07', true);
+INSERT INTO users_java (id, name, password, divisi, created_at, updated_at, password_seen, last_login, isdeleted) VALUES (3, 'nina', '$2a$08$EZOlJI.XKUqB0YnnanZNVuupFUTBQYaV/iGLV0PrA4oaD1HErQryu', 'Operator', '2015-09-02 19:06:10.553+07', '2015-09-02 19:06:10.553+07', '123456', NULL, true);
+INSERT INTO users_java (id, name, password, divisi, created_at, updated_at, password_seen, last_login, isdeleted) VALUES (1, 'ade', '$2a$08$eyYdP5DgDs0gmjbbG/sic.jzdqxhdIkv0F/NEOkM3uDTnmgPMOA3G', 'Admin', '2015-05-10 15:43:09.615+07', '2015-05-24 09:29:22+07', '1234', '2015-09-05 02:54:22.578+07', false);
+
+
+--
+-- TOC entry 2131 (class 0 OID 0)
+-- Dependencies: 187
+-- Name: users_java_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('users_java_id_seq', 3, true);
+
+
+--
+-- TOC entry 2096 (class 0 OID 33187)
 -- Dependencies: 179
 -- Data for Name: validasi_rules; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-INSERT INTO validasi_rules (id, aturan, urutan, created_at, updated_at, isdeleted) VALUES (14, 'skc
-', 1, '2015-05-22 23:02:19+07', '2015-05-22 23:03:05+07', false);
-INSERT INTO validasi_rules (id, aturan, urutan, created_at, updated_at, isdeleted) VALUES (15, 'KOKI', 2, '2015-05-22 23:02:31+07', '2015-05-22 23:03:05+07', false);
+INSERT INTO validasi_rules (id, aturan, urutan, created_at, updated_at, isdeleted) VALUES (2, 'jika', 2, '2015-09-02 07:04:44.904+07', '2015-09-02 07:04:44.904+07', false);
+INSERT INTO validasi_rules (id, aturan, urutan, created_at, updated_at, isdeleted) VALUES (3, 'Berdan', 3, '2015-09-02 19:14:19.213+07', '2015-09-02 19:14:19.213+07', true);
+INSERT INTO validasi_rules (id, aturan, urutan, created_at, updated_at, isdeleted) VALUES (1, 'lengkap', 1, '2015-09-02 07:04:30.191+07', '2015-09-02 07:04:30.191+07', true);
 
 
 --
--- TOC entry 2100 (class 0 OID 0)
+-- TOC entry 2132 (class 0 OID 0)
 -- Dependencies: 178
 -- Name: validasi_rules_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('validasi_rules_id_seq', 15, true);
+SELECT pg_catalog.setval('validasi_rules_id_seq', 3, true);
 
 
 --
--- TOC entry 1955 (class 2606 OID 49637)
+-- TOC entry 1973 (class 2606 OID 49637)
 -- Name: pk4ree535; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -554,7 +698,16 @@ ALTER TABLE ONLY users
 
 
 --
--- TOC entry 1947 (class 2606 OID 25014)
+-- TOC entry 1977 (class 2606 OID 50254)
+-- Name: pk8979; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY users_java
+    ADD CONSTRAINT pk8979 PRIMARY KEY (id);
+
+
+--
+-- TOC entry 1961 (class 2606 OID 25014)
 -- Name: pkdgdget; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -563,7 +716,7 @@ ALTER TABLE ONLY filling
 
 
 --
--- TOC entry 1951 (class 2606 OID 33206)
+-- TOC entry 1965 (class 2606 OID 33206)
 -- Name: pkdsfdwr3r34; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -572,7 +725,7 @@ ALTER TABLE ONLY joborder
 
 
 --
--- TOC entry 1943 (class 2606 OID 24992)
+-- TOC entry 1957 (class 2606 OID 24992)
 -- Name: pkdtewt; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -581,7 +734,25 @@ ALTER TABLE ONLY pegawai
 
 
 --
--- TOC entry 1945 (class 2606 OID 25003)
+-- TOC entry 1971 (class 2606 OID 50280)
+-- Name: pkfdg4464d; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY joborder_validasi_rules
+    ADD CONSTRAINT pkfdg4464d PRIMARY KEY (id);
+
+
+--
+-- TOC entry 1969 (class 2606 OID 50272)
+-- Name: pkfdg454ee; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY joborder_pegawai
+    ADD CONSTRAINT pkfdg454ee PRIMARY KEY (id);
+
+
+--
+-- TOC entry 1959 (class 2606 OID 25003)
 -- Name: pkfdgtet; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -590,7 +761,7 @@ ALTER TABLE ONLY customers
 
 
 --
--- TOC entry 1949 (class 2606 OID 33195)
+-- TOC entry 1963 (class 2606 OID 33195)
 -- Name: pkrgte64354; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -599,7 +770,7 @@ ALTER TABLE ONLY validasi_rules
 
 
 --
--- TOC entry 1957 (class 2606 OID 49639)
+-- TOC entry 1975 (class 2606 OID 49639)
 -- Name: undfge3453; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -608,7 +779,7 @@ ALTER TABLE ONLY users
 
 
 --
--- TOC entry 1953 (class 2606 OID 33208)
+-- TOC entry 1967 (class 2606 OID 33208)
 -- Name: undsferre; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -616,7 +787,16 @@ ALTER TABLE ONLY joborder
     ADD CONSTRAINT undsferre UNIQUE (kode);
 
 
--- Completed on 2015-08-11 21:45:49
+--
+-- TOC entry 1979 (class 2606 OID 50256)
+-- Name: uniu876; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY users_java
+    ADD CONSTRAINT uniu876 UNIQUE (name);
+
+
+-- Completed on 2015-09-05 03:11:31
 
 --
 -- PostgreSQL database dump complete

@@ -854,7 +854,7 @@ public class CertificateTambah extends JInternalFrame {
 			document.open();
 
 			Paragraph newLine = new Paragraph("\n");
-			for (int i = 0; i < 5; i++) {
+			for (int i = 0; i < 9; i++) {
 				document.add(newLine);
 			}
 
@@ -1011,6 +1011,16 @@ public class CertificateTambah extends JInternalFrame {
 					fontregular);
 			parg5.setAlignment(Element.ALIGN_RIGHT);
 			document.add(parg5);
+			
+			for (int i = 0; i < 4; i++) {
+				document.add(newLine);
+			}
+			
+			Paragraph parg6 = new Paragraph(
+					"( .................. )",
+					fontregular);
+			parg6.setAlignment(Element.ALIGN_RIGHT);
+			document.add(parg6);
 			
 			created = true;
 		} catch (FileNotFoundException e1) {
