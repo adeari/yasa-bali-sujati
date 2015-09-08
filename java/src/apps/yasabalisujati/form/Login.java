@@ -138,8 +138,16 @@ public class Login extends JFrame {
 
 		Button loginButton = new Button(new ImageIcon(
 				getClass().getClassLoader().getResource("icons/key.png")), "L O G I N");
+		loginButton.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+					login();
+				}
+			}
+		});
+		
 		loginButton.addActionListener(new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				login();
@@ -149,6 +157,14 @@ public class Login extends JFrame {
 
 		Button tutupButton = new Button(new ImageIcon(
 				getClass().getClassLoader().getResource("icons/cancel.png")), "T U T U P");
+		tutupButton.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+					close();
+				}
+			}
+		});
 		tutupButton.addActionListener(new ActionListener() {
 
 			@Override

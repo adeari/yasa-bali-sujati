@@ -94,9 +94,6 @@ public class Joborder implements Serializable {
 	@Column(name = "containerno")
 	private String containerno;
 	
-	@Column(name = "sealno")
-	private String sealno;
-	
 	@Column(name = "type_of_wood_packing")
 	private String type_of_wood_packing;
 	
@@ -129,6 +126,12 @@ public class Joborder implements Serializable {
 	
 	@Column(name = "downloadpath_party")
 	private String downloadpathParty;
+	
+	@Column(name = "consigmentfile")
+	private byte[] consigmentfile;
+	
+	@Column(name = "partyfile")
+	private byte[] partyfile;
 
 	public Integer getId() {
 		return id;
@@ -314,14 +317,6 @@ public class Joborder implements Serializable {
 		this.containerno = containerno;
 	}
 
-	public String getSealno() {
-		return sealno;
-	}
-
-	public void setSealno(String sealno) {
-		this.sealno = sealno;
-	}
-
 	public String getType_of_wood_packing() {
 		return type_of_wood_packing;
 	}
@@ -408,6 +403,22 @@ public class Joborder implements Serializable {
 
 	public void setDownloadpathParty(String downloadpathParty) {
 		this.downloadpathParty = downloadpathParty;
+	}
+
+	public byte[] getConsigmentfile() {
+		return consigmentfile;
+	}
+
+	public void setConsigmentfile(byte[] consigmentfile) {
+		this.consigmentfile = consigmentfile;
+	}
+
+	public byte[] getPartyfile() {
+		return partyfile;
+	}
+
+	public void setPartyfile(byte[] partyfile) {
+		this.partyfile = partyfile;
 	}
 	
 }

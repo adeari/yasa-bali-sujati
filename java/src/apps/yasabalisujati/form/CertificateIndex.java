@@ -53,8 +53,9 @@ import apps.yasabalisujati.components.Button;
 import apps.yasabalisujati.components.ComboBox;
 import apps.yasabalisujati.components.Label;
 import apps.yasabalisujati.components.Textbox;
-import apps.yasabalisujati.components.table.JoborderTableRenderer;
+import apps.yasabalisujati.components.table.CertificateTableRenderer;
 import apps.yasabalisujati.components.table.Table;
+import apps.yasabalisujati.database.entity.CertificateNewColumn;
 import apps.yasabalisujati.database.entity.Customer;
 import apps.yasabalisujati.database.entity.Filling;
 import apps.yasabalisujati.database.entity.Joborder;
@@ -76,10 +77,11 @@ public class CertificateIndex extends JInternalFrame {
 	private ComboBox searchingComboBox;
 	private Textbox searchTextbox;
 	private Button searchButton;
-	private final String[] kolom = new String[] { "", "Kode", "CERTIFICATE NUMBER", "TREATMENT", "CONSIGNEE",
+	private final String[] kolom = new String[] { "", "Kode",
+			"CERTIFICATE NUMBER", "TREATMENT", "CONSIGNEE",
 			"Waktu Pelaksanaan", "Jenis Kegiatan", "Tempat Pelaksanaan",
 			"Destinasi", "Komoditi", "Partai", "Petugas", "Validasi",
-			"Customer", "Shipper", "Status Job Order", "" };
+			"Customer", "Shipper", "", "" };
 	private TableModel tableModel;
 	private Dimension tableDimension;
 	private Vector<Object> dataVector;
@@ -97,8 +99,6 @@ public class CertificateIndex extends JInternalFrame {
 	private SimpleDateFormat _simpleDateFormat;
 
 	private JInternalFrame _frame;
-
-	
 
 	private String[] jenisCustomersNotShow = new String[] { "Exportir",
 			"Importir" };
@@ -174,7 +174,6 @@ public class CertificateIndex extends JInternalFrame {
 				.put(refreshKeyStroke, "REFRESH");
 		_frame.getRootPane().getActionMap().put("REFRESH", refreshAction);
 
-
 		Button ubahButton = new Button(new ImageIcon(getClass()
 				.getClassLoader().getResource("icons/edit.png")),
 				"(Ctrl+E) Buat Certificate");
@@ -239,6 +238,7 @@ public class CertificateIndex extends JInternalFrame {
 		searchingComboBox.setPreferredSize(new Dimension(180, 30));
 		searchingComboBox.removeItemAt(0);
 		searchingComboBox.removeItemAt(kolom.length - 2);
+		searchingComboBox.removeItemAt(kolom.length - 3);
 		searchingPanel.add(searchingComboBox);
 
 		searchTextbox = new Textbox("");
@@ -303,7 +303,7 @@ public class CertificateIndex extends JInternalFrame {
 				if (column == 0) {
 					return Boolean.class;
 				} else if (column == kolom.length - 1) {
-					return Customer.class;
+					return Joborder.class;
 				} else {
 					return String.class;
 				}
@@ -317,7 +317,7 @@ public class CertificateIndex extends JInternalFrame {
 
 		table.getColumnModel().getColumn(1).setPreferredWidth(150);
 		table.getColumnModel().getColumn(1)
-				.setCellRenderer(new JoborderTableRenderer());
+				.setCellRenderer(new CertificateTableRenderer());
 
 		table.getColumnModel().getColumn(2).setPreferredWidth(250);
 		table.getColumnModel().getColumn(3).setPreferredWidth(200);
@@ -333,23 +333,21 @@ public class CertificateIndex extends JInternalFrame {
 		table.getColumnModel().getColumn(13).setPreferredWidth(150);
 		table.getColumnModel().getColumn(14).setPreferredWidth(150);
 
-		table.getColumnModel().getColumn(15).setPreferredWidth(0);
-		table.getColumnModel().getColumn(15).setMinWidth(0);
-		table.getColumnModel().getColumn(15).setMaxWidth(0);
-		table.getColumnModel().getColumn(15).setWidth(0);
-
-		table.getColumnModel().getColumn(16).setPreferredWidth(0);
-		table.getColumnModel().getColumn(16).setMinWidth(0);
-		table.getColumnModel().getColumn(16).setMaxWidth(0);
-		table.getColumnModel().getColumn(16).setWidth(0);
+		for (int i = 15; i < 17; i++) {
+			table.getColumnModel().getColumn(i).setPreferredWidth(0);
+			table.getColumnModel().getColumn(i).setMinWidth(0);
+			table.getColumnModel().getColumn(i).setMaxWidth(0);
+			table.getColumnModel().getColumn(i).setWidth(0);
+		}
 
 		table.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 2) {
-					_certiCertificateTambah.setVisible((Joborder) table.getValueAt(
-							table.getSelectedRow(), kolom.length - 1));
+					_certiCertificateTambah.setVisible((Joborder) table
+							.getValueAt(table.getSelectedRow(),
+									kolom.length - 1));
 				}
 			}
 		});
@@ -501,93 +499,82 @@ public class CertificateIndex extends JInternalFrame {
 
 	public Criteria setCriteriaCondition(Criteria criteria) {
 		String searchText = searchTextbox.getText();
-		if (searchText.isEmpty()) {
-			if (searchingComboBox.getSelectedItem().equals(kolom[12])) {
-				criteria.add(Restrictions.like("status", searchText)
-						.ignoreCase());
+		criteria.add(Restrictions.like("status", "Selesai").ignoreCase());
+		if (searchingComboBox.getSelectedItem().equals(kolom[1])) {
+			criteria.add(Restrictions.like("kode", searchText + "%")
+					.ignoreCase());
+		} else if (searchingComboBox.getSelectedItem().equals(kolom[2])) {
+			criteria.add(Restrictions.like("certificate_number",
+					"%" + searchText + "%").ignoreCase());
+		} else if (searchingComboBox.getSelectedItem().equals(kolom[3])) {
+			criteria.add(Restrictions.like("treatment", searchText + "%")
+					.ignoreCase());
+		} else if (searchingComboBox.getSelectedItem().equals(kolom[4])) {
+			criteria.add(Restrictions.like("consignee", searchText + "%")
+					.ignoreCase());
+		} else if (searchingComboBox.getSelectedItem().equals(kolom[5])) {
+			if (_service.convertStringToDate("dd/MM/yyyy HH:mm:ss",
+					searchTextbox.getText(), _simpleDateFormat) != null) {
+				_timeBegin.setTime(_service.convertStringToDate(
+						"dd/MM/yyyy HH:mm:ss", searchTextbox.getText(),
+						_simpleDateFormat).getTime());
+				criteria.add(Restrictions.eq("tgl_pelaksanaan", _timeBegin));
+			} else if (_service.convertStringToDate("dd/MM/yyyy HH:mm",
+					searchTextbox.getText(), _simpleDateFormat) != null) {
+
+				_timeBegin.setTime(_service.convertStringToDate(
+						"dd/MM/yyyy HH:mm:ss", searchTextbox.getText() + ":00",
+						_simpleDateFormat).getTime());
+
+				_timeEnd.setTime(_service.convertStringToDate(
+						"dd/MM/yyyy HH:mm:ss", searchTextbox.getText() + ":59",
+						_simpleDateFormat).getTime());
+				criteria.add(Restrictions.between("tgl_pelaksanaan",
+						_timeBegin, _timeEnd));
+			} else if (_service.convertStringToDate("dd/MM/yyyy",
+					searchTextbox.getText(), _simpleDateFormat) != null) {
+
+				_timeBegin.setTime(_service.convertStringToDate(
+						"dd/MM/yyyy HH:mm:ss",
+						searchTextbox.getText() + " 00:00:00",
+						_simpleDateFormat).getTime());
+
+				_timeEnd.setTime(_service.convertStringToDate(
+						"dd/MM/yyyy HH:mm:ss",
+						searchTextbox.getText() + " 23:59:59",
+						_simpleDateFormat).getTime());
+				criteria.add(Restrictions.between("tgl_pelaksanaan",
+						_timeBegin, _timeEnd));
 			}
-		} else {
-			if (searchingComboBox.getSelectedItem().equals(kolom[12])) {
-				criteria.add(Restrictions.like("status", searchText + "%")
-						.ignoreCase());
-			} else if (searchingComboBox.getSelectedItem().equals(kolom[1])) {
-				criteria.add(Restrictions.like("kode", searchText + "%")
-						.ignoreCase());
-			} else if (searchingComboBox.getSelectedItem().equals(kolom[2])) {
-				criteria.add(Restrictions.like("certificate_number", "%" + searchText + "%")
-						.ignoreCase());
-			} else if (searchingComboBox.getSelectedItem().equals(kolom[3])) {
-				criteria.add(Restrictions.like("treatment", searchText + "%")
-						.ignoreCase());
-			} else if (searchingComboBox.getSelectedItem().equals(kolom[4])) {
-				criteria.add(Restrictions.like("consignee", searchText + "%")
-						.ignoreCase());
-			} else if (searchingComboBox.getSelectedItem().equals(kolom[5])) {
-				if (_service.convertStringToDate("dd/MM/yyyy HH:mm:ss",
-						searchTextbox.getText(), _simpleDateFormat) != null) {
-					_timeBegin.setTime(_service.convertStringToDate(
-							"dd/MM/yyyy HH:mm:ss", searchTextbox.getText(),
-							_simpleDateFormat).getTime());
-					criteria.add(Restrictions.eq("tgl_pelaksanaan", _timeBegin));
-				} else if (_service.convertStringToDate("dd/MM/yyyy HH:mm",
-						searchTextbox.getText(), _simpleDateFormat) != null) {
-
-					_timeBegin.setTime(_service.convertStringToDate(
-							"dd/MM/yyyy HH:mm:ss",
-							searchTextbox.getText() + ":00", _simpleDateFormat)
-							.getTime());
-
-					_timeEnd.setTime(_service.convertStringToDate(
-							"dd/MM/yyyy HH:mm:ss",
-							searchTextbox.getText() + ":59", _simpleDateFormat)
-							.getTime());
-					criteria.add(Restrictions.between("tgl_pelaksanaan",
-							_timeBegin, _timeEnd));
-				} else if (_service.convertStringToDate("dd/MM/yyyy",
-						searchTextbox.getText(), _simpleDateFormat) != null) {
-
-					_timeBegin.setTime(_service.convertStringToDate(
-							"dd/MM/yyyy HH:mm:ss",
-							searchTextbox.getText() + " 00:00:00",
-							_simpleDateFormat).getTime());
-
-					_timeEnd.setTime(_service.convertStringToDate(
-							"dd/MM/yyyy HH:mm:ss",
-							searchTextbox.getText() + " 23:59:59",
-							_simpleDateFormat).getTime());
-					criteria.add(Restrictions.between("tgl_pelaksanaan",
-							_timeBegin, _timeEnd));
-				}
-			} else if (searchingComboBox.getSelectedItem().equals(kolom[6])) {
-				criteria.add(Restrictions.like("jenis_kegiatan",
-						searchText + "%").ignoreCase());
-			} else if (searchingComboBox.getSelectedItem().equals(kolom[7])) {
-				criteria.add(Restrictions.like("t4Pelaksanaan",
-						searchText + "%").ignoreCase());
-			} else if (searchingComboBox.getSelectedItem().equals(kolom[8])) {
-				criteria.add(Restrictions.like("destinasi", searchText + "%")
-						.ignoreCase());
-			} else if (searchingComboBox.getSelectedItem().equals(kolom[9])) {
-				criteria.add(Restrictions.like("komoditi", searchText + "%")
-						.ignoreCase());
-			} else if (searchingComboBox.getSelectedItem().equals(kolom[10])) {
-				criteria.add(Restrictions.like("partai", searchText + "%")
-						.ignoreCase());
-			} else if (searchingComboBox.getSelectedItem().equals(kolom[11])) {
-				criteria.add(Restrictions.like("pegawainame",
-						"%" + searchText + "%").ignoreCase());
-			} else if (searchingComboBox.getSelectedItem().equals(kolom[12])) {
-				criteria.add(Restrictions.like("validasiname",
-						"%" + searchText + "%").ignoreCase());
-			} else if (searchingComboBox.getSelectedItem().equals(kolom[13])) {
-				criteria.createAlias("customer", "customer1");
-				criteria.add(Restrictions.like("customer1.nama",
-						searchText + "%").ignoreCase());
-			} else if (searchingComboBox.getSelectedItem().equals(kolom[14])) {
-				criteria.createAlias("exportir", "exportir1");
-				criteria.add(Restrictions.like("exportir1.nama",
-						searchText + "%").ignoreCase());
-			}
+		} else if (searchingComboBox.getSelectedItem().equals(kolom[6])) {
+			criteria.add(Restrictions.like("jenis_kegiatan", searchText + "%")
+					.ignoreCase());
+		} else if (searchingComboBox.getSelectedItem().equals(kolom[7])) {
+			criteria.add(Restrictions.like("t4Pelaksanaan", searchText + "%")
+					.ignoreCase());
+		} else if (searchingComboBox.getSelectedItem().equals(kolom[8])) {
+			criteria.add(Restrictions.like("destinasi", searchText + "%")
+					.ignoreCase());
+		} else if (searchingComboBox.getSelectedItem().equals(kolom[9])) {
+			criteria.add(Restrictions.like("komoditi", searchText + "%")
+					.ignoreCase());
+		} else if (searchingComboBox.getSelectedItem().equals(kolom[10])) {
+			criteria.add(Restrictions.like("partai", searchText + "%")
+					.ignoreCase());
+		} else if (searchingComboBox.getSelectedItem().equals(kolom[11])) {
+			criteria.add(Restrictions.like("pegawainame",
+					"%" + searchText + "%").ignoreCase());
+		} else if (searchingComboBox.getSelectedItem().equals(kolom[12])) {
+			criteria.add(Restrictions.like("validasiname",
+					"%" + searchText + "%").ignoreCase());
+		} else if (searchingComboBox.getSelectedItem().equals(kolom[13])) {
+			criteria.createAlias("customer", "customer1");
+			criteria.add(Restrictions.like("customer1.nama", searchText + "%")
+					.ignoreCase());
+		} else if (searchingComboBox.getSelectedItem().equals(kolom[14])) {
+			criteria.createAlias("exportir", "exportir1");
+			criteria.add(Restrictions.like("exportir1.nama", searchText + "%")
+					.ignoreCase());
 		}
 		return criteria;
 	}
@@ -631,7 +618,8 @@ public class CertificateIndex extends JInternalFrame {
 
 		criteria = _session.createCriteria(Joborder.class);
 		criteria = setCriteriaCondition(criteria);
-		criteria.addOrder(Order.asc("tgl_pelaksanaan"));
+		criteria.addOrder(Order.asc("certificate_number"));
+		criteria.addOrder(Order.asc("kode"));
 		criteria.setFirstResult(startRow);
 		criteria.setMaxResults(Long.valueOf(countRows).intValue());
 
@@ -642,25 +630,25 @@ public class CertificateIndex extends JInternalFrame {
 			data1.addElement(false);
 
 			data1.addElement(joborder.getKode());
-			
+
 			if (joborder.getCertificate_number() == null) {
 				data1.addElement("");
 			} else {
 				data1.addElement(joborder.getCertificate_number());
 			}
-			
+
 			if (joborder.getTreatment() == null) {
 				data1.addElement("");
 			} else {
 				data1.addElement(joborder.getTreatment());
 			}
-			
+
 			if (joborder.getConsignee() == null) {
 				data1.addElement("");
 			} else {
 				data1.addElement(joborder.getConsignee());
 			}
-			
+
 			if (joborder.getTgl_pelaksanaan() == null) {
 				data1.addElement("");
 			} else {
@@ -717,8 +705,6 @@ public class CertificateIndex extends JInternalFrame {
 	public void setJoborderTambah(JoborderTambah joborderTambah) {
 		_joborderTambah = joborderTambah;
 	}
-	
-	
 
 	public void setCertificateTambah(CertificateTambah certificateTambah) {
 		_certiCertificateTambah = certificateTambah;
@@ -735,13 +721,15 @@ public class CertificateIndex extends JInternalFrame {
 		}
 
 		if (countSelected == 0) {
-			JOptionPane.showMessageDialog(null, "Klik data yang akan dibuat Certificate",
-					"Informasi", JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(null,
+					"Klik data yang akan dibuat Certificate", "Informasi",
+					JOptionPane.INFORMATION_MESSAGE);
 		} else if (countSelected == 1) {
 			_certiCertificateTambah.setVisible(joborders.get(0));
 		} else {
-			JOptionPane.showMessageDialog(null, "Klik 1 data yang akan dibuat Certificate",
-					"Informasi", JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(null,
+					"Klik 1 data yang akan dibuat Certificate", "Informasi",
+					JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
 
@@ -760,12 +748,12 @@ public class CertificateIndex extends JInternalFrame {
 					"Informasi", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		} else {
-			
+
 			if (JOptionPane.showConfirmDialog(null,
 					"Apakah data ini ingin di hapus ?", "Informasi",
 					JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 				_session = _service.getConnectionDB(_session);
-				
+
 				Criteria criteria = null;
 				Set<Customer> customerCheck = new HashSet<Customer>();
 				Set<User> userCheck = new HashSet<User>();
@@ -773,25 +761,25 @@ public class CertificateIndex extends JInternalFrame {
 				Set<Pegawai> pegawaiCheck = new HashSet<Pegawai>();
 				Set<ValidasiRules> validasiRulesCheck = new HashSet<ValidasiRules>();
 				for (Joborder joborder : joborders) {
-					
+
 					if (joborder.getCustomer() != null) {
 						customerCheck.add(joborder.getCustomer());
 					}
 					if (joborder.getExportir() != null) {
 						customerCheck.add(joborder.getExportir());
 					}
-					
+
 					if (joborder.getCreateBy() != null) {
 						userCheck.add(joborder.getCreateBy());
 					}
 					if (joborder.getUpdatedBy() != null) {
 						userCheck.add(joborder.getUpdatedBy());
 					}
-					
+
 					if (joborder.getFilling() != null) {
 						fillingCheck.add(joborder.getFilling());
 					}
-					
+
 					criteria = _session.createCriteria(JoborderPegawai.class);
 					criteria.add(Restrictions.eq("joborder", joborder));
 					List<JoborderPegawai> joborderPegawais = criteria.list();
@@ -800,13 +788,24 @@ public class CertificateIndex extends JInternalFrame {
 						_session.delete(joborderPegawai);
 						_session.flush();
 					}
-					
+
 					criteria = _session.createCriteria(JoborderValidasi.class);
 					criteria.add(Restrictions.eq("joborder", joborder));
 					List<JoborderValidasi> joborderValidasis = criteria.list();
 					for (JoborderValidasi joborderValidasi : joborderValidasis) {
-						validasiRulesCheck.add(joborderValidasi.getValidasiRules());
+						validasiRulesCheck.add(joborderValidasi
+								.getValidasiRules());
 						_session.delete(joborderValidasi);
+						_session.flush();
+					}
+
+					criteria = _session
+							.createCriteria(CertificateNewColumn.class);
+					criteria.add(Restrictions.eq("joborder", joborder));
+					List<CertificateNewColumn> certificateNewColumns = criteria
+							.list();
+					for (CertificateNewColumn certificateNewColumn : certificateNewColumns) {
+						_session.delete(certificateNewColumn);
 						_session.flush();
 					}
 
@@ -818,12 +817,12 @@ public class CertificateIndex extends JInternalFrame {
 					_service.setIsDeletedUser(_session, user);
 					_session.flush();
 				}
-				
+
 				for (Filling filling : fillingCheck) {
 					_service.setIsDeletedFilling(_session, filling);
 					_session.flush();
 				}
-				
+
 				for (Customer customer : customerCheck) {
 					_service.setIsDeletedCustomer(_session, customer);
 					_session.flush();
@@ -842,7 +841,7 @@ public class CertificateIndex extends JInternalFrame {
 				_joborderTambah.refreshPegawai();
 				_joborderTambah.refreshShipper();
 				_joborderTambah.refreshValidasiRules();
-				
+
 				_shipperIndex.refreshTable();
 				_customerIndex.refreshTable();
 				_pegawaiIndex.refreshTable();
@@ -882,7 +881,7 @@ public class CertificateIndex extends JInternalFrame {
 	}
 
 	public void setAturanIndex(AturanIndex aturanIndex) {
-		_aturanIndex  = aturanIndex;
+		_aturanIndex = aturanIndex;
 	}
 
 	public void setPegawaiIndex(PegawaiIndex pegawaiIndex) {

@@ -55,6 +55,7 @@ import apps.yasabalisujati.components.Label;
 import apps.yasabalisujati.components.Textbox;
 import apps.yasabalisujati.components.table.JoborderTableRenderer;
 import apps.yasabalisujati.components.table.Table;
+import apps.yasabalisujati.database.entity.CertificateNewColumn;
 import apps.yasabalisujati.database.entity.Customer;
 import apps.yasabalisujati.database.entity.Filling;
 import apps.yasabalisujati.database.entity.Joborder;
@@ -324,7 +325,7 @@ public class JoborderIndex extends JInternalFrame {
 				if (column == 0) {
 					return Boolean.class;
 				} else if (column == kolom.length - 1) {
-					return Customer.class;
+					return Joborder.class;
 				} else {
 					return String.class;
 				}
@@ -640,7 +641,7 @@ public class JoborderIndex extends JInternalFrame {
 
 		criteria = _session.createCriteria(Joborder.class);
 		criteria = setCriteriaCondition(criteria);
-		criteria.addOrder(Order.asc("tgl_pelaksanaan"));
+		criteria.addOrder(Order.asc("kode"));
 		criteria.setFirstResult(startRow);
 		criteria.setMaxResults(Long.valueOf(countRows).intValue());
 
@@ -791,6 +792,15 @@ public class JoborderIndex extends JInternalFrame {
 					for (JoborderValidasi joborderValidasi : joborderValidasis) {
 						validasiRulesCheck.add(joborderValidasi.getValidasiRules());
 						_session.delete(joborderValidasi);
+						_session.flush();
+					}
+					
+					
+					criteria = _session.createCriteria(CertificateNewColumn.class);
+					criteria.add(Restrictions.eq("joborder", joborder));
+					List<CertificateNewColumn> certificateNewColumns = criteria.list();
+					for (CertificateNewColumn certificateNewColumn : certificateNewColumns) {
+						_session.delete(certificateNewColumn);
 						_session.flush();
 					}
 

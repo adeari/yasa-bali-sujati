@@ -4,21 +4,27 @@ import java.awt.Container;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.StringTokenizer;
+import java.util.Vector;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -34,8 +40,13 @@ import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
+import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 
 import apps.yasabalisujati.components.Button;
 import apps.yasabalisujati.components.ComboBox;
@@ -44,6 +55,8 @@ import apps.yasabalisujati.components.Label;
 import apps.yasabalisujati.components.Textbox;
 import apps.yasabalisujati.components.TextboxArea;
 import apps.yasabalisujati.components.itext.CustomDashedLineSeparator;
+import apps.yasabalisujati.components.table.Table;
+import apps.yasabalisujati.database.entity.CertificateNewColumn;
 import apps.yasabalisujati.database.entity.Customer;
 import apps.yasabalisujati.database.entity.Joborder;
 import apps.yasabalisujati.database.entity.User;
@@ -86,12 +99,11 @@ public class CertificateTambah extends JInternalFrame {
 	private Textbox kodeTextbox;
 	private TextboxArea consigmentTextboxArea;
 	private TextboxArea shipperTextboxArea;
-	private Textbox consigneeTextbox;
+	private TextboxArea consigneeTextboxArea;
 	private TextboxArea partyTextboxArea;
 	private Textbox vesselTextbox;
 	private Textbox blnoTextbox;
-	private Textbox containerNoTextbox;
-	private Textbox sealnoTextbox;
+	private TextboxArea containerNoTextboxArea;
 	private Textbox destinationTextbox;
 	private Textbox typeWoodTextbox;
 	private Textbox htWoodCoreTemperaturTextbox;
@@ -102,6 +114,11 @@ public class CertificateTambah extends JInternalFrame {
 	private Textbox certificateNumberTextbox;
 	private Datebox tglCetakDatebox;
 	
+	private TableModel columnNewTableModel;
+	private Table columnNewTable;
+	private Vector<Object> columnNewVector;
+	private String[] columnNewKolom = new String[]{"", "", "Data", "Detail", ""};
+
 	private Button downloadButton;
 	private Button download1Button;
 
@@ -111,29 +128,48 @@ public class CertificateTambah extends JInternalFrame {
 	private Label exposureTimeLabel;
 	private Label fgFumigantLabel;
 	private Label fgDosageRateLabel;
+	
+	private JScrollPane mainJScrollPane;
+	private Dimension mainDimension;
+	private JPanel mainPanel;
 
 	public CertificateTambah(Session session, Service service,
 			SimpleDateFormat simpleDateFormat) {
-		super("a", false, true, false, true);
+		super("a", true, true, true, true);
 		_frame = this;
 		_frame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		_frame.setFrameIcon(new ImageIcon(getClass().getClassLoader()
 				.getResource("icons/star.png")));
 		_frame.setLayout(new FlowLayout(FlowLayout.LEADING));
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		_frame.setPreferredSize(new Dimension( Double.valueOf(screenSize.getWidth()).intValue() - 15, Double.valueOf(screenSize.getHeight()).intValue() - 130));
+		_frame.setSize(_frame.getPreferredSize());
+		_frame.addComponentListener(new ComponentAdapter() {
+			public void componentResized(ComponentEvent evt) {
+				reSizePanel();
+			}
+		});
 
 		_session = session;
 		_service = service;
 		_simpleDateFormat = simpleDateFormat;
 
 		Container container = _frame.getContentPane();
+		
+		
 
-		JPanel mainPanel = new JPanel();
-		mainPanel.setPreferredSize(new Dimension(1000, 600));
+		mainPanel = new JPanel();
+		mainPanel.setPreferredSize(new Dimension(1350, 600));
 		mainPanel.setLayout(new FlowLayout(FlowLayout.LEADING));
-		container.add(mainPanel);
+		
+		mainJScrollPane = new JScrollPane(mainPanel);
+		container.add(mainJScrollPane);
+		mainDimension = new Dimension();
+		
+		
 
 		JPanel leftPanel = new JPanel();
-		leftPanel.setPreferredSize(new Dimension(490, mainPanel
+		leftPanel.setPreferredSize(new Dimension(475, mainPanel
 				.getPreferredSize().height - 60));
 		leftPanel.setLayout(new FlowLayout(FlowLayout.LEADING));
 		mainPanel.add(leftPanel);
@@ -143,15 +179,22 @@ public class CertificateTambah extends JInternalFrame {
 				.getPreferredSize().height - 60));
 		rightPanel.setLayout(new FlowLayout(FlowLayout.LEADING));
 		mainPanel.add(rightPanel);
+		
+		JPanel right1Panel = new JPanel();
+		right1Panel.setPreferredSize(new Dimension(420, mainPanel
+				.getPreferredSize().height - 60));
+		right1Panel.setLayout(new FlowLayout(FlowLayout.LEADING));
+		mainPanel.add(right1Panel);
 
 		Dimension labelDimension = new Dimension(120, 30);
-		Dimension labelRightDimension = new Dimension(130, 30);
 		Dimension labelAreaDimension = new Dimension(120, 100);
 		Dimension textAreaDimension = new Dimension(280, 100);
 		Dimension textDimension = new Dimension(280, 30);
-		Dimension textRightDimension = new Dimension(270, 30);
+
 		Dimension singleDimension = new Dimension(410, 30);
-		
+
+		Dimension labelRightDimension = new Dimension(130, 30);
+		Dimension textRightDimension = new Dimension(270, 30);
 		Dimension uploadPanelDimension = new Dimension(60, 100);
 
 		Label kodeLabel = new Label("KODE");
@@ -195,16 +238,16 @@ public class CertificateTambah extends JInternalFrame {
 		consigmentScrollPane.setPreferredSize(textAreaDimension);
 		consigmentScrollPane.setBorder(new Textbox(null).getBorderCustom());
 		leftPanel.add(consigmentScrollPane);
-		
+
 		JPanel buttonUploadPanel = new JPanel();
 		buttonUploadPanel.setPreferredSize(uploadPanelDimension);
 		leftPanel.add(buttonUploadPanel);
-		
+
 		Button uploadButton = new Button(new ImageIcon(getClass()
-				.getClassLoader().getResource("icons/document_small_upload.png")),
-				"");
-		uploadButton.addActionListener( new ActionListener() {
-			
+				.getClassLoader()
+				.getResource("icons/document_small_upload.png")), "");
+		uploadButton.addActionListener(new ActionListener() {
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fileChooser = new JFileChooser();
@@ -213,10 +256,27 @@ public class CertificateTambah extends JInternalFrame {
 					if (fileChooser.getSelectedFile().isFile()) {
 						_session = _service.getConnectionDB(_session);
 						_session.clear();
-						_joborder.setDownloadpath(fileChooser.getSelectedFile().getPath());
+
+						File file = fileChooser.getSelectedFile();
+
+						_joborder.setDownloadpath(file.getName());
+
+						byte[] bFile = new byte[(int) file.length()];
+
+						try {
+							FileInputStream fileInputStream = new FileInputStream(
+									file);
+							fileInputStream.read(bFile);
+							fileInputStream.close();
+						} catch (Exception ex) {
+							ex.printStackTrace();
+						}
+
+						_joborder.setConsigmentfile(bFile);
+
 						_session.update(_joborder);
 						_session.flush();
-						
+
 						_joborderIndex.refreshTable();
 						_certificateIndex.refreshTable();
 						downloadButton.setEnabled(true);
@@ -225,15 +285,27 @@ public class CertificateTambah extends JInternalFrame {
 			}
 		});
 		buttonUploadPanel.add(uploadButton);
-		downloadButton = new Button(new ImageIcon(getClass()
-				.getClassLoader().getResource("icons/download.png")),
-				"");
-		downloadButton.addActionListener( new ActionListener() {
-			
+		downloadButton = new Button(new ImageIcon(getClass().getClassLoader()
+				.getResource("icons/download.png")), "");
+		downloadButton.addActionListener(new ActionListener() {
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (_joborder.getDownloadpath() != null && (!_joborder.getDownloadpath().isEmpty())) {
-					File file = new File(_joborder.getDownloadpath());
+				if (_joborder.getDownloadpath() != null
+						&& (!_joborder.getDownloadpath().isEmpty())) {
+					byte[] bAvatar = _joborder.getConsigmentfile();
+					File file = new File("D:/yasabalisujati/files/" + _joborder.getDownloadpath());
+					if (file.isFile()) {
+						file.delete();
+					}
+					try {
+						FileOutputStream fos = new FileOutputStream(file);
+						fos.write(bAvatar);
+						fos.close();
+					} catch (Exception ex) {
+						ex.printStackTrace();
+					}
+
 					if (file.isFile()) {
 						try {
 							Desktop.getDesktop().open(file);
@@ -242,7 +314,8 @@ public class CertificateTambah extends JInternalFrame {
 						}
 					} else {
 						JOptionPane.showMessageDialog(null,
-								"File "+_joborder.getDownloadpath() +" hilang atau kehapus.", "Informasi",
+								"File " + _joborder.getDownloadpath()
+										+ " hilang atau kehapus.", "Informasi",
 								JOptionPane.INFORMATION_MESSAGE);
 					}
 				}
@@ -270,7 +343,7 @@ public class CertificateTambah extends JInternalFrame {
 											0,
 											shipperTextboxArea.getText()
 													.length() - 1));
-							consigneeTextbox.requestFocus();
+							consigneeTextboxArea.requestFocus();
 						}
 
 					}
@@ -283,11 +356,36 @@ public class CertificateTambah extends JInternalFrame {
 		leftPanel.add(shipperScrollPane);
 
 		Label consigneeLabel = new Label("CONSIGNEE");
-		consigneeLabel.setPreferredSize(labelDimension);
+		consigneeLabel.setPreferredSize(labelAreaDimension);
 		leftPanel.add(consigneeLabel);
-		consigneeTextbox = new Textbox("");
-		consigneeTextbox.setPreferredSize(textDimension);
-		leftPanel.add(consigneeTextbox);
+		consigneeTextboxArea = new TextboxArea("");
+		consigneeTextboxArea.addKeyListener(new KeyAdapter() {
+			public void keyReleased(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_TAB) {
+					if (consigneeTextboxArea.getText().length() > 0) {
+						String checkAkhiran = consigneeTextboxArea
+								.getText()
+								.substring(
+										consigneeTextboxArea.getText().length() - 1,
+										consigneeTextboxArea.getText().length());
+						if ((int) checkAkhiran.charAt(0) == 9) {
+							consigneeTextboxArea.setText(consigneeTextboxArea
+									.getText().substring(
+											0,
+											consigneeTextboxArea.getText()
+													.length() - 1));
+							partyTextboxArea.requestFocus();
+						}
+
+					}
+				}
+			}
+		});
+
+		JScrollPane consigneeScrollPane = new JScrollPane(consigneeTextboxArea);
+		consigneeScrollPane.setPreferredSize(textAreaDimension);
+		consigneeScrollPane.setBorder(new Textbox(null).getBorderCustom());
+		leftPanel.add(consigneeScrollPane);
 
 		Label partyLabel = new Label("NOTIFY PARTY");
 		partyLabel.setPreferredSize(labelAreaDimension);
@@ -321,16 +419,16 @@ public class CertificateTambah extends JInternalFrame {
 		partyScrollPane.setPreferredSize(textAreaDimension);
 		partyScrollPane.setBorder(new Textbox(null).getBorderCustom());
 		leftPanel.add(partyScrollPane);
-		
+
 		JPanel button1UploadPanel = new JPanel();
 		button1UploadPanel.setPreferredSize(uploadPanelDimension);
 		leftPanel.add(button1UploadPanel);
-		
+
 		Button upload1Button = new Button(new ImageIcon(getClass()
-				.getClassLoader().getResource("icons/document_small_upload.png")),
-				"");
-		upload1Button.addActionListener( new ActionListener() {
-			
+				.getClassLoader()
+				.getResource("icons/document_small_upload.png")), "");
+		upload1Button.addActionListener(new ActionListener() {
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fileChooser = new JFileChooser();
@@ -339,10 +437,27 @@ public class CertificateTambah extends JInternalFrame {
 					if (fileChooser.getSelectedFile().isFile()) {
 						_session = _service.getConnectionDB(_session);
 						_session.clear();
-						_joborder.setDownloadpathParty(fileChooser.getSelectedFile().getPath());
+						
+						File file = fileChooser.getSelectedFile();
+						
+						_joborder.setDownloadpathParty(file.getName());
+						
+						byte[] bFile = new byte[(int) file.length()];
+						
+						try {
+							FileInputStream fileInputStream = new FileInputStream(
+									file);
+							fileInputStream.read(bFile);
+							fileInputStream.close();
+						} catch (Exception ex) {
+							ex.printStackTrace();
+						}
+						
+						_joborder.setPartyfile(bFile);
+						
 						_session.update(_joborder);
 						_session.flush();
-						
+
 						_joborderIndex.refreshTable();
 						_certificateIndex.refreshTable();
 						download1Button.setEnabled(true);
@@ -351,15 +466,26 @@ public class CertificateTambah extends JInternalFrame {
 			}
 		});
 		button1UploadPanel.add(upload1Button);
-		download1Button = new Button(new ImageIcon(getClass()
-				.getClassLoader().getResource("icons/download.png")),
-				"");
-		download1Button.addActionListener( new ActionListener() {
-			
+		download1Button = new Button(new ImageIcon(getClass().getClassLoader()
+				.getResource("icons/download.png")), "");
+		download1Button.addActionListener(new ActionListener() {
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (_joborder.getDownloadpathParty() != null && (!_joborder.getDownloadpathParty().isEmpty())) {
-					File file = new File(_joborder.getDownloadpathParty());
+				if (_joborder.getDownloadpathParty() != null
+						&& (!_joborder.getDownloadpathParty().isEmpty())) {
+					byte[] bAvatar = _joborder.getPartyfile();
+					File file = new File("D:/yasabalisujati/files/" + _joborder.getDownloadpathParty());
+					if (file.isFile()) {
+						file.delete();
+					}
+					try {
+						FileOutputStream fos = new FileOutputStream(file);
+						fos.write(bAvatar);
+						fos.close();
+					} catch (Exception ex) {
+						ex.printStackTrace();
+					}
 					if (file.isFile()) {
 						try {
 							Desktop.getDesktop().open(file);
@@ -368,7 +494,8 @@ public class CertificateTambah extends JInternalFrame {
 						}
 					} else {
 						JOptionPane.showMessageDialog(null,
-								"File "+_joborder.getDownloadpath() +" hilang atau kehapus.", "Informasi",
+								"File " + _joborder.getDownloadpathParty()
+										+ " hilang atau kehapus.", "Informasi",
 								JOptionPane.INFORMATION_MESSAGE);
 					}
 				}
@@ -391,18 +518,40 @@ public class CertificateTambah extends JInternalFrame {
 		leftPanel.add(blnoTextbox);
 
 		Label containerLabel = new Label("CONTAINER NO");
-		containerLabel.setPreferredSize(labelDimension);
-		leftPanel.add(containerLabel);
-		containerNoTextbox = new Textbox("");
-		containerNoTextbox.setPreferredSize(textDimension);
-		leftPanel.add(containerNoTextbox);
+		containerLabel.setPreferredSize(labelAreaDimension);
+		containerLabel.setVerticalAlignment(SwingConstants.TOP);
+		rightPanel.add(containerLabel);
+		containerNoTextboxArea = new TextboxArea("");
+		containerNoTextboxArea.addKeyListener(new KeyAdapter() {
+			public void keyReleased(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_TAB) {
+					if (containerNoTextboxArea.getText().length() > 0) {
+						String checkAkhiran = containerNoTextboxArea.getText()
+								.substring(
+										containerNoTextboxArea.getText()
+												.length() - 1,
+										containerNoTextboxArea.getText()
+												.length());
+						if ((int) checkAkhiran.charAt(0) == 9) {
+							containerNoTextboxArea
+									.setText(containerNoTextboxArea
+											.getText()
+											.substring(
+													0,
+													containerNoTextboxArea
+															.getText().length() - 1));
+							destinationTextbox.requestFocus();
+						}
 
-		Label sealnoLabel = new Label("SEAL NO");
-		sealnoLabel.setPreferredSize(labelDimension);
-		leftPanel.add(sealnoLabel);
-		sealnoTextbox = new Textbox("");
-		sealnoTextbox.setPreferredSize(textDimension);
-		leftPanel.add(sealnoTextbox);
+					}
+				}
+			}
+		});
+		JScrollPane containerNoScrollPane = new JScrollPane(
+				containerNoTextboxArea);
+		containerNoScrollPane.setPreferredSize(textAreaDimension);
+		containerNoScrollPane.setBorder(new Textbox(null).getBorderCustom());
+		rightPanel.add(containerNoScrollPane);
 
 		Label destinationLabel = new Label("DESTINATION");
 		destinationLabel.setPreferredSize(labelRightDimension);
@@ -441,10 +590,10 @@ public class CertificateTambah extends JInternalFrame {
 		rightPanel.add(treatmentComboBox);
 
 		htWoodCoreTemperaturLabel = new Label("WOOD CORE TEMPERATURE (\u00b0C)");
-		htWoodCoreTemperaturLabel.setPreferredSize(singleDimension);
+		htWoodCoreTemperaturLabel.setPreferredSize(new Dimension(250, 30));
 		rightPanel.add(htWoodCoreTemperaturLabel);
 		htWoodCoreTemperaturTextbox = new Textbox("");
-		htWoodCoreTemperaturTextbox.setPreferredSize(singleDimension);
+		htWoodCoreTemperaturTextbox.setPreferredSize(new Dimension(150, 30));
 		rightPanel.add(htWoodCoreTemperaturTextbox);
 
 		fgFumigantLabel = new Label("FUMIGANT");
@@ -481,6 +630,76 @@ public class CertificateTambah extends JInternalFrame {
 		tglCetakDatebox = new Datebox("dd/MM/yyyy", "##-##-####", '_');
 		tglCetakDatebox.setPreferredSize(textRightDimension);
 		rightPanel.add(tglCetakDatebox);
+		
+		Button addColumnNew = new Button(new ImageIcon(getClass()
+				.getClassLoader().getResource("icons/add.png")),
+				"Tambah Data");
+		right1Panel.add(addColumnNew);
+		
+		columnNewVector = new Vector<Object>();
+		columnNewTableModel = new AbstractTableModel() {
+			private static final long serialVersionUID = 9194573404469074938L;
+
+			public int getColumnCount() {
+				return columnNewKolom.length;
+			}
+
+			public int getRowCount() {
+				return columnNewVector.size();
+			}
+
+			public Object getValueAt(int baris1, int kolom1) {
+				Vector<?> barisan = (Vector<?>) columnNewVector.elementAt(baris1);
+				return barisan.elementAt(kolom1);
+			}
+
+			public String getColumnName(int kolom1) {
+				return columnNewKolom[kolom1];
+			}
+
+			public boolean isCellEditable(int baris1, int kolom1) {
+				if (kolom1 == 0 || kolom1 == 1)
+					return true;
+				else 
+					return false;
+			}
+
+			public void setValueAt(Object obj, int baris1, int kolom1) {
+				Vector<Object> barisdata = (Vector<Object>) columnNewVector.elementAt(baris1);
+				barisdata.setElementAt(obj, kolom1);
+			}
+
+			public Class<?> getColumnClass(int column) {
+				if (column == 0 || column == 1) {
+					return Button.class;
+				} else if (column == 2 || column == 3) {
+					return String.class;
+				} else {
+					return CertificateNewColumn.class;
+				}
+			}
+		};
+		
+		columnNewTable = new Table(columnNewTableModel);
+		TableRowSorter<TableModel> columnNewSorter = new TableRowSorter<>(
+				columnNewTable.getModel());
+		columnNewTable.setRowSorter(columnNewSorter);
+		columnNewSorter.setSortable(0, false);
+		columnNewSorter.setSortable(1, false);
+		
+		columnNewTable.getColumnModel().getColumn(0).setPreferredWidth(50);
+		columnNewTable.getColumnModel().getColumn(1).setPreferredWidth(50);
+		columnNewTable.getColumnModel().getColumn(2).setPreferredWidth(150);
+		columnNewTable.getColumnModel().getColumn(3).setPreferredWidth(250);
+		
+		columnNewTable.getColumnModel().getColumn(4).setPreferredWidth(0);
+		columnNewTable.getColumnModel().getColumn(4).setMinWidth(0);
+		columnNewTable.getColumnModel().getColumn(4).setMaxWidth(0);
+		columnNewTable.getColumnModel().getColumn(4).setWidth(0);
+		
+		JScrollPane petugasJscoJScrollPane = new JScrollPane(columnNewTable);
+		petugasJscoJScrollPane.setPreferredSize(new Dimension(right1Panel.getPreferredSize().width -15, 400));
+		right1Panel.add(petugasJscoJScrollPane);
 
 		JPanel buttonSavePanel = new JPanel();
 		buttonSavePanel.setPreferredSize(new Dimension(Double.valueOf(
@@ -569,8 +788,9 @@ public class CertificateTambah extends JInternalFrame {
 			}
 		});
 		buttonSavePanel.add(closeButton);
-
+		
 		_frame.pack();
+		reSizePanel();
 	}
 
 	public void setVisible(Joborder joborder) {
@@ -611,7 +831,7 @@ public class CertificateTambah extends JInternalFrame {
 		destinationTextbox.setText(_joborder.getDestinasi());
 
 		if (_joborder.getConsignee() != null) {
-			consigneeTextbox.setText(_joborder.getConsignee());
+			consigneeTextboxArea.setText(_joborder.getConsignee());
 		}
 
 		if (_joborder.getVessel() != null) {
@@ -623,11 +843,7 @@ public class CertificateTambah extends JInternalFrame {
 		}
 
 		if (_joborder.getContainerno() != null) {
-			containerNoTextbox.setText(_joborder.getContainerno());
-		}
-
-		if (_joborder.getSealno() != null) {
-			sealnoTextbox.setText(_joborder.getSealno());
+			containerNoTextboxArea.setText(_joborder.getContainerno());
 		}
 
 		if (_joborder.getType_of_wood_packing() != null) {
@@ -666,24 +882,21 @@ public class CertificateTambah extends JInternalFrame {
 		if (_joborder.getTgl_cetak() != null) {
 			tglCetakDatebox.setDate(_joborder.getTgl_cetak());
 		}
-		
+
 		downloadButton.setEnabled(false);
-		if (_joborder.getDownloadpath() != null && (!_joborder.getDownloadpath().isEmpty())) {
-			File file = new File(_joborder.getDownloadpath());
-			if (file.isFile()) {
+		if (_joborder.getDownloadpath() != null && _joborder.getConsigmentfile() != null
+				&& (!_joborder.getDownloadpath().isEmpty())) {
 				downloadButton.setEnabled(true);
-			}
 		}
-		
+
 		download1Button.setEnabled(false);
-		if (_joborder.getDownloadpathParty() != null && (!_joborder.getDownloadpathParty().isEmpty())) {
-			File file = new File(_joborder.getDownloadpathParty());
-			if (file.isFile()) {
-				download1Button.setEnabled(true);
-			}
+		if (_joborder.getDownloadpathParty() != null
+				&& (_joborder.getPartyfile() != null)) {
+			download1Button.setEnabled(true);
 		}
 
 		_frame.setVisible(true);
+		reSizePanel();
 		_frame.moveToFront();
 	}
 
@@ -711,12 +924,11 @@ public class CertificateTambah extends JInternalFrame {
 		kodeTextbox.setText("");
 		consigmentTextboxArea.setText("");
 		shipperTextboxArea.setText("");
-		consigneeTextbox.setText("");
+		consigneeTextboxArea.setText("");
 		partyTextboxArea.setText("");
 		vesselTextbox.setText("");
 		blnoTextbox.setText("");
-		containerNoTextbox.setText("");
-		sealnoTextbox.setText("");
+		containerNoTextboxArea.setText("");
 		destinationTextbox.setText("");
 		typeWoodTextbox.setText("");
 		htWoodCoreTemperaturTextbox.setText("");
@@ -765,11 +977,10 @@ public class CertificateTambah extends JInternalFrame {
 		_joborder.setKomoditi(consigmentTextboxArea.getText());
 		_joborder.setPartai(partyTextboxArea.getText());
 		_joborder.setDestinasi(destinationTextbox.getText());
-		_joborder.setConsignee(consigneeTextbox.getText());
+		_joborder.setConsignee(consigneeTextboxArea.getText());
 		_joborder.setVessel(vesselTextbox.getText());
 		_joborder.setBlno(blnoTextbox.getText());
-		_joborder.setContainerno(containerNoTextbox.getText());
-		_joborder.setSealno(sealnoTextbox.getText());
+		_joborder.setContainerno(containerNoTextboxArea.getText());
 		_joborder.setType_of_wood_packing(typeWoodTextbox.getText());
 		_joborder.setQuantity(quantityTextbox.getText());
 		_joborder.setTreatment(treatmentComboBox.getSelectedItem().toString());
@@ -779,8 +990,10 @@ public class CertificateTambah extends JInternalFrame {
 		_joborder.setFumigant(fgFumigantTextbox.getText());
 		_joborder.setDosage_rate(fgDosageRateTextbox.getText());
 		_joborder.setCertificate_number(certificateNumberTextbox.getText());
-		_joborder.setTgl_cetak(new java.sql.Date(tglCetakDatebox.getDate()
-				.getTime()));
+		if (tglCetakDatebox.getDate() != null) {
+			_joborder.setTgl_cetak(new java.sql.Date(tglCetakDatebox.getDate()
+					.getTime()));
+		}
 		_joborder.setUpdatedBy(userLogin);
 		_joborder.setUpdatedAt(nowSqlDate);
 
@@ -903,10 +1116,6 @@ public class CertificateTambah extends JInternalFrame {
 			setIsiData("BL / NO", _joborder.getBlno(), table, fontregular);
 			setIsiData("CONTAINER NO", _joborder.getContainerno(), table,
 					fontregular);
-			if (_joborder.getSealno() != null
-					&& (!_joborder.getSealno().isEmpty())) {
-				setIsiData("SEAL NO", _joborder.getSealno(), table, fontregular);
-			}
 			setIsiData("DESTINATION", _joborder.getDestinasi(), table,
 					fontregular);
 
@@ -920,7 +1129,7 @@ public class CertificateTambah extends JInternalFrame {
 			document.add(linebreak);
 
 			Paragraph parg = new Paragraph(
-					"THIS IS TO CERTIFY THAT THE WOOD PACKAGING ON THE ABOVE CONSIGMENT HAS BEEN TREATED IN ACCORDANCE WITH ISM#15 ANNEX 1 :",
+					"THIS IS TO CERTIFY THAT THE WOOD PACKAGING ON THE ABOVE CONSIGMENT HAS BEEN TREATED IN ACCORDANCE WITH ISPM#15 ANNEX 1 :",
 					fontregular);
 			document.add(parg);
 
@@ -928,62 +1137,63 @@ public class CertificateTambah extends JInternalFrame {
 			table.setWidthPercentage(100);
 			table.setWidths(new int[] { 4, 1, 7 });
 
-			setIsiData("TYPE OF WOOD PACKAGING", _joborder.getType_of_wood_packing(), table,
-					fontregular);
-			setIsiData("QUANTITY", _joborder.getQuantity(), table,
-					fontregular);
+			setIsiData("TYPE OF WOOD PACKAGING",
+					_joborder.getType_of_wood_packing(), table, fontregular);
+			setIsiData("QUANTITY", _joborder.getQuantity(), table, fontregular);
 			setIsiData("TREATMENT", _joborder.getTreatment(), table,
 					fontregular);
-			if (_joborder.getTreatment().equals("HEAT TREATMENT (HT)") ) {
-				setIsiData("DESCRIPTION OF TREATMENT", 
-						"WOOD CORE TEMPERATURE : "+_joborder.getWood_core_temperatur()+" (\u00b0C)\n"+
-						"EXPOSURE TIME         : "+_joborder.getExposure_time()
-						, table,
-					fontregular);
-			} else if (_joborder.getTreatment().equals("FUMIGATION") ) {
-				setIsiData("DESCRIPTION OF TREATMENT", 
-						"FUMIGANT       : "+_joborder.getFumigant()+"\n"+
-						"DOSAGE RATE    : "+_joborder.getDosage_rate() +"\n"+
-						"EXPOSURE TIME  : "+_joborder.getExposure_time()
-						, table,
-					fontregular);
+			if (_joborder.getTreatment().equals("HEAT TREATMENT (HT)")) {
+				setIsiData(
+						"DESCRIPTION OF TREATMENT",
+						"WOOD CORE TEMPERATURE : "
+								+ _joborder.getWood_core_temperatur()
+								+ " (\u00b0C)\n" + "EXPOSURE TIME         : "
+								+ _joborder.getExposure_time(), table,
+						fontregular);
+			} else if (_joborder.getTreatment().equals("FUMIGATION")) {
+				setIsiData("DESCRIPTION OF TREATMENT", "FUMIGANT       : "
+						+ _joborder.getFumigant() + "\n" + "DOSAGE RATE    : "
+						+ _joborder.getDosage_rate() + "\n"
+						+ "EXPOSURE TIME  : " + _joborder.getExposure_time(),
+						table, fontregular);
 			}
-			
+
 			document.add(newLine);
 			document.add(table);
 			document.add(newLine);
-			
+
 			Paragraph parg1 = new Paragraph(
 					"ALL WOOD PACKAGING MATERIAL HAS BEEN DEBARKED BEFORE THE TREATMENT",
 					fontregular);
 			document.add(parg1);
-			
+
 			table = new PdfPTable(3);
 			table.setWidthPercentage(100);
 			table.setWidths(new int[] { 4, 1, 7 });
-			
-			PdfPCell cellOne = new PdfPCell(new Paragraph("MARKING", fontregular));
+
+			PdfPCell cellOne = new PdfPCell(new Paragraph("MARKING",
+					fontregular));
 			cellOne.setBorder(Rectangle.NO_BORDER);
 			table.addCell(cellOne);
-			
+
 			Paragraph titikdua = new Paragraph(":", fontregular);
 			PdfPCell titikduaCell = new PdfPCell(titikdua);
 			titikduaCell.setBorder(Rectangle.NO_BORDER);
 			titikduaCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
 			table.addCell(titikduaCell);
-			
+
 			PdfPCell imageCell = new PdfPCell();
 			imageCell.setBorder(Rectangle.NO_BORDER);
 			try {
 				Image image1 = null;
-				if (_joborder.getTreatment().equals("HEAT TREATMENT (HT)") ) {
+				if (_joborder.getTreatment().equals("HEAT TREATMENT (HT)")) {
 					image1 = Image.getInstance(getClass().getClassLoader()
-						.getResource("icons/ippcht.png"));
-				} else if (_joborder.getTreatment().equals("FUMIGATION") ) {
+							.getResource("icons/ippcht.png"));
+				} else if (_joborder.getTreatment().equals("FUMIGATION")) {
 					image1 = Image.getInstance(getClass().getClassLoader()
 							.getResource("icons/ippfumigant.png"));
 				}
-				image1.scaleToFit(120, 120);
+				image1.scaleToFit(120, 30);
 				imageCell.addElement(image1);
 			} catch (MalformedURLException e) {
 				e.printStackTrace();
@@ -991,37 +1201,42 @@ public class CertificateTambah extends JInternalFrame {
 				e.printStackTrace();
 			}
 			table.addCell(imageCell);
-			
+
+			setIsiData("CERTIFICATE NUMBER", _joborder.getCertificate_number(),
+					table, fontregular);
+
 			document.add(table);
-			
-			setIsiData("CERTIFICATE NUMBER", _joborder.getCertificate_number(), table,
-					fontregular);
-			
-			Paragraph parg3 = new Paragraph(
-					"THIS CERTIFICATE REFERS ISPM#15 HEAT TREATMENT ONLY AND DOES NOT CERTIFY ANY OTHER MATTERS",
+
+			String specification = "HEAT TREATMENT";
+			if (treatment.equals("FUMIGATION")) {
+				specification = "FUMIGATION";
+			}
+
+			Paragraph parg3 = new Paragraph("THIS CERTIFICATE REFERS ISPM#15 "
+					+ specification
+					+ " ONLY AND DOES NOT CERTIFY ANY OTHER MATTERS",
 					fontregular);
 			document.add(parg3);
 			Paragraph parg4 = new Paragraph(
-					("SURABAYA ," + _service.convertStringFromDate("MMMM dd, yyyy", _joborder.getTgl_cetak(), _simpleDateFormat)).toUpperCase(),
-					fontregular);
+					("SURABAYA ," + _service.convertStringFromDate(
+							"MMMM dd, yyyy", _joborder.getTgl_cetak(),
+							_simpleDateFormat)).toUpperCase(), fontregular);
 			document.add(parg4);
-			
+
 			Paragraph parg5 = new Paragraph(
-					"AUTHORIZED SIGNATURE\nPT YASA BALI SUJATI ",
-					fontregular);
+					"AUTHORIZED SIGNATURE\nPT YASA BALI SUJATI ", fontregular);
 			parg5.setAlignment(Element.ALIGN_RIGHT);
 			document.add(parg5);
-			
+
 			for (int i = 0; i < 4; i++) {
 				document.add(newLine);
 			}
-			
-			Paragraph parg6 = new Paragraph(
-					"( .................. )",
+
+			Paragraph parg6 = new Paragraph("( .................. )",
 					fontregular);
 			parg6.setAlignment(Element.ALIGN_RIGHT);
 			document.add(parg6);
-			
+
 			created = true;
 		} catch (FileNotFoundException e1) {
 			e1.printStackTrace();
@@ -1059,5 +1274,30 @@ public class CertificateTambah extends JInternalFrame {
 		PdfPCell cellTwo = new PdfPCell(new Paragraph(isi, fontregular));
 		cellTwo.setBorder(Rectangle.NO_BORDER);
 		table.addCell(cellTwo);
+	}
+	
+	public void reSizePanel() {
+		mainDimension.setSize(_frame.getPreferredSize().getWidth(), _frame.getPreferredSize().getHeight());
+		mainJScrollPane.setPreferredSize(mainDimension);
+	}
+	
+	public void refreshColumnNew() {
+		columnNewVector.clear();
+		_session = _service.getConnectionDB(_session);
+		_session.clear();
+		
+		Criteria criteria = _session.createCriteria(CertificateNewColumn.class);
+		criteria.add(Restrictions.eq("joborder", _joborder));
+		List<CertificateNewColumn> dataList = criteria.list();
+		for (CertificateNewColumn certificateNewColumn : dataList) {
+			Vector<Object> data1 = new Vector<Object>();
+			data1.addElement(null);
+			data1.addElement(null);
+			data1.addElement(certificateNewColumn.getColumnName());
+			data1.addElement(certificateNewColumn.getDescription());
+			data1.addElement(certificateNewColumn);
+			columnNewVector.add(data1);
+		}
+		columnNewTable.tableChanged(new javax.swing.event.TableModelEvent(columnNewTableModel));
 	}
 }
