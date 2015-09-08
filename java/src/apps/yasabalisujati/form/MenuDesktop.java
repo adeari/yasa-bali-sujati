@@ -55,6 +55,8 @@ public class MenuDesktop extends JFrame {
 	private CertificateIndex certificateIndex;
 	private CertificateTambah certificateTambah;
 	
+	private CertificateNewTambah certificateNewTambah;
+	
 	private IPAddressForm ipAddressForm;
 	
 	
@@ -116,6 +118,8 @@ public class MenuDesktop extends JFrame {
 		_desktopPane.add(certificateIndex);
 		certificateTambah = new  CertificateTambah(_session, _service, _simpleDateFormat);
 		_desktopPane.add(certificateTambah);
+		certificateNewTambah = new CertificateNewTambah(_session, _service, _simpleDateFormat);
+		_desktopPane.add(certificateNewTambah);
 		ipAddressForm = new IPAddressForm();
 		_desktopPane.add(ipAddressForm);
 		
@@ -194,11 +198,14 @@ public class MenuDesktop extends JFrame {
 		certificateTambah.setFillingIndex(fillingIndex);
 		certificateTambah.setUserIndex(userIndex);
 		certificateTambah.setCertificateIndex(certificateIndex);
+		certificateTambah.setCertificateNewTambah(certificateNewTambah);
 		try {
 			certificateTambah.setMaximum(true);
 		} catch (PropertyVetoException e1) {
 			e1.printStackTrace();
 		}
+		
+		certificateNewTambah.setCertificateTambah(certificateTambah);
 		
 		
 		JMenuBar menuBar = new JMenuBar();

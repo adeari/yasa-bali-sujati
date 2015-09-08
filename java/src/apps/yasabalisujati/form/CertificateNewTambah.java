@@ -8,8 +8,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -18,16 +16,12 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
 import javax.swing.WindowConstants;
 
-import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 
 import apps.yasabalisujati.components.Button;
 import apps.yasabalisujati.components.Label;
@@ -35,7 +29,6 @@ import apps.yasabalisujati.components.Textbox;
 import apps.yasabalisujati.components.TextboxArea;
 import apps.yasabalisujati.database.entity.CertificateNewColumn;
 import apps.yasabalisujati.database.entity.Joborder;
-import apps.yasabalisujati.database.entity.User;
 import apps.yasabalisujati.service.Service;
 
 public class CertificateNewTambah extends JInternalFrame {
@@ -58,7 +51,7 @@ public class CertificateNewTambah extends JInternalFrame {
 		super("a", false, true, false, true); 
 		_frame = this;
 		_frame.setLayout(new FlowLayout(FlowLayout.LEADING));
-		_frame.setPreferredSize(new Dimension(550, 250));
+		_frame.setPreferredSize(new Dimension(400, 250));
 		_frame.setSize(_frame.getPreferredSize());
 		_frame.setLocation(10, 10);
 		_frame.setDefaultCloseOperation(
@@ -72,32 +65,24 @@ public class CertificateNewTambah extends JInternalFrame {
 		Container container = _frame.getContentPane();
 		
 		Dimension labelDimension = new Dimension(100, 30);
-		Dimension blankLabelDimension = new Dimension(250, 30);
 		
 		Label dataLabel = new Label("Data");
 		dataLabel.setPreferredSize(labelDimension);
 		container.add(dataLabel);
 		dataTextbox = new Textbox("");
-		dataTextbox.setPreferredSize(new Dimension(150, 30));
+		dataTextbox.setPreferredSize(new Dimension(250, 30));
 		container.add(dataTextbox);
-		JLabel blankLabel = new JLabel("");
-		blankLabel.setPreferredSize(blankLabelDimension);
-		container.add(blankLabel);
 		
 		
 		Label detailLabel = new Label("Detail");
 		detailLabel.setPreferredSize(labelDimension);
 		container.add(detailLabel);
 		detailTextbox = new TextboxArea("");
-		container.add(dataTextbox);
 		JScrollPane detailScrollPane  = new JScrollPane(detailTextbox);
-		detailScrollPane.setPreferredSize(new Dimension(150, 200));
+		detailScrollPane.setPreferredSize(new Dimension(250, 120));
 		detailScrollPane.setBorder(new Textbox(null).getBorderCustom());
 		container.add(detailScrollPane);
 		
-		blankLabel = new JLabel("");
-		blankLabel.setPreferredSize(blankLabelDimension);
-		container.add(blankLabel);
 		
 		
 		JPanel buttonSavePanel = new JPanel();
@@ -139,7 +124,7 @@ public class CertificateNewTambah extends JInternalFrame {
 		_frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(escapeKeyStroke, "ESCAPE");
 		_frame.getRootPane().getActionMap().put("ESCAPE", escapeAction);
 		
-		blankLabel = new JLabel("");
+		JLabel blankLabel = new JLabel("");
 		blankLabel.setPreferredSize(new Dimension(70, 30));
 		buttonSavePanel.add(blankLabel);
 		
@@ -179,6 +164,7 @@ public class CertificateNewTambah extends JInternalFrame {
 	
 	public void clearForm() {
 		dataTextbox.setText("");
+		dataTextbox.requestFocus();
 		detailTextbox.setText("");
 	}
 	

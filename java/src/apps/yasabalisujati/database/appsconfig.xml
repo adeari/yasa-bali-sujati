@@ -19,6 +19,7 @@
   <mapping class="apps.yasabalisujati.database.entity.Joborder"/>
   <mapping class="apps.yasabalisujati.database.entity.JoborderPegawai"/>
   <mapping class="apps.yasabalisujati.database.entity.JoborderValidasi"/>
+  <mapping class="apps.yasabalisujati.database.entity.CertificateNewColumn"/>
   
  </session-factory>
 </hibernate-configuration>

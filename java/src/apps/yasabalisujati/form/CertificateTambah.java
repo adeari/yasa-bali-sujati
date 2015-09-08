@@ -30,6 +30,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JInternalFrame;
@@ -47,8 +48,10 @@ import javax.swing.table.TableRowSorter;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.engine.jdbc.ColumnNameCache;
 
 import apps.yasabalisujati.components.Button;
+import apps.yasabalisujati.components.ButtonColumnRenderer;
 import apps.yasabalisujati.components.ComboBox;
 import apps.yasabalisujati.components.Datebox;
 import apps.yasabalisujati.components.Label;
@@ -56,6 +59,8 @@ import apps.yasabalisujati.components.Textbox;
 import apps.yasabalisujati.components.TextboxArea;
 import apps.yasabalisujati.components.itext.CustomDashedLineSeparator;
 import apps.yasabalisujati.components.table.Table;
+import apps.yasabalisujati.components.table.certificate.ButtonDeleteNewColumnRenderer;
+import apps.yasabalisujati.components.table.certificate.ButtonEditNewColumnRenderer;
 import apps.yasabalisujati.database.entity.CertificateNewColumn;
 import apps.yasabalisujati.database.entity.Customer;
 import apps.yasabalisujati.database.entity.Joborder;
@@ -93,6 +98,7 @@ public class CertificateTambah extends JInternalFrame {
 	private FillingIndex _fillingIndex;
 	private UserIndex _userIndex;
 	private CertificateIndex _certificateIndex;
+	private CertificateNewTambah _certificateNewTambah;
 
 	private Joborder _joborder;
 
@@ -357,6 +363,7 @@ public class CertificateTambah extends JInternalFrame {
 
 		Label consigneeLabel = new Label("CONSIGNEE");
 		consigneeLabel.setPreferredSize(labelAreaDimension);
+		consigneeLabel.setVerticalAlignment(SwingConstants.TOP);
 		leftPanel.add(consigneeLabel);
 		consigneeTextboxArea = new TextboxArea("");
 		consigneeTextboxArea.addKeyListener(new KeyAdapter() {
@@ -634,6 +641,13 @@ public class CertificateTambah extends JInternalFrame {
 		Button addColumnNew = new Button(new ImageIcon(getClass()
 				.getClassLoader().getResource("icons/add.png")),
 				"Tambah Data");
+		addColumnNew.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				_certificateNewTambah.setVisible(_joborder, null);
+			}
+		});
 		right1Panel.add(addColumnNew);
 		
 		columnNewVector = new Vector<Object>();
@@ -688,7 +702,15 @@ public class CertificateTambah extends JInternalFrame {
 		columnNewSorter.setSortable(1, false);
 		
 		columnNewTable.getColumnModel().getColumn(0).setPreferredWidth(50);
+		columnNewTable.getColumnModel().getColumn(0).setCellRenderer(new ButtonColumnRenderer(new ImageIcon(getClass()
+				.getClassLoader().getResource("icons/remove_outline.png")),
+				""));
+		columnNewTable.getColumnModel().getColumn(0).setCellEditor(new ButtonDeleteNewColumnRenderer(new JCheckBox(), this));
 		columnNewTable.getColumnModel().getColumn(1).setPreferredWidth(50);
+		columnNewTable.getColumnModel().getColumn(1).setCellRenderer(new ButtonColumnRenderer(new ImageIcon(getClass()
+				.getClassLoader().getResource("icons/edit.png")),
+				""));
+		columnNewTable.getColumnModel().getColumn(1).setCellEditor(new ButtonEditNewColumnRenderer(new JCheckBox(), this));
 		columnNewTable.getColumnModel().getColumn(2).setPreferredWidth(150);
 		columnNewTable.getColumnModel().getColumn(3).setPreferredWidth(250);
 		
@@ -897,6 +919,7 @@ public class CertificateTambah extends JInternalFrame {
 
 		_frame.setVisible(true);
 		reSizePanel();
+		refreshColumnNew();
 		_frame.moveToFront();
 	}
 
@@ -1053,6 +1076,10 @@ public class CertificateTambah extends JInternalFrame {
 	public void setUserLogin(User user) {
 		userLogin = user;
 	}
+	
+	public void setCertificateNewTambah(CertificateNewTambah certificateNewTambah) {
+		_certificateNewTambah = certificateNewTambah;
+	}
 
 	public void createPDFPreview() {
 		File file = new File("D:/yasabalisujati/ini.pdf");
@@ -1112,6 +1139,18 @@ public class CertificateTambah extends JInternalFrame {
 					fontregular);
 			setIsiData("NOTIFY PARTY", _joborder.getPartai(), table,
 					fontregular);
+			
+			Criteria criteria = _session.createCriteria(CertificateNewColumn.class);
+			criteria.add(Restrictions.eq("joborder", _joborder));
+			List<CertificateNewColumn> dataList = criteria.list();
+			for (CertificateNewColumn certificateNewColumn : dataList) {
+				if (certificateNewColumn.getColumnName() != null && certificateNewColumn.getDescription() != null 
+						&& (!certificateNewColumn.getColumnName().isEmpty() && !certificateNewColumn.getDescription().isEmpty() )) {
+					setIsiData(certificateNewColumn.getColumnName(), certificateNewColumn.getDescription(), table,
+							fontregular);
+				}
+			}
+			
 			setIsiData("VESSEL", _joborder.getVessel(), table, fontregular);
 			setIsiData("BL / NO", _joborder.getBlno(), table, fontregular);
 			setIsiData("CONTAINER NO", _joborder.getContainerno(), table,
@@ -1299,5 +1338,16 @@ public class CertificateTambah extends JInternalFrame {
 			columnNewVector.add(data1);
 		}
 		columnNewTable.tableChanged(new javax.swing.event.TableModelEvent(columnNewTableModel));
+	}
+	
+	public void deleteNewColumn(CertificateNewColumn certificateNewColumn) {
+		_session = _service.getConnectionDB(_session);
+		_session.delete(certificateNewColumn);
+		_session.flush();
+		refreshColumnNew();
+	}
+	
+	public void editNewColumn(CertificateNewColumn certificateNewColumn) {
+		_certificateNewTambah.setVisible(_joborder, certificateNewColumn);
 	}
 }
