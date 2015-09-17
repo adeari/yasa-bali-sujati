@@ -9,7 +9,6 @@ import apps.yasabalisujati.service.Service;
 
 public class StartClass {
 	public static void main(String[] args) {
-		
 		new DataUpdate();
 		
 		Service service = new Service();

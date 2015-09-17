@@ -14,6 +14,8 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -62,9 +64,12 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTBody;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPPr;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPageMar;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPageSz;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSectPr;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSpacing;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STLineSpacingRule;
 
 import apps.yasabalisujati.components.Button;
 import apps.yasabalisujati.components.ButtonColumnRenderer;
@@ -712,6 +717,15 @@ public class CertificateTambah extends JInternalFrame {
 		};
 		
 		columnNewTable = new Table(columnNewTableModel);
+		columnNewTable.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() == 2) {
+					editNewColumn((CertificateNewColumn) columnNewTable.getValueAt(columnNewTable.getSelectedRow(),4));
+				}
+			}
+		});
 		TableRowSorter<TableModel> columnNewSorter = new TableRowSorter<>(
 				columnNewTable.getModel());
 		columnNewTable.setRowSorter(columnNewSorter);
@@ -1121,7 +1135,7 @@ public class CertificateTambah extends JInternalFrame {
 		_certificateNewTambah = certificateNewTambah;
 	}
 	
-	public void createMsWord() {
+	private void createMsWord() {
 		File file = new File("D:/yasabalisujati/ini.docx");
 		
 		XWPFDocument document = new XWPFDocument();
@@ -1145,6 +1159,7 @@ public class CertificateTambah extends JInternalFrame {
 	    pageMar.setTop(BigInteger.valueOf(120L));
 	    pageMar.setRight(BigInteger.valueOf(720L));
 	    pageMar.setBottom(BigInteger.valueOf(120L));
+	    
 		
 		XWPFParagraph tmpParagraph = document.createParagraph();
 		XWPFRun tmpRun = tmpParagraph.createRun();
@@ -1155,11 +1170,12 @@ public class CertificateTambah extends JInternalFrame {
 		}
 		
 		tmpParagraph = document.createParagraph();
+		setParagraphStyle(tmpParagraph);
 		tmpParagraph.setAlignment(ParagraphAlignment.CENTER);
 		tmpRun = tmpParagraph.createRun();
 		tmpRun.setText("ISPM#15 CERTIFICATE");
 		tmpRun.setFontFamily("Courier");
-		tmpRun.setFontSize(14);
+		tmpRun.setFontSize(16);
 		tmpRun.setBold(true);
 		tmpRun.setUnderline(UnderlinePatterns.SINGLE);
 		
@@ -1170,20 +1186,22 @@ public class CertificateTambah extends JInternalFrame {
 		}
 		
 		tmpParagraph = document.createParagraph();
+		setParagraphStyle(tmpParagraph);
 		tmpParagraph.setAlignment(ParagraphAlignment.CENTER);
 		tmpRun = tmpParagraph.createRun();
 		tmpRun.setText(treatment);
 		tmpRun.setFontFamily("Courier");
-		tmpRun.setFontSize(12);
+		tmpRun.setFontSize(14);
 		tmpRun.setBold(true);
 		
 		tmpParagraph = document.createParagraph();
+		setParagraphStyle(tmpParagraph);
 		tmpParagraph.setAlignment(ParagraphAlignment.CENTER);
 		tmpRun = tmpParagraph.createRun();
 		tmpRun.setText("ID No : 107");
 		tmpRun.addBreak();
 		tmpRun.setFontFamily("Courier");
-		tmpRun.setFontSize(10);
+		tmpRun.setFontSize(12);
 		
 		addRowMSWord(document, "CONSIGMENT", _joborder.getKomoditi());
 		if (_joborder.getExportir() != null) {
@@ -1206,16 +1224,16 @@ public class CertificateTambah extends JInternalFrame {
 		addRowMSWord(document, "BL / NO", _joborder.getBlno());
 		addRowMSWord(document, "CONTAINER NO", _joborder.getContainerno());
 		addRowMSWord(document, "DESTINATION", _joborder.getDestinasi());
-		addRowMSWord(document, "DESTINATION", _joborder.getDestinasi());
 		
 		tmpParagraph = document.createParagraph();
 		tmpParagraph.setBorderBottom(Borders.DASH_SMALL_GAP);
 		
 		tmpParagraph = document.createParagraph();
+		setParagraphStyle(tmpParagraph);
 		tmpRun = tmpParagraph.createRun();
-		tmpRun.setText("THIS IS TO CERTIFY THAT THE WOOD PACKAGING ON THE ABOVE CONSIGMENT HAS BEEN TREATED IN ACCORDANCE WITH ISPM#15 ANNEX 1:");
+		tmpRun.setText("THIS IS TO CERTIFY THAT THE WOOD PACKAGING ON THE ABOVE CONSIGMENT HAS BEEN TREATED IN ACCORDANCE WITH ISPM#15 ANNEX 1 :");
 		tmpRun.setFontFamily("Courier");
-		tmpRun.setFontSize(10);
+		tmpRun.setFontSize(12);
 		
 		addRowMSWord(document, "TYPE OF WOOD PACKAGING", _joborder.getType_of_wood_packing());
 		addRowMSWord(document, "QUANTITY", _joborder.getQuantity());
@@ -1236,44 +1254,46 @@ public class CertificateTambah extends JInternalFrame {
 		}
 		
 		tmpParagraph = document.createParagraph();
+		setParagraphStyle(tmpParagraph);
 		tmpRun = tmpParagraph.createRun();
 		tmpRun.setText("ALL WOOD PACKAGING MATERIAL HAS BEEN DEBARKED BEFORE THE TREATMENT");
 		tmpRun.setFontFamily("Courier");
-		tmpRun.setFontSize(10);
+		tmpRun.setFontSize(12);
 		
 		setMark(document);
 		addRowMSWord(document, "CERTIFICATE NUMBER", _joborder.getCertificate_number());
 		
 		tmpParagraph = document.createParagraph();
+		setParagraphStyle(tmpParagraph);
 		tmpRun = tmpParagraph.createRun();
 		tmpRun.setText("THIS CERTIFICATE REFERS ISPM#15 "
 				+ _joborder.getTreatment()
 				+ " ONLY AND DOES NOT CERTIFY ANY OTHER MATTERS");
 		tmpRun.setFontFamily("Courier");
-		tmpRun.setFontSize(10);
+		tmpRun.setFontSize(12);
 		
 		tmpParagraph = document.createParagraph();
+		setParagraphStyle(tmpParagraph);
 		tmpRun = tmpParagraph.createRun();
-		tmpRun.setText(("SURABAYA ," + _service.convertStringFromDate(
+		tmpRun.setText(("SURABAYA, " + _service.convertStringFromDate(
 				"MMMM dd, yyyy", _joborder.getTgl_cetak(),
 				_simpleDateFormat)).toUpperCase());
 		tmpRun.setFontFamily("Courier");
-		tmpRun.setFontSize(10);
+		tmpRun.setFontSize(12);
 		
 		tmpParagraph = document.createParagraph();
+		setParagraphStyle(tmpParagraph);
 		tmpParagraph.setAlignment(ParagraphAlignment.RIGHT);
 		tmpRun = tmpParagraph.createRun();
 		tmpRun.setText("AUTHORIZED SIGNATURE");
 		tmpRun.addBreak();
 		tmpRun.setText("PT YASA BALI SUJATI ");
-		tmpRun.addBreak();
-		tmpRun.addBreak();
-		tmpRun.addBreak();
-		tmpRun.addBreak();
-		tmpRun.addBreak();
+		for (int i = 0; i < 5; i++) {
+			tmpRun.addBreak();
+		}
 		tmpRun.setText("....................");
 		tmpRun.setFontFamily("Courier");
-		tmpRun.setFontSize(10);
+		tmpRun.setFontSize(12);
 		
 		
 		try {
@@ -1288,7 +1308,7 @@ public class CertificateTambah extends JInternalFrame {
 		}
 	}
 	
-	public void setMark(XWPFDocument document) {
+	private void setMark(XWPFDocument document) {
 		XWPFTable table = document.createTable(1,3);
 		table.getCTTbl().getTblPr().unsetTblBorders();
 		XWPFTableRow row = table.getRow(0);
@@ -1296,21 +1316,24 @@ public class CertificateTambah extends JInternalFrame {
 		XWPFTableCell cell = row.getCell(0);
 		cell.getCTTc().addNewTcPr().addNewTcW().setW(BigInteger.valueOf(3600));
 		XWPFParagraph tmpParagraph = cell.getParagraphs().get(0);
+		setParagraphStyle(tmpParagraph);
 		XWPFRun tmpRun = tmpParagraph.createRun();
 		tmpRun.setText("MARKING");
 		tmpRun.setFontFamily("Courier");
-		tmpRun.setFontSize(10);
+		tmpRun.setFontSize(12);
 		
 		cell = row.getCell(1);
 		tmpParagraph = cell.getParagraphs().get(0);
+		setParagraphStyle(tmpParagraph);
 		tmpRun = tmpParagraph.createRun();
 		tmpRun.setText(":");
 		tmpRun.setFontFamily("Courier");
-		tmpRun.setFontSize(10);
+		tmpRun.setFontSize(12);
 		
 		cell = row.getCell(2);
 		
 		tmpParagraph = cell.getParagraphs().get(0);
+		setParagraphStyle(tmpParagraph);
 		tmpRun = tmpParagraph.createRun();
 		InputStream pic;
 		try {
@@ -1334,7 +1357,7 @@ public class CertificateTambah extends JInternalFrame {
 		}
 	}
 	
-	public void addRowMSWord(XWPFDocument document, String title, String data) {
+	private void addRowMSWord(XWPFDocument document, String title, String data) {
 		XWPFTable table = document.createTable(1,3);
 		table.getCTTbl().getTblPr().unsetTblBorders();
 		XWPFTableRow row = table.getRow(0);
@@ -1342,20 +1365,24 @@ public class CertificateTambah extends JInternalFrame {
 		XWPFTableCell cell = row.getCell(0);
 		cell.getCTTc().addNewTcPr().addNewTcW().setW(BigInteger.valueOf(3600));
 		XWPFParagraph tmpParagraph = cell.getParagraphs().get(0);
+		setParagraphStyle(tmpParagraph);
 		XWPFRun tmpRun = tmpParagraph.createRun();
 		tmpRun.setText(title);
 		tmpRun.setFontFamily("Courier");
-		tmpRun.setFontSize(10);
+		tmpRun.setFontSize(12);
 		
 		cell = row.getCell(1);
 		tmpParagraph = cell.getParagraphs().get(0);
+		setParagraphStyle(tmpParagraph);
 		tmpRun = tmpParagraph.createRun();
 		tmpRun.setText(":");
 		tmpRun.setFontFamily("Courier");
-		tmpRun.setFontSize(10);
+		tmpRun.setFontSize(12);
 		
 		cell = row.getCell(2);
 		tmpParagraph = cell.getParagraphs().get(0);
+		setParagraphStyle(tmpParagraph);
+		
 		tmpRun = tmpParagraph.createRun();
 		if (data != null) {
 			StringTokenizer stk = new StringTokenizer(data, "\n");
@@ -1369,10 +1396,19 @@ public class CertificateTambah extends JInternalFrame {
 			}
 		}
 		tmpRun.setFontFamily("Courier");
-		tmpRun.setFontSize(10);
+		tmpRun.setFontSize(12);
+	}
+	
+	private void setParagraphStyle(XWPFParagraph tmpParagraph) {
+		CTPPr ppr = tmpParagraph.getCTP().getPPr();
+	    if (ppr == null) {
+	    	ppr = tmpParagraph.getCTP().addNewPPr();
+	    }
+	    CTSpacing spacing = ppr.isSetSpacing()? ppr.getSpacing() : ppr.addNewSpacing();
+	    spacing.setAfter(BigInteger.valueOf(0));
 	}
 
-	public void createPDFPreview() {
+	private void createPDFPreview() {
 		File file = new File("D:/yasabalisujati/ini.pdf");
 		if (file.isFile()) {
 			file.delete();
@@ -1543,7 +1579,7 @@ public class CertificateTambah extends JInternalFrame {
 					fontregular);
 			document.add(parg3);
 			Paragraph parg4 = new Paragraph(
-					("SURABAYA ," + _service.convertStringFromDate(
+					("SURABAYA, " + _service.convertStringFromDate(
 							"MMMM dd, yyyy", _joborder.getTgl_cetak(),
 							_simpleDateFormat)).toUpperCase(), fontregular);
 			document.add(parg4);
@@ -1583,7 +1619,7 @@ public class CertificateTambah extends JInternalFrame {
 		}
 	}
 
-	public void setIsiData(String title, String isi, PdfPTable table,
+	private void setIsiData(String title, String isi, PdfPTable table,
 			Font fontregular) {
 		Paragraph titikdua = new Paragraph(":", fontregular);
 
