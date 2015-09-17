@@ -119,7 +119,7 @@ public class CertificateIndex extends JInternalFrame {
 
 	public CertificateIndex(Session session, Service service,
 			SimpleDateFormat simpleDateFormat) {
-		super("Job Order", true, true, true, true);
+		super("Certificate / Job Order (Selesai)", true, true, true, true);
 		_frame = this;
 		_frame.setLayout(new FlowLayout(FlowLayout.LEADING));
 		_frame.setPreferredSize(new Dimension(800, 600));

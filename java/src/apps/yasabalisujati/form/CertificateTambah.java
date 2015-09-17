@@ -19,6 +19,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -45,10 +47,24 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.util.Units;
+import org.apache.poi.xwpf.usermodel.Borders;
+import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
+import org.apache.poi.xwpf.usermodel.UnderlinePatterns;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.XWPFTableCell;
+import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.hibernate.engine.jdbc.ColumnNameCache;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTBody;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPageMar;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPageSz;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSectPr;
 
 import apps.yasabalisujati.components.Button;
 import apps.yasabalisujati.components.ButtonColumnRenderer;
@@ -201,6 +217,7 @@ public class CertificateTambah extends JInternalFrame {
 
 		Dimension labelRightDimension = new Dimension(130, 30);
 		Dimension textRightDimension = new Dimension(270, 30);
+		Dimension textAreaRightDimension = new Dimension(270, 100);
 		Dimension uploadPanelDimension = new Dimension(60, 100);
 
 		Label kodeLabel = new Label("KODE");
@@ -525,7 +542,7 @@ public class CertificateTambah extends JInternalFrame {
 		leftPanel.add(blnoTextbox);
 
 		Label containerLabel = new Label("CONTAINER NO");
-		containerLabel.setPreferredSize(labelAreaDimension);
+		containerLabel.setPreferredSize(labelRightDimension);
 		containerLabel.setVerticalAlignment(SwingConstants.TOP);
 		rightPanel.add(containerLabel);
 		containerNoTextboxArea = new TextboxArea("");
@@ -556,7 +573,7 @@ public class CertificateTambah extends JInternalFrame {
 		});
 		JScrollPane containerNoScrollPane = new JScrollPane(
 				containerNoTextboxArea);
-		containerNoScrollPane.setPreferredSize(textAreaDimension);
+		containerNoScrollPane.setPreferredSize(textAreaRightDimension);
 		containerNoScrollPane.setBorder(new Textbox(null).getBorderCustom());
 		rightPanel.add(containerNoScrollPane);
 
@@ -791,10 +808,33 @@ public class CertificateTambah extends JInternalFrame {
 
 			}
 		};
+		
+		Button msWordButton = new Button(new ImageIcon(getClass()
+				.getClassLoader().getResource("icons/page_white_word.png")),
+				"(Ctrl+M)  MS. WORD");
+		msWordButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				createMsWord();
+			}
+		});
+		buttonSavePanel.add(msWordButton);
+		
+		KeyStroke msWordKeyStroke = KeyStroke.getKeyStroke((KeyEvent.VK_M),
+				InputEvent.CTRL_MASK, false);
+		Action msWordAction = new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+			
+			public void actionPerformed(ActionEvent e) {
+				createMsWord();
+				
+			}
+		};
 
 		_frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
-				.put(previewKeyStroke, "PREVIEW");
-		_frame.getRootPane().getActionMap().put("PREVIEW", previewAction);
+				.put(msWordKeyStroke, "MSWORD");
+		_frame.getRootPane().getActionMap().put("MSWORD", msWordAction);
 
 		JLabel blankLabel = new JLabel("");
 		blankLabel.setPreferredSize(new Dimension(70, 30));
@@ -1080,6 +1120,257 @@ public class CertificateTambah extends JInternalFrame {
 	public void setCertificateNewTambah(CertificateNewTambah certificateNewTambah) {
 		_certificateNewTambah = certificateNewTambah;
 	}
+	
+	public void createMsWord() {
+		File file = new File("D:/yasabalisujati/ini.docx");
+		
+		XWPFDocument document = new XWPFDocument();
+		
+		CTBody body = document.getDocument().getBody();
+		if(!body.isSetSectPr()){
+			body.addNewSectPr();
+		}
+		 
+		CTSectPr section = body.getSectPr();
+		if(!section.isSetPgSz()){
+			section.addNewPgSz();
+		}
+		
+		CTPageSz pageSize = section.getPgSz();
+		pageSize.setW(BigInteger.valueOf(12240));
+		pageSize.setH(BigInteger.valueOf(20160));
+		
+		CTPageMar pageMar = section.addNewPgMar();
+	    pageMar.setLeft(BigInteger.valueOf(720L));
+	    pageMar.setTop(BigInteger.valueOf(120L));
+	    pageMar.setRight(BigInteger.valueOf(720L));
+	    pageMar.setBottom(BigInteger.valueOf(120L));
+		
+		XWPFParagraph tmpParagraph = document.createParagraph();
+		XWPFRun tmpRun = tmpParagraph.createRun();
+		
+		for (int i = 0; i < 5; i++) {
+			tmpRun.setText("");
+			tmpRun.addBreak();
+		}
+		
+		tmpParagraph = document.createParagraph();
+		tmpParagraph.setAlignment(ParagraphAlignment.CENTER);
+		tmpRun = tmpParagraph.createRun();
+		tmpRun.setText("ISPM#15 CERTIFICATE");
+		tmpRun.setFontFamily("Courier");
+		tmpRun.setFontSize(14);
+		tmpRun.setBold(true);
+		tmpRun.setUnderline(UnderlinePatterns.SINGLE);
+		
+		
+		String treatment = _joborder.getTreatment();
+		if (treatment.equals("FUMIGATION")) {
+			treatment = "TREATMENT : METHYL BROMIDE (MB)";
+		}
+		
+		tmpParagraph = document.createParagraph();
+		tmpParagraph.setAlignment(ParagraphAlignment.CENTER);
+		tmpRun = tmpParagraph.createRun();
+		tmpRun.setText(treatment);
+		tmpRun.setFontFamily("Courier");
+		tmpRun.setFontSize(12);
+		tmpRun.setBold(true);
+		
+		tmpParagraph = document.createParagraph();
+		tmpParagraph.setAlignment(ParagraphAlignment.CENTER);
+		tmpRun = tmpParagraph.createRun();
+		tmpRun.setText("ID No : 107");
+		tmpRun.addBreak();
+		tmpRun.setFontFamily("Courier");
+		tmpRun.setFontSize(10);
+		
+		addRowMSWord(document, "CONSIGMENT", _joborder.getKomoditi());
+		if (_joborder.getExportir() != null) {
+			addRowMSWord(document, "SHIPPER", _joborder.getExportir().getNama() + "\n"
+					+ _joborder.getExportir().getDetail());
+		}
+		addRowMSWord(document, "CONSIGNEE", _joborder.getConsignee());
+		addRowMSWord(document, "NOTIFY PARTY", _joborder.getPartai());
+
+		Criteria criteria = _session.createCriteria(CertificateNewColumn.class);
+		criteria.add(Restrictions.eq("joborder", _joborder));
+		List<CertificateNewColumn> dataList = criteria.list();
+		for (CertificateNewColumn certificateNewColumn : dataList) {
+			if (certificateNewColumn.getColumnName() != null && certificateNewColumn.getDescription() != null 
+					&& (!certificateNewColumn.getColumnName().isEmpty() && !certificateNewColumn.getDescription().isEmpty() )) {
+				addRowMSWord(document, certificateNewColumn.getColumnName(), certificateNewColumn.getDescription());
+			}
+		}
+		addRowMSWord(document, "VESSEL", _joborder.getVessel());
+		addRowMSWord(document, "BL / NO", _joborder.getBlno());
+		addRowMSWord(document, "CONTAINER NO", _joborder.getContainerno());
+		addRowMSWord(document, "DESTINATION", _joborder.getDestinasi());
+		addRowMSWord(document, "DESTINATION", _joborder.getDestinasi());
+		
+		tmpParagraph = document.createParagraph();
+		tmpParagraph.setBorderBottom(Borders.DASH_SMALL_GAP);
+		
+		tmpParagraph = document.createParagraph();
+		tmpRun = tmpParagraph.createRun();
+		tmpRun.setText("THIS IS TO CERTIFY THAT THE WOOD PACKAGING ON THE ABOVE CONSIGMENT HAS BEEN TREATED IN ACCORDANCE WITH ISPM#15 ANNEX 1:");
+		tmpRun.setFontFamily("Courier");
+		tmpRun.setFontSize(10);
+		
+		addRowMSWord(document, "TYPE OF WOOD PACKAGING", _joborder.getType_of_wood_packing());
+		addRowMSWord(document, "QUANTITY", _joborder.getQuantity());
+		addRowMSWord(document, "TREATMENT", _joborder.getTreatment());
+		
+		if (_joborder.getTreatment().equals("HEAT TREATMENT (HT)")) {
+			addRowMSWord(document,
+					"DESCRIPTION OF TREATMENT",
+					"WOOD CORE TEMPERATURE : "
+							+ _joborder.getWood_core_temperatur()
+							+ " (\u00b0C)\n" + "EXPOSURE TIME         : "
+							+ _joborder.getExposure_time());
+		} else if (_joborder.getTreatment().equals("FUMIGATION")) {
+			addRowMSWord(document, "DESCRIPTION OF TREATMENT", "FUMIGANT       : "
+					+ _joborder.getFumigant() + "\n" + "DOSAGE RATE    : "
+					+ _joborder.getDosage_rate() + "\n"
+					+ "EXPOSURE TIME  : " + _joborder.getExposure_time());
+		}
+		
+		tmpParagraph = document.createParagraph();
+		tmpRun = tmpParagraph.createRun();
+		tmpRun.setText("ALL WOOD PACKAGING MATERIAL HAS BEEN DEBARKED BEFORE THE TREATMENT");
+		tmpRun.setFontFamily("Courier");
+		tmpRun.setFontSize(10);
+		
+		setMark(document);
+		addRowMSWord(document, "CERTIFICATE NUMBER", _joborder.getCertificate_number());
+		
+		tmpParagraph = document.createParagraph();
+		tmpRun = tmpParagraph.createRun();
+		tmpRun.setText("THIS CERTIFICATE REFERS ISPM#15 "
+				+ _joborder.getTreatment()
+				+ " ONLY AND DOES NOT CERTIFY ANY OTHER MATTERS");
+		tmpRun.setFontFamily("Courier");
+		tmpRun.setFontSize(10);
+		
+		tmpParagraph = document.createParagraph();
+		tmpRun = tmpParagraph.createRun();
+		tmpRun.setText(("SURABAYA ," + _service.convertStringFromDate(
+				"MMMM dd, yyyy", _joborder.getTgl_cetak(),
+				_simpleDateFormat)).toUpperCase());
+		tmpRun.setFontFamily("Courier");
+		tmpRun.setFontSize(10);
+		
+		tmpParagraph = document.createParagraph();
+		tmpParagraph.setAlignment(ParagraphAlignment.RIGHT);
+		tmpRun = tmpParagraph.createRun();
+		tmpRun.setText("AUTHORIZED SIGNATURE");
+		tmpRun.addBreak();
+		tmpRun.setText("PT YASA BALI SUJATI ");
+		tmpRun.addBreak();
+		tmpRun.addBreak();
+		tmpRun.addBreak();
+		tmpRun.addBreak();
+		tmpRun.addBreak();
+		tmpRun.setText("....................");
+		tmpRun.setFontFamily("Courier");
+		tmpRun.setFontSize(10);
+		
+		
+		try {
+			document.write(new FileOutputStream(file));
+			Desktop.getDesktop().open(file);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "Tutup MS Word dulu",
+					"Informasi", JOptionPane.INFORMATION_MESSAGE);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void setMark(XWPFDocument document) {
+		XWPFTable table = document.createTable(1,3);
+		table.getCTTbl().getTblPr().unsetTblBorders();
+		XWPFTableRow row = table.getRow(0);
+		
+		XWPFTableCell cell = row.getCell(0);
+		cell.getCTTc().addNewTcPr().addNewTcW().setW(BigInteger.valueOf(3600));
+		XWPFParagraph tmpParagraph = cell.getParagraphs().get(0);
+		XWPFRun tmpRun = tmpParagraph.createRun();
+		tmpRun.setText("MARKING");
+		tmpRun.setFontFamily("Courier");
+		tmpRun.setFontSize(10);
+		
+		cell = row.getCell(1);
+		tmpParagraph = cell.getParagraphs().get(0);
+		tmpRun = tmpParagraph.createRun();
+		tmpRun.setText(":");
+		tmpRun.setFontFamily("Courier");
+		tmpRun.setFontSize(10);
+		
+		cell = row.getCell(2);
+		
+		tmpParagraph = cell.getParagraphs().get(0);
+		tmpRun = tmpParagraph.createRun();
+		InputStream pic;
+		try {
+			if (_joborder.getTreatment().equals("HEAT TREATMENT (HT)")) {
+				pic = getClass().getClassLoader()
+					.getResourceAsStream("icons/ippcht.png");
+			} else {
+				pic = getClass().getClassLoader()
+						.getResourceAsStream("icons/ippfumigant.png");
+			}
+			tmpRun.addPicture(pic, XWPFDocument.PICTURE_TYPE_PNG, "logo1" , Units.toEMU(120), Units.toEMU(30));
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (InvalidFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void addRowMSWord(XWPFDocument document, String title, String data) {
+		XWPFTable table = document.createTable(1,3);
+		table.getCTTbl().getTblPr().unsetTblBorders();
+		XWPFTableRow row = table.getRow(0);
+		
+		XWPFTableCell cell = row.getCell(0);
+		cell.getCTTc().addNewTcPr().addNewTcW().setW(BigInteger.valueOf(3600));
+		XWPFParagraph tmpParagraph = cell.getParagraphs().get(0);
+		XWPFRun tmpRun = tmpParagraph.createRun();
+		tmpRun.setText(title);
+		tmpRun.setFontFamily("Courier");
+		tmpRun.setFontSize(10);
+		
+		cell = row.getCell(1);
+		tmpParagraph = cell.getParagraphs().get(0);
+		tmpRun = tmpParagraph.createRun();
+		tmpRun.setText(":");
+		tmpRun.setFontFamily("Courier");
+		tmpRun.setFontSize(10);
+		
+		cell = row.getCell(2);
+		tmpParagraph = cell.getParagraphs().get(0);
+		tmpRun = tmpParagraph.createRun();
+		if (data != null) {
+			StringTokenizer stk = new StringTokenizer(data, "\n");
+			int i = 0;
+			while (stk.hasMoreTokens()) {
+				if (i > 0) {
+					tmpRun.addBreak();
+				}
+				tmpRun.setText(stk.nextToken());
+				i++;
+			}
+		}
+		tmpRun.setFontFamily("Courier");
+		tmpRun.setFontSize(10);
+	}
 
 	public void createPDFPreview() {
 		File file = new File("D:/yasabalisujati/ini.pdf");
@@ -1246,13 +1537,8 @@ public class CertificateTambah extends JInternalFrame {
 
 			document.add(table);
 
-			String specification = "HEAT TREATMENT";
-			if (treatment.equals("FUMIGATION")) {
-				specification = "FUMIGATION";
-			}
-
 			Paragraph parg3 = new Paragraph("THIS CERTIFICATE REFERS ISPM#15 "
-					+ specification
+					+ _joborder.getTreatment()
 					+ " ONLY AND DOES NOT CERTIFY ANY OTHER MATTERS",
 					fontregular);
 			document.add(parg3);
@@ -1279,7 +1565,7 @@ public class CertificateTambah extends JInternalFrame {
 			created = true;
 		} catch (FileNotFoundException e1) {
 			e1.printStackTrace();
-			JOptionPane.showMessageDialog(null, "Tutup preview dulu",
+			JOptionPane.showMessageDialog(null, "Tutup PDF dulu",
 					"Informasi", JOptionPane.INFORMATION_MESSAGE);
 		} catch (DocumentException e1) {
 			e1.printStackTrace();
