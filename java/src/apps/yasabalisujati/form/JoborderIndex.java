@@ -522,15 +522,15 @@ public class JoborderIndex extends JInternalFrame {
 		String searchText = searchTextbox.getText();
 		if (searchText.isEmpty()) {
 			if (searchingComboBox.getSelectedItem().equals(kolom[12])) {
-				criteria.add(Restrictions.like("status", searchText)
+				criteria.add(Restrictions.eq("status", "")
 						.ignoreCase());
 			}
 		} else {
 			if (searchingComboBox.getSelectedItem().equals(kolom[12])) {
-				criteria.add(Restrictions.like("status", searchText + "%")
+				criteria.add(Restrictions.like("status", "%"+ searchText + "%")
 						.ignoreCase());
 			} else if (searchingComboBox.getSelectedItem().equals(kolom[1])) {
-				criteria.add(Restrictions.like("kode", searchText + "%")
+				criteria.add(Restrictions.like("kode", "%"+ searchText + "%")
 						.ignoreCase());
 			} else if (searchingComboBox.getSelectedItem().equals(kolom[2])) {
 				if (_service.convertStringToDate("dd/MM/yyyy HH:mm:ss",
@@ -570,18 +570,18 @@ public class JoborderIndex extends JInternalFrame {
 				}
 			} else if (searchingComboBox.getSelectedItem().equals(kolom[3])) {
 				criteria.add(Restrictions.like("jenis_kegiatan",
-						searchText + "%").ignoreCase());
+						"%"+ searchText + "%").ignoreCase());
 			} else if (searchingComboBox.getSelectedItem().equals(kolom[4])) {
 				criteria.add(Restrictions.like("t4Pelaksanaan",
-						searchText + "%").ignoreCase());
+						"%"+ searchText + "%").ignoreCase());
 			} else if (searchingComboBox.getSelectedItem().equals(kolom[5])) {
-				criteria.add(Restrictions.like("destinasi", searchText + "%")
+				criteria.add(Restrictions.like("destinasi", "%"+ searchText + "%")
 						.ignoreCase());
 			} else if (searchingComboBox.getSelectedItem().equals(kolom[6])) {
-				criteria.add(Restrictions.like("komoditi", searchText + "%")
+				criteria.add(Restrictions.like("komoditi", "%"+ searchText + "%")
 						.ignoreCase());
 			} else if (searchingComboBox.getSelectedItem().equals(kolom[7])) {
-				criteria.add(Restrictions.like("partai", searchText + "%")
+				criteria.add(Restrictions.like("partai", "%"+ searchText + "%")
 						.ignoreCase());
 			} else if (searchingComboBox.getSelectedItem().equals(kolom[8])) {
 				criteria.add(Restrictions.like("pegawainame",
@@ -592,11 +592,11 @@ public class JoborderIndex extends JInternalFrame {
 			} else if (searchingComboBox.getSelectedItem().equals(kolom[10])) {
 				criteria.createAlias("customer", "customer1");
 				criteria.add(Restrictions.like("customer1.nama",
-						searchText + "%").ignoreCase());
+						"%"+ searchText + "%").ignoreCase());
 			} else if (searchingComboBox.getSelectedItem().equals(kolom[11])) {
 				criteria.createAlias("exportir", "exportir1");
 				criteria.add(Restrictions.like("exportir1.nama",
-						searchText + "%").ignoreCase());
+						"%"+ searchText + "%").ignoreCase());
 			}
 		}
 		return criteria;

@@ -500,81 +500,85 @@ public class CertificateIndex extends JInternalFrame {
 	public Criteria setCriteriaCondition(Criteria criteria) {
 		String searchText = searchTextbox.getText();
 		criteria.add(Restrictions.like("status", "Selesai").ignoreCase());
-		if (searchingComboBox.getSelectedItem().equals(kolom[1])) {
-			criteria.add(Restrictions.like("kode", searchText + "%")
-					.ignoreCase());
-		} else if (searchingComboBox.getSelectedItem().equals(kolom[2])) {
-			criteria.add(Restrictions.like("certificate_number",
-					"%" + searchText + "%").ignoreCase());
-		} else if (searchingComboBox.getSelectedItem().equals(kolom[3])) {
-			criteria.add(Restrictions.like("treatment", searchText + "%")
-					.ignoreCase());
-		} else if (searchingComboBox.getSelectedItem().equals(kolom[4])) {
-			criteria.add(Restrictions.like("consignee", searchText + "%")
-					.ignoreCase());
-		} else if (searchingComboBox.getSelectedItem().equals(kolom[5])) {
-			if (_service.convertStringToDate("dd/MM/yyyy HH:mm:ss",
-					searchTextbox.getText(), _simpleDateFormat) != null) {
-				_timeBegin.setTime(_service.convertStringToDate(
-						"dd/MM/yyyy HH:mm:ss", searchTextbox.getText(),
-						_simpleDateFormat).getTime());
-				criteria.add(Restrictions.eq("tgl_pelaksanaan", _timeBegin));
-			} else if (_service.convertStringToDate("dd/MM/yyyy HH:mm",
-					searchTextbox.getText(), _simpleDateFormat) != null) {
+		if (!searchText.isEmpty()) {
+			if (searchingComboBox.getSelectedItem().equals(kolom[1])) {
+				criteria.add(Restrictions.like("kode", "%" + searchText + "%")
+						.ignoreCase());
+			} else if (searchingComboBox.getSelectedItem().equals(kolom[2])) {
+				criteria.add(Restrictions.like("certificate_number",
+						"%" + searchText + "%").ignoreCase());
+			} else if (searchingComboBox.getSelectedItem().equals(kolom[3])) {
+				criteria.add(Restrictions.like("treatment",
+						"%" + searchText + "%").ignoreCase());
+			} else if (searchingComboBox.getSelectedItem().equals(kolom[4])) {
+				criteria.add(Restrictions.like("consignee",
+						"%" + searchText + "%").ignoreCase());
+			} else if (searchingComboBox.getSelectedItem().equals(kolom[5])) {
+				if (_service.convertStringToDate("dd/MM/yyyy HH:mm:ss",
+						searchTextbox.getText(), _simpleDateFormat) != null) {
+					_timeBegin.setTime(_service.convertStringToDate(
+							"dd/MM/yyyy HH:mm:ss", searchTextbox.getText(),
+							_simpleDateFormat).getTime());
+					criteria.add(Restrictions.eq("tgl_pelaksanaan", _timeBegin));
+				} else if (_service.convertStringToDate("dd/MM/yyyy HH:mm",
+						searchTextbox.getText(), _simpleDateFormat) != null) {
 
-				_timeBegin.setTime(_service.convertStringToDate(
-						"dd/MM/yyyy HH:mm:ss", searchTextbox.getText() + ":00",
-						_simpleDateFormat).getTime());
+					_timeBegin.setTime(_service.convertStringToDate(
+							"dd/MM/yyyy HH:mm:ss",
+							searchTextbox.getText() + ":00", _simpleDateFormat)
+							.getTime());
 
-				_timeEnd.setTime(_service.convertStringToDate(
-						"dd/MM/yyyy HH:mm:ss", searchTextbox.getText() + ":59",
-						_simpleDateFormat).getTime());
-				criteria.add(Restrictions.between("tgl_pelaksanaan",
-						_timeBegin, _timeEnd));
-			} else if (_service.convertStringToDate("dd/MM/yyyy",
-					searchTextbox.getText(), _simpleDateFormat) != null) {
+					_timeEnd.setTime(_service.convertStringToDate(
+							"dd/MM/yyyy HH:mm:ss",
+							searchTextbox.getText() + ":59", _simpleDateFormat)
+							.getTime());
+					criteria.add(Restrictions.between("tgl_pelaksanaan",
+							_timeBegin, _timeEnd));
+				} else if (_service.convertStringToDate("dd/MM/yyyy",
+						searchTextbox.getText(), _simpleDateFormat) != null) {
 
-				_timeBegin.setTime(_service.convertStringToDate(
-						"dd/MM/yyyy HH:mm:ss",
-						searchTextbox.getText() + " 00:00:00",
-						_simpleDateFormat).getTime());
+					_timeBegin.setTime(_service.convertStringToDate(
+							"dd/MM/yyyy HH:mm:ss",
+							searchTextbox.getText() + " 00:00:00",
+							_simpleDateFormat).getTime());
 
-				_timeEnd.setTime(_service.convertStringToDate(
-						"dd/MM/yyyy HH:mm:ss",
-						searchTextbox.getText() + " 23:59:59",
-						_simpleDateFormat).getTime());
-				criteria.add(Restrictions.between("tgl_pelaksanaan",
-						_timeBegin, _timeEnd));
+					_timeEnd.setTime(_service.convertStringToDate(
+							"dd/MM/yyyy HH:mm:ss",
+							searchTextbox.getText() + " 23:59:59",
+							_simpleDateFormat).getTime());
+					criteria.add(Restrictions.between("tgl_pelaksanaan",
+							_timeBegin, _timeEnd));
+				}
+			} else if (searchingComboBox.getSelectedItem().equals(kolom[6])) {
+				criteria.add(Restrictions.like("jenis_kegiatan",
+						"%" + searchText + "%").ignoreCase());
+			} else if (searchingComboBox.getSelectedItem().equals(kolom[7])) {
+				criteria.add(Restrictions.like("t4Pelaksanaan",
+						"%" + searchText + "%").ignoreCase());
+			} else if (searchingComboBox.getSelectedItem().equals(kolom[8])) {
+				criteria.add(Restrictions.like("destinasi",
+						"%" + searchText + "%").ignoreCase());
+			} else if (searchingComboBox.getSelectedItem().equals(kolom[9])) {
+				criteria.add(Restrictions.like("komoditi",
+						"%" + searchText + "%").ignoreCase());
+			} else if (searchingComboBox.getSelectedItem().equals(kolom[10])) {
+				criteria.add(Restrictions
+						.like("partai", "%" + searchText + "%").ignoreCase());
+			} else if (searchingComboBox.getSelectedItem().equals(kolom[11])) {
+				criteria.add(Restrictions.like("pegawainame",
+						"%" + searchText + "%").ignoreCase());
+			} else if (searchingComboBox.getSelectedItem().equals(kolom[12])) {
+				criteria.add(Restrictions.like("validasiname",
+						"%" + searchText + "%").ignoreCase());
+			} else if (searchingComboBox.getSelectedItem().equals(kolom[13])) {
+				criteria.createAlias("customer", "customer1");
+				criteria.add(Restrictions.like("customer1.nama",
+						"%" + searchText + "%").ignoreCase());
+			} else if (searchingComboBox.getSelectedItem().equals(kolom[14])) {
+				criteria.createAlias("exportir", "exportir1");
+				criteria.add(Restrictions.like("exportir1.nama",
+						"%" + searchText + "%").ignoreCase());
 			}
-		} else if (searchingComboBox.getSelectedItem().equals(kolom[6])) {
-			criteria.add(Restrictions.like("jenis_kegiatan", searchText + "%")
-					.ignoreCase());
-		} else if (searchingComboBox.getSelectedItem().equals(kolom[7])) {
-			criteria.add(Restrictions.like("t4Pelaksanaan", searchText + "%")
-					.ignoreCase());
-		} else if (searchingComboBox.getSelectedItem().equals(kolom[8])) {
-			criteria.add(Restrictions.like("destinasi", searchText + "%")
-					.ignoreCase());
-		} else if (searchingComboBox.getSelectedItem().equals(kolom[9])) {
-			criteria.add(Restrictions.like("komoditi", searchText + "%")
-					.ignoreCase());
-		} else if (searchingComboBox.getSelectedItem().equals(kolom[10])) {
-			criteria.add(Restrictions.like("partai", searchText + "%")
-					.ignoreCase());
-		} else if (searchingComboBox.getSelectedItem().equals(kolom[11])) {
-			criteria.add(Restrictions.like("pegawainame",
-					"%" + searchText + "%").ignoreCase());
-		} else if (searchingComboBox.getSelectedItem().equals(kolom[12])) {
-			criteria.add(Restrictions.like("validasiname",
-					"%" + searchText + "%").ignoreCase());
-		} else if (searchingComboBox.getSelectedItem().equals(kolom[13])) {
-			criteria.createAlias("customer", "customer1");
-			criteria.add(Restrictions.like("customer1.nama", searchText + "%")
-					.ignoreCase());
-		} else if (searchingComboBox.getSelectedItem().equals(kolom[14])) {
-			criteria.createAlias("exportir", "exportir1");
-			criteria.add(Restrictions.like("exportir1.nama", searchText + "%")
-					.ignoreCase());
 		}
 		return criteria;
 	}

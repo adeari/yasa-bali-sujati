@@ -461,7 +461,7 @@ public class AturanIndex extends JInternalFrame {
 					criteria.add(Restrictions.eq("urutan", null));
 				}
 			} else if (searchingComboBox.getSelectedItem().equals(kolom[2])) {
-				criteria.add(Restrictions.like("aturan", searchText+"%").ignoreCase());
+				criteria.add(Restrictions.like("aturan", "%"+ searchText+"%").ignoreCase());
 			}
 		}
 		return criteria;

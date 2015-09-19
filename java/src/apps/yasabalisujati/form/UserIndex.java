@@ -462,41 +462,41 @@ public class UserIndex extends JInternalFrame {
 		String searchText = searchTextbox.getText();
 		if (!searchText.isEmpty()) {
 			if (searchingComboBox.getSelectedItem().equals(kolom[1])) {
-				criteria.add(Restrictions.like("name", searchText+"%").ignoreCase());
+				criteria.add(Restrictions.like("name", "%"+ searchText+"%").ignoreCase());
 			} else if (searchingComboBox.getSelectedItem().equals(kolom[2])) {
-				criteria.add(Restrictions.like("divisi", searchText+"%").ignoreCase());
+				criteria.add(Restrictions.like("divisi", "%"+ searchText+"%").ignoreCase());
 			} else if (searchingComboBox.getSelectedItem().equals(kolom[3])) {
 				if (_service.convertStringToDate("dd/MM/yyyy HH:mm:ss",
-						searchTextbox.getText(), _simpleDateFormat) != null) {
+						searchText, _simpleDateFormat) != null) {
 					_timeBegin.setTime(_service.convertStringToDate(
-							"dd/MM/yyyy HH:mm:ss", searchTextbox.getText(),
+							"dd/MM/yyyy HH:mm:ss", searchText,
 							_simpleDateFormat).getTime());
 					criteria.add(Restrictions.eq("lastLogin", _timeBegin));
 				} else if (_service.convertStringToDate("dd/MM/yyyy HH:mm",
-						searchTextbox.getText(), _simpleDateFormat) != null) {
+						searchText, _simpleDateFormat) != null) {
 
 					_timeBegin.setTime(_service.convertStringToDate(
 							"dd/MM/yyyy HH:mm:ss",
-							searchTextbox.getText() + ":00", _simpleDateFormat)
+							searchText + ":00", _simpleDateFormat)
 							.getTime());
 
 					_timeEnd.setTime(_service.convertStringToDate(
 							"dd/MM/yyyy HH:mm:ss",
-							searchTextbox.getText() + ":59", _simpleDateFormat)
+							searchText + ":59", _simpleDateFormat)
 							.getTime());
 
 					criteria.add(Restrictions.between("lastLogin", _timeBegin, _timeEnd));
 				} else if (_service.convertStringToDate("dd/MM/yyyy",
-						searchTextbox.getText(), _simpleDateFormat) != null) {
+						searchText, _simpleDateFormat) != null) {
 					
 					_timeBegin.setTime(_service.convertStringToDate(
 							"dd/MM/yyyy HH:mm:ss",
-							searchTextbox.getText() + " 00:00:00",
+							searchText + " 00:00:00",
 							_simpleDateFormat).getTime());
 
 					_timeEnd.setTime(_service.convertStringToDate(
 							"dd/MM/yyyy HH:mm:ss",
-							searchTextbox.getText() + " 23:59:59",
+							searchText + " 23:59:59",
 							_simpleDateFormat).getTime());
 					
 					criteria.add(Restrictions.between("lastLogin", _timeBegin, _timeEnd));

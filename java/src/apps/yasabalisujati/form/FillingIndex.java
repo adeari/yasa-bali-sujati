@@ -463,9 +463,9 @@ public class FillingIndex extends JInternalFrame {
 		String searchText = searchTextbox.getText();
 		if (!searchText.isEmpty()) {
 			if (searchingComboBox.getSelectedItem().equals(kolom[1])) {
-				criteria.add(Restrictions.like("warna", searchText+"%").ignoreCase());
+				criteria.add(Restrictions.like("warna", "%"+ searchText+"%").ignoreCase());
 			} else if (searchingComboBox.getSelectedItem().equals(kolom[2])) {
-				criteria.add(Restrictions.like("huruf", searchText+"%").ignoreCase());
+				criteria.add(Restrictions.like("huruf", "%"+ searchText+"%").ignoreCase());
 			} else if (searchingComboBox.getSelectedItem().equals(kolom[3])) {
 				try {
 					criteria.add(Restrictions.eq("digit", Integer.valueOf(searchText)));
@@ -473,7 +473,7 @@ public class FillingIndex extends JInternalFrame {
 					criteria.add(Restrictions.eq("digit", null));
 				}
 			} else if (searchingComboBox.getSelectedItem().equals(kolom[4])) {
-				criteria.add(Restrictions.like("nomorTerakhir", searchText+"%").ignoreCase());
+				criteria.add(Restrictions.like("nomorTerakhir", "%"+ searchText+"%").ignoreCase());
 			}
 		}
 		return criteria;

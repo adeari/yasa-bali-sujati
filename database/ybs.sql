@@ -1,10 +1,10 @@
-﻿--
+--
 -- PostgreSQL database dump
 --
 
 -- Dumped from database version 9.4.1
 -- Dumped by pg_dump version 9.4.1
--- Started on 2015-09-14 22:35:49
+-- Started on 2015-09-19 06:20:23
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -12,41 +12,6 @@ SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
-
-DROP DATABASE dbybs;
---
--- TOC entry 2124 (class 1262 OID 24960)
--- Name: dbybs; Type: DATABASE; Schema: -; Owner: -
---
-
-CREATE DATABASE dbybs WITH TEMPLATE = template0 ENCODING = 'UTF8' LC_COLLATE = 'Indonesian_Indonesia.1252' LC_CTYPE = 'Indonesian_Indonesia.1252';
-
-
-\connect dbybs
-
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SET check_function_bodies = false;
-SET client_min_messages = warning;
-
---
--- TOC entry 6 (class 2615 OID 2200)
--- Name: public; Type: SCHEMA; Schema: -; Owner: -
---
-
-CREATE SCHEMA public;
-
-
---
--- TOC entry 2125 (class 0 OID 0)
--- Dependencies: 6
--- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: -
---
-
-COMMENT ON SCHEMA public IS 'standard public schema';
-
 
 --
 -- TOC entry 193 (class 3079 OID 11855)
@@ -569,6 +534,11 @@ ALTER TABLE ONLY validasi_rules ALTER COLUMN id SET DEFAULT nextval('validasi_ru
 -- Data for Name: certificatenewcolumn; Type: TABLE DATA; Schema: public; Owner: -
 --
 
+INSERT INTO certificatenewcolumn (id, joborder_id, column_name, description) VALUES (1, 4, 'murma', 'tubi
+bui');
+INSERT INTO certificatenewcolumn (id, joborder_id, column_name, description) VALUES (2, 4, 'fufan', 'miulo
+mun
+gindan');
 
 
 --
@@ -577,7 +547,7 @@ ALTER TABLE ONLY validasi_rules ALTER COLUMN id SET DEFAULT nextval('validasi_ru
 -- Name: certificatenewcolumn_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('certificatenewcolumn_id_seq', 1, false);
+SELECT pg_catalog.setval('certificatenewcolumn_id_seq', 2, true);
 
 
 --
@@ -761,9 +731,9 @@ SELECT pg_catalog.setval('users_id_seq', 1, true);
 -- Data for Name: users_java; Type: TABLE DATA; Schema: public; Owner: -
 --
 
+INSERT INTO users_java (id, name, password, divisi, created_at, updated_at, password_seen, last_login, isdeleted) VALUES (1, 'ade', '$2a$08$B8aNofJ9EYp6BIY0SpOqFOh39or48g1mR4n53gBrBqsT8wPGXdG/2', 'Admin', '2015-05-10 15:43:09.615+07', '2015-05-24 09:29:22+07', '1234', '2015-09-17 21:31:48.21+07', false);
 INSERT INTO users_java (id, name, password, divisi, created_at, updated_at, password_seen, last_login, isdeleted) VALUES (2, 'dina', '$2a$08$oVjuftIBqAyKJz.YRqMesOG8q37DDmk0ce1MA71F4LdcYEwsR6vX.', 'Admin', '2015-09-02 06:59:32.446+07', '2015-09-02 06:59:32.446+07', '123456', '2015-09-02 06:59:40.605+07', true);
 INSERT INTO users_java (id, name, password, divisi, created_at, updated_at, password_seen, last_login, isdeleted) VALUES (3, 'nina', '$2a$08$EZOlJI.XKUqB0YnnanZNVuupFUTBQYaV/iGLV0PrA4oaD1HErQryu', 'Operator', '2015-09-02 19:06:10.553+07', '2015-09-02 19:06:10.553+07', '123456', NULL, true);
-INSERT INTO users_java (id, name, password, divisi, created_at, updated_at, password_seen, last_login, isdeleted) VALUES (1, 'ade', '$2a$08$rCwpy6gQRNV.FNaqOvCT..9uCGB80OkqrSpkom2c8U5IpeNnH81KW', 'Admin', '2015-05-10 15:43:09.615+07', '2015-05-24 09:29:22+07', '1234', '2015-09-14 22:28:40.292+07', false);
 
 
 --
@@ -912,7 +882,7 @@ ALTER TABLE ONLY users_java
     ADD CONSTRAINT uniu876 UNIQUE (name);
 
 
--- Completed on 2015-09-14 22:35:52
+-- Completed on 2015-09-19 06:20:24
 
 --
 -- PostgreSQL database dump complete

@@ -69,7 +69,6 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPageMar;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPageSz;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSectPr;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSpacing;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.STLineSpacingRule;
 
 import apps.yasabalisujati.components.Button;
 import apps.yasabalisujati.components.ButtonColumnRenderer;
@@ -955,7 +954,9 @@ public class CertificateTambah extends JInternalFrame {
 			certificateNumberTextbox.setText(_joborder.getCertificate_number());
 		}
 
-		if (_joborder.getTgl_cetak() != null) {
+		if (_joborder.getTgl_cetak() == null) {
+			tglCetakDatebox.setDate(new Date());
+		} else {
 			tglCetakDatebox.setDate(_joborder.getTgl_cetak());
 		}
 
@@ -1275,8 +1276,14 @@ public class CertificateTambah extends JInternalFrame {
 		tmpParagraph = document.createParagraph();
 		setParagraphStyle(tmpParagraph);
 		tmpRun = tmpParagraph.createRun();
+		Date cetakDate = null;
+		if (_joborder.getTgl_cetak() != null) {
+			cetakDate = _joborder.getTgl_cetak();
+		} else {
+			cetakDate = new Date();
+		}
 		tmpRun.setText(("SURABAYA, " + _service.convertStringFromDate(
-				"MMMM dd, yyyy", _joborder.getTgl_cetak(),
+				"MMMM dd, yyyy", cetakDate,
 				_simpleDateFormat)).toUpperCase());
 		tmpRun.setFontFamily("Courier");
 		tmpRun.setFontSize(12);
@@ -1578,9 +1585,15 @@ public class CertificateTambah extends JInternalFrame {
 					+ " ONLY AND DOES NOT CERTIFY ANY OTHER MATTERS",
 					fontregular);
 			document.add(parg3);
+			Date cetakDate = null;
+			if (_joborder.getTgl_cetak() != null) {
+				cetakDate = _joborder.getTgl_cetak();
+			} else {
+				cetakDate = new Date();
+			}
 			Paragraph parg4 = new Paragraph(
 					("SURABAYA, " + _service.convertStringFromDate(
-							"MMMM dd, yyyy", _joborder.getTgl_cetak(),
+							"MMMM dd, yyyy", cetakDate,
 							_simpleDateFormat)).toUpperCase(), fontregular);
 			document.add(parg4);
 

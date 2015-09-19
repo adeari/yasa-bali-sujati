@@ -460,11 +460,11 @@ public class ShipperIndex extends JInternalFrame {
 		String searchText = searchTextbox.getText();
 		if (!searchText.isEmpty()) {
 			if (searchingComboBox.getSelectedItem().equals(kolom[1])) {
-				criteria.add(Restrictions.like("nama", searchText+"%").ignoreCase());
+				criteria.add(Restrictions.like("nama", "%"+ searchText+"%").ignoreCase());
 			} else if (searchingComboBox.getSelectedItem().equals(kolom[2])) {
 				criteria.add(Restrictions.like("detail", "%"+searchText+"%").ignoreCase());
 			} else if (searchingComboBox.getSelectedItem().equals(kolom[3])) {
-				criteria.add(Restrictions.like("jenisCustomer", searchText+"%").ignoreCase());
+				criteria.add(Restrictions.like("jenisCustomer", "%"+ searchText+"%").ignoreCase());
 			}
 		}
 		return criteria;
